@@ -1,12 +1,12 @@
 import type { ChangeEvent, ComponentProps, ComponentType } from "react";
+import { Dialog } from "@base-ui/react/dialog";
+import { Languages, Menu, Moon, Search, Sun, X } from "lucide-react";
 import { createContext, useContext, useEffect, useState } from "react";
 
-import { Dialog } from "@base-ui/react/dialog";
-
+import type { IDocumentRoute, IMdxContentProps, IRuntimeConfig } from "./types.js";
 import { Button } from "./components/ui/button.js";
 import { DialogSurface } from "./components/ui/dialog-surface.js";
 import { localizedText } from "./i18n.js";
-import type { IDocumentRoute, IMdxContentProps, IRuntimeConfig } from "./types.js";
 import { withBase } from "./url.js";
 
 export interface IAppProps {
@@ -33,6 +33,7 @@ interface IPagefindModule {
 
 interface ILabels {
   close: string;
+  language: string;
   menu: string;
   noResults: string;
   notFound: string;
@@ -45,6 +46,7 @@ interface ILabels {
 const LABELS: Readonly<Record<"en" | "zh", ILabels>> = {
   en: {
     close: "Close",
+    language: "Language",
     menu: "Menu",
     noResults: "No results found.",
     notFound: "Page not found",
@@ -55,6 +57,7 @@ const LABELS: Readonly<Record<"en" | "zh", ILabels>> = {
   },
   zh: {
     close: "关闭",
+    language: "语言",
     menu: "菜单",
     noResults: "没有找到结果。",
     notFound: "页面不存在",
@@ -137,15 +140,18 @@ function MobileNavigation({
     <Dialog.Root>
       <Dialog.Trigger
         aria-label={labels.menu}
-        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border lg:hidden"
+        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
       >
-        <span aria-hidden="true">☰</span>
+        <Menu aria-hidden="true" className="size-4" />
       </Dialog.Trigger>
       <DialogSurface className="max-w-sm">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <Dialog.Title className="font-semibold">{labels.menu}</Dialog.Title>
-          <Dialog.Close aria-label={labels.close} className="rounded-md p-2 hover:bg-muted">
-            <span aria-hidden="true">×</span>
+          <Dialog.Close
+            aria-label={labels.close}
+            className="rounded-md p-2 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <X aria-hidden="true" className="size-4" />
           </Dialog.Close>
         </div>
         <Navigation current={current} mobile routes={routes} />
@@ -156,10 +162,12 @@ function MobileNavigation({
 
 function LocaleSwitcher({
   config,
+  label,
   route,
   routes,
 }: {
   config: IRuntimeConfig;
+  label: string;
   route?: IDocumentRoute;
   routes: readonly IDocumentRoute[];
 }) {
@@ -172,19 +180,24 @@ function LocaleSwitcher({
     window.location.assign(event.target.value);
   }
 
+  const value = withBase(config.base, route?.path ?? translations[0]?.path ?? "/");
+
   return (
-    <select
-      aria-label="Language"
-      className="h-9 rounded-md border border-border bg-background px-2 text-sm"
-      onChange={handleChange}
-      value={withBase(config.base, route?.path ?? translations[0]?.path ?? "/")}
-    >
-      {translations.map((translation) => (
-        <option key={translation.locale} value={withBase(config.base, translation.path)}>
-          {config.locales.labels?.[translation.locale] ?? translation.locale}
-        </option>
-      ))}
-    </select>
+    <div className="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background transition-colors hover:bg-muted focus-within:ring-2 focus-within:ring-ring">
+      <Languages aria-hidden="true" className="pointer-events-none size-4" />
+      <select
+        aria-label={label}
+        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+        onChange={handleChange}
+        value={value}
+      >
+        {translations.map((translation) => (
+          <option key={translation.locale} value={withBase(config.base, translation.path)}>
+            {config.locales.labels?.[translation.locale] ?? translation.locale}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 }
 
@@ -197,13 +210,14 @@ function ThemeToggle({ label }: { label: string }) {
   }
 
   return (
-    <Button aria-label={label} className="w-9 px-0" onClick={handleClick} variant="outline">
-      <span aria-hidden="true" className="theme-icon-light">
-        ☀
-      </span>
-      <span aria-hidden="true" className="theme-icon-dark">
-        ☾
-      </span>
+    <Button
+      aria-label={label}
+      className="w-9 shrink-0 px-0"
+      onClick={handleClick}
+      variant="outline"
+    >
+      <Sun aria-hidden="true" className="theme-icon-light size-4" />
+      <Moon aria-hidden="true" className="theme-icon-dark size-4" />
     </Button>
   );
 }
@@ -271,13 +285,11 @@ function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILab
     <Dialog.Root onOpenChange={handleOpenChange} open={open}>
       <Dialog.Trigger
         aria-label={labels.search}
-        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background text-sm text-muted-foreground sm:min-w-52 sm:justify-between sm:px-3"
+        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-sm text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-52 sm:justify-start sm:px-3"
       >
-        <span aria-hidden="true" className="sm:hidden">
-          ⌕
-        </span>
+        <Search aria-hidden="true" className="size-4" />
         <span className="hidden sm:inline">{labels.search}</span>
-        <kbd className="hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] sm:inline">
+        <kbd className="ml-auto hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] sm:inline">
           ⌘K
         </kbd>
       </Dialog.Trigger>
@@ -285,9 +297,7 @@ function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILab
         <Dialog.Title className="sr-only">{labels.search}</Dialog.Title>
         <Dialog.Description className="sr-only">{labels.searchPlaceholder}</Dialog.Description>
         <div className="flex items-center border-b border-border px-4">
-          <span aria-hidden="true" className="text-muted-foreground">
-            ⌕
-          </span>
+          <Search aria-hidden="true" className="size-4 text-muted-foreground" />
           <input
             aria-label={labels.search}
             autoComplete="off"
@@ -296,8 +306,11 @@ function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILab
             placeholder={labels.searchPlaceholder}
             value={query}
           />
-          <Dialog.Close aria-label={labels.close} className="rounded-md p-2 hover:bg-muted">
-            <span aria-hidden="true">×</span>
+          <Dialog.Close
+            aria-label={labels.close}
+            className="rounded-md p-2 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <X aria-hidden="true" className="size-4" />
           </Dialog.Close>
         </div>
         <div aria-live="polite" className="max-h-[55vh] min-h-24 overflow-y-auto p-2">
@@ -333,16 +346,16 @@ export function App({ Content, config, route, routes }: IAppProps) {
         className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur"
         data-pagefind-ignore
       >
-        <div className="mx-auto flex h-14 max-w-screen-2xl items-center gap-3 px-4 lg:px-8">
+        <div className="mx-auto flex h-14 max-w-screen-2xl items-center gap-2 px-3 sm:gap-3 sm:px-4 lg:px-8">
           <MobileNavigation current={route} labels={labels} routes={localeRoutes} />
           <a
-            className="mr-auto truncate font-semibold tracking-tight"
+            className="min-w-0 flex-1 truncate font-semibold tracking-tight"
             href={withBase(config.base, home?.path ?? "/")}
           >
             {siteTitle}
           </a>
           <SearchDialog config={config} labels={labels} />
-          <LocaleSwitcher config={config} route={route} routes={routes} />
+          <LocaleSwitcher config={config} label={labels.language} route={route} routes={routes} />
           <ThemeToggle label={labels.theme} />
         </div>
       </header>
