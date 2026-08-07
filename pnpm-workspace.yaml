@@ -1,2 +1,2 @@
-overrides:
-  "@amamo/mdx": link:../amamo-mdx
+minimumReleaseAgeExclude:
+  - '@amamo/*'
