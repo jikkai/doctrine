@@ -2,6 +2,7 @@ import { existsSync, realpathSync } from "node:fs";
 import { stat } from "node:fs/promises";
 import path from "node:path";
 
+import type { ElementType } from "react";
 import { loadConfigFromFile } from "vite";
 
 export type DoctrineLocalizedText = string | Readonly<Record<string, string>>;
@@ -12,7 +13,12 @@ export interface IDoctrineLocaleConfig {
   names: string[];
 }
 
+export interface IDoctrineComponents {
+  readonly [name: string]: ElementType;
+}
+
 export interface IDoctrineConfig {
+  components?: string;
   description?: DoctrineLocalizedText;
   locales?: IDoctrineLocaleConfig;
   outDir?: string;
@@ -22,6 +28,7 @@ export interface IDoctrineConfig {
 
 export interface INormalizedDoctrineConfig {
   base: string;
+  components?: string;
   contentDirectory: string;
   description: DoctrineLocalizedText;
   locales: IDoctrineLocaleConfig;
@@ -76,9 +83,16 @@ export async function normalizeDoctrineConfig(
 
   const locales = normalizeLocales(config.locales);
   const siteUrl = normalizeSiteUrl(options.siteUrl ?? config.siteUrl ?? "http://localhost/");
+  const components = config.components ? path.resolve(root, config.components) : undefined;
+  if (components) {
+    const componentsStat = await stat(components).catch(() => undefined);
+    if (!componentsStat?.isFile())
+      throw new Error(`Components module does not exist: ${components}`);
+  }
 
   return {
     base: new URL(siteUrl).pathname,
+    components: components ? realpathSync.native(components) : undefined,
     contentDirectory: realpathSync.native(contentDirectory),
     description: config.description ?? "Documentation built from MDX.",
     locales,

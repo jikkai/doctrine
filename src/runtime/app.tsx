@@ -3,6 +3,7 @@ import { Dialog } from "@base-ui/react/dialog";
 import { Languages, Menu, Moon, Search, Sun, X } from "lucide-react";
 import { createContext, useContext, useEffect, useState } from "react";
 
+import type { IDoctrineComponents } from "../config.js";
 import type { IDocumentRoute, IMdxContentProps, IRuntimeConfig } from "./types.js";
 import { Button } from "./components/ui/button.js";
 import { DialogSurface } from "./components/ui/dialog-surface.js";
@@ -11,6 +12,7 @@ import { withBase } from "./url.js";
 
 export interface IAppProps {
   Content?: ComponentType<IMdxContentProps>;
+  components: IDoctrineComponents;
   config: IRuntimeConfig;
   route?: IDocumentRoute;
   routes: readonly IDocumentRoute[];
@@ -69,7 +71,6 @@ const LABELS: Readonly<Record<"en" | "zh", ILabels>> = {
 };
 
 const BaseContext = createContext("/");
-const MDX_COMPONENTS = { a: MdxLink };
 let pagefindModule: Promise<IPagefindModule> | undefined;
 
 function labelsFor(locale: string): ILabels {
@@ -333,12 +334,13 @@ function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILab
   );
 }
 
-export function App({ Content, config, route, routes }: IAppProps) {
+export function App({ Content, components, config, route, routes }: IAppProps) {
   const locale = route?.locale ?? config.locales.default;
   const labels = labelsFor(locale);
   const localeRoutes = routes.filter((candidate) => candidate.locale === locale);
   const home = localeRoutes.find((candidate) => candidate.slug === "/") ?? localeRoutes[0];
   const siteTitle = localizedText(config.title, locale, config.locales.default);
+  const mdxComponents: IDoctrineComponents = { a: MdxLink, ...components };
 
   return (
     <BaseContext value={config.base}>
@@ -369,7 +371,7 @@ export function App({ Content, config, route, routes }: IAppProps) {
         <main className="min-w-0 px-0 py-10 sm:px-6 lg:px-12 lg:py-14">
           {route && Content ? (
             <article className="doctrine-prose mx-auto max-w-3xl" data-pagefind-body>
-              <Content components={MDX_COMPONENTS} />
+              <Content components={mdxComponents} />
             </article>
           ) : (
             <div className="mx-auto max-w-3xl py-20 text-center">

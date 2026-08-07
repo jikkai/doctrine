@@ -1,5 +1,6 @@
 import { hydrateRoot } from "react-dom/client";
 
+import components from "virtual:doctrine/components";
 import { documents } from "virtual:doctrine/content";
 import config from "virtual:doctrine/config";
 import "virtual:doctrine/styles.css";
@@ -18,7 +19,13 @@ async function main(): Promise<void> {
   const module = route ? await route.document.load() : undefined;
   hydrateRoot(
     root,
-    <App Content={module?.default} config={config} route={route} routes={routes} />,
+    <App
+      Content={module?.default}
+      components={components}
+      config={config}
+      route={route}
+      routes={routes}
+    />,
   );
 }
 

@@ -2,6 +2,7 @@ import type { Readable } from "node:stream";
 
 import { prerenderToNodeStream } from "react-dom/static";
 
+import components from "virtual:doctrine/components";
 import { documents } from "virtual:doctrine/content";
 import config from "virtual:doctrine/config";
 import "virtual:doctrine/styles.css";
@@ -21,7 +22,13 @@ export async function renderPage(pathname: string, assets: IPageAssets): Promise
   const route = findDocumentRoute(routes, pathname);
   const module = route ? await route.document.load() : undefined;
   const result = await prerenderToNodeStream(
-    <App Content={module?.default} config={config} route={route} routes={routes} />,
+    <App
+      Content={module?.default}
+      components={components}
+      config={config}
+      route={route}
+      routes={routes}
+    />,
   );
   const appHtml = await readStream(result.prelude as Readable);
   return htmlDocument(appHtml, config, routes, route, assets);

@@ -20,6 +20,7 @@ Add `doctrine.config.ts` when the site needs metadata or multiple locales:
 import { defineConfig } from "@amamo/doctrine";
 
 export default defineConfig({
+  components: "./docs/components.tsx",
   title: "My project",
   locales: {
     default: "en",
@@ -27,6 +28,26 @@ export default defineConfig({
     labels: { en: "English", "zh-CN": "简体中文" },
   },
 });
+```
+
+The component module exports an MDX component map. It is bundled for both static rendering and
+client hydration, and its Tailwind classes are scanned automatically:
+
+```tsx
+import type { IDoctrineComponents } from "@amamo/doctrine";
+import type { ReactNode } from "react";
+
+function Callout({ children }: { children: ReactNode }) {
+  return <aside className="rounded-lg border p-4">{children}</aside>;
+}
+
+export default { Callout } satisfies IDoctrineComponents;
+```
+
+Registered components can be used directly in any document:
+
+```mdx
+<Callout>Remember to set the final site URL before building.</Callout>
 ```
 
 Locale variants use the `@amamo/mdx` filename convention:

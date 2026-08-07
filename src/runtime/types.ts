@@ -1,6 +1,10 @@
-import type { ComponentType, ElementType } from "react";
+import type { ComponentType } from "react";
 
-import type { DoctrineLocalizedText, IDoctrineLocaleConfig } from "../config.js";
+import type {
+  DoctrineLocalizedText,
+  IDoctrineComponents,
+  IDoctrineLocaleConfig,
+} from "../config.js";
 
 export interface IRuntimeConfig {
   base: string;
@@ -12,7 +16,7 @@ export interface IRuntimeConfig {
 }
 
 export interface IMdxContentProps {
-  components?: Readonly<Record<string, ElementType>>;
+  components?: IDoctrineComponents;
 }
 
 export interface IDocumentModule {

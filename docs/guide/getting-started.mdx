@@ -20,3 +20,15 @@ pnpm exec doctrine build docs --site-url https://example.com/project/
 ```
 
 The URL pathname becomes the asset and navigation base. Output still goes directly to `dist`, so the example above creates `dist/index.html`, not `dist/project/index.html`.
+
+## Custom components
+
+Point `components` at a module from `doctrine.config.ts`:
+
+```ts
+export default defineConfig({
+  components: "./docs/components.tsx",
+});
+```
+
+The module must default-export a component map. Doctrine includes it in static rendering and client hydration, and scans it for Tailwind classes.

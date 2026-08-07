@@ -1,6 +1,7 @@
 import { defineConfig } from "@amamo/doctrine";
 
 export default defineConfig({
+  components: "./docs/components.tsx",
   description: {
     en: "A Vite-powered static documentation generator for MDX.",
     "zh-CN": "一个由 Vite 驱动的 MDX 静态文档生成器。",

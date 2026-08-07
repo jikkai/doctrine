@@ -35,6 +35,8 @@ test("builds localized static pages and search below a GitHub Pages subpath", as
     assert.match(home, /https:\/\/example\.com\/doctrine\//);
     assert.match(home, /hreflang="zh-CN"/);
     assert.match(home, /doctrine-theme/);
+    assert.match(home, /data-doctrine-callout="true"/);
+    assert.match(home, /Register React components once/);
     assert.match(chinese, /lang="zh-CN"/);
     assert.match(notFound, /src="\/doctrine\/assets\//);
     assert.ok(existsSync(path.join(outDir, "pagefind/pagefind.js")));

@@ -20,3 +20,15 @@ pnpm exec doctrine build docs --site-url https://example.com/project/
 ```
 
 网址的 pathname 会成为资源和导航的基础路径；产物仍直接写入 `dist`，不会额外嵌套一层 `project` 目录。
+
+## 自定义组件
+
+在 `doctrine.config.ts` 中用 `components` 指向组件模块：
+
+```ts
+export default defineConfig({
+  components: "./docs/components.tsx",
+});
+```
+
+该模块需要默认导出组件映射。Doctrine 会将它同时用于静态渲染和客户端 hydration，并自动扫描其中的 Tailwind class。

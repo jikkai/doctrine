@@ -7,4 +7,9 @@ declare module "virtual:doctrine/config" {
   export default config;
 }
 
+declare module "virtual:doctrine/components" {
+  const components: import("./config.js").IDoctrineComponents;
+  export default components;
+}
+
 declare module "virtual:doctrine/styles.css" {}

@@ -10,9 +10,11 @@ import type { INormalizedDoctrineConfig } from "./config.js";
 import type { IRuntimeConfig } from "./runtime/types.js";
 
 const CONTENT_ID = "virtual:doctrine/content";
+const COMPONENTS_ID = "virtual:doctrine/components";
 const CONFIG_ID = "virtual:doctrine/config";
 const STYLES_ID = "virtual:doctrine/styles.css";
 const RESOLVED_CONTENT_ID = `\0${CONTENT_ID}`;
+const RESOLVED_COMPONENTS_ID = `\0${COMPONENTS_ID}`;
 const RESOLVED_CONFIG_ID = `\0${CONFIG_ID}`;
 const RESOLVED_STYLES_ID = `\0${STYLES_ID}`;
 
@@ -74,6 +76,7 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
       enforce: "pre",
       resolveId(source) {
         if (source === CONTENT_ID) return RESOLVED_CONTENT_ID;
+        if (source === COMPONENTS_ID) return RESOLVED_COMPONENTS_ID;
         if (source === CONFIG_ID) return RESOLVED_CONFIG_ID;
         if (source === STYLES_ID) return RESOLVED_STYLES_ID;
         return null;
@@ -82,10 +85,18 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
         if (id === RESOLVED_CONTENT_ID) {
           return `import { collections } from ${JSON.stringify(generatedModule)}; export const documents = collections.docs ?? [];`;
         }
+        if (id === RESOLVED_COMPONENTS_ID) {
+          return options.config.components
+            ? `export { default } from ${JSON.stringify(options.config.components)};`
+            : "export default {};";
+        }
         if (id === RESOLVED_CONFIG_ID) return `export default ${JSON.stringify(runtimeConfig)};`;
         if (id === RESOLVED_STYLES_ID) {
           const source = await readFile(styles, "utf8");
-          return `${source}\n@source ${JSON.stringify(path.dirname(styles))};\n@source ${JSON.stringify(options.config.contentDirectory)};\n`;
+          const componentSource = options.config.components
+            ? `\n@source ${JSON.stringify(options.config.components)};`
+            : "";
+          return `${source}\n@source ${JSON.stringify(path.dirname(styles))};\n@source ${JSON.stringify(options.config.contentDirectory)};${componentSource}\n`;
         }
         return null;
       },
