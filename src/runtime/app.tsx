@@ -1,103 +1,105 @@
-import type { ChangeEvent, ComponentProps, ComponentType } from "react";
-import { Dialog } from "@base-ui/react/dialog";
-import { Languages, Menu, Moon, Search, Sun, X } from "lucide-react";
-import { createContext, useContext, useEffect, useState } from "react";
+import type { ChangeEvent, ComponentProps, ComponentType } from 'react'
+import { Dialog } from '@base-ui/react/dialog'
+import { Languages, Menu, Moon, Search, Sun, X } from 'lucide-react'
+import { createContext, useContext, useEffect, useState } from 'react'
 
-import type { IDoctrineComponents } from "../config.js";
-import type { IDocumentRoute, IMdxContentProps, IRuntimeConfig } from "./types.js";
-import { builtinMdxComponents } from "./components/mdx.js";
-import { Button } from "./components/ui/button.js";
-import { DialogSurface } from "./components/ui/dialog-surface.js";
-import { localizedText } from "./i18n.js";
-import { withBase } from "./url.js";
+import type { IDoctrineComponents } from '../config.js'
+import type { IDocumentRoute, IMdxContentProps, IRuntimeConfig } from './types.js'
+import { builtinMdxComponents } from './components/mdx.js'
+import { Button } from './components/ui/button.js'
+import { DialogSurface } from './components/ui/dialog-surface.js'
+import { localizedText } from './i18n.js'
+import { withBase } from './url.js'
 
 export interface IAppProps {
-  Content?: ComponentType<IMdxContentProps>;
-  components: IDoctrineComponents;
-  config: IRuntimeConfig;
-  route?: IDocumentRoute;
-  routes: readonly IDocumentRoute[];
+  Content?: ComponentType<IMdxContentProps>
+  components: IDoctrineComponents
+  config: IRuntimeConfig
+  route?: IDocumentRoute
+  routes: readonly IDocumentRoute[]
 }
 
 interface IPagefindResultData {
-  excerpt: string;
-  meta: Readonly<Record<string, string>>;
-  url: string;
+  excerpt: string
+  meta: Readonly<Record<string, string>>
+  url: string
 }
 
 interface IPagefindResult {
-  data: () => Promise<IPagefindResultData>;
+  data: () => Promise<IPagefindResultData>
 }
 
 interface IPagefindModule {
-  options: (options: { baseUrl: string }) => Promise<void>;
-  search: (query: string) => Promise<{ results: IPagefindResult[] }>;
+  options: (options: { baseUrl: string }) => Promise<void>
+  search: (query: string) => Promise<{ results: IPagefindResult[] }>
 }
 
 interface ILabels {
-  close: string;
-  language: string;
-  menu: string;
-  noResults: string;
-  notFound: string;
-  notFoundDescription: string;
-  search: string;
-  searchPlaceholder: string;
-  theme: string;
+  close: string
+  language: string
+  menu: string
+  noResults: string
+  notFound: string
+  notFoundDescription: string
+  search: string
+  searchPlaceholder: string
+  theme: string
 }
 
-const LABELS: Readonly<Record<"en" | "zh", ILabels>> = {
+const LABELS: Readonly<Record<'en' | 'zh', ILabels>> = {
   en: {
-    close: "Close",
-    language: "Language",
-    menu: "Menu",
-    noResults: "No results found.",
-    notFound: "Page not found",
-    notFoundDescription: "The page may have moved or does not exist.",
-    search: "Search",
-    searchPlaceholder: "Search documentation…",
-    theme: "Toggle color theme",
+    close: 'Close',
+    language: 'Language',
+    menu: 'Menu',
+    noResults: 'No results found.',
+    notFound: 'Page not found',
+    notFoundDescription: 'The page may have moved or does not exist.',
+    search: 'Search',
+    searchPlaceholder: 'Search documentation…',
+    theme: 'Toggle color theme',
   },
   zh: {
-    close: "关闭",
-    language: "语言",
-    menu: "菜单",
-    noResults: "没有找到结果。",
-    notFound: "页面不存在",
-    notFoundDescription: "该页面可能已移动，或从未存在。",
-    search: "搜索",
-    searchPlaceholder: "搜索文档…",
-    theme: "切换颜色主题",
+    close: '关闭',
+    language: '语言',
+    menu: '菜单',
+    noResults: '没有找到结果。',
+    notFound: '页面不存在',
+    notFoundDescription: '该页面可能已移动，或从未存在。',
+    search: '搜索',
+    searchPlaceholder: '搜索文档…',
+    theme: '切换颜色主题',
   },
-};
+}
 
-const BaseContext = createContext("/");
-let pagefindModule: Promise<IPagefindModule> | undefined;
+const BaseContext = createContext('/')
+let pagefindModule: Promise<IPagefindModule> | undefined
 
 function labelsFor(locale: string): ILabels {
-  return locale.toLowerCase().startsWith("zh") ? LABELS.zh : LABELS.en;
+  return locale.toLowerCase().startsWith('zh') ? LABELS.zh : LABELS.en
 }
 
 async function loadPagefind(base: string): Promise<IPagefindModule> {
   pagefindModule ??= import(
     /* @vite-ignore */ `${base}pagefind/pagefind.js`
-  ) as Promise<IPagefindModule>;
-  const module = await pagefindModule;
-  await module.options({ baseUrl: base });
-  return module;
+  ) as Promise<IPagefindModule>
+  const module = await pagefindModule
+  await module.options({ baseUrl: base })
+  return module
 }
 
-function MdxLink({ href = "", ...props }: ComponentProps<"a">) {
-  const base = useContext(BaseContext);
-  const external = /^(?:[a-z]+:)?\/\//i.test(href);
+function MdxLink({ children, href = '', ...props }: ComponentProps<'a'>) {
+  const base = useContext(BaseContext)
+  const external = /^(?:[a-z]+:)?\/\//i.test(href)
   return (
     <a
       href={withBase(base, href)}
-      rel={external ? "noreferrer" : undefined}
-      target={external ? "_blank" : undefined}
+      rel={external ? 'noreferrer' : undefined}
+      target={external ? '_blank' : undefined}
       {...props}
-    />
-  );
+    >
+      {children}
+    </a>
+  )
 }
 
 function Navigation({
@@ -105,18 +107,18 @@ function Navigation({
   mobile,
   routes,
 }: {
-  current?: IDocumentRoute;
-  mobile?: boolean;
-  routes: readonly IDocumentRoute[];
+  current?: IDocumentRoute
+  mobile?: boolean
+  routes: readonly IDocumentRoute[]
 }) {
-  const base = useContext(BaseContext);
+  const base = useContext(BaseContext)
   return (
-    <nav aria-label="Documentation" className={mobile ? "p-4" : "py-6 pr-5"} data-slot="navigation">
+    <nav aria-label="Documentation" className={mobile ? 'p-4' : 'py-6 pr-5'} data-slot="navigation">
       <ul className="space-y-1">
         {routes.map((route) => (
           <li key={route.path}>
             <a
-              aria-current={current?.path === route.path ? "page" : undefined}
+              aria-current={current?.path === route.path ? 'page' : undefined}
               className="block rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground aria-[current=page]:bg-muted aria-[current=page]:font-medium aria-[current=page]:text-foreground"
               href={withBase(base, route.path)}
             >
@@ -126,7 +128,7 @@ function Navigation({
         ))}
       </ul>
     </nav>
-  );
+  )
 }
 
 function MobileNavigation({
@@ -134,9 +136,9 @@ function MobileNavigation({
   labels,
   routes,
 }: {
-  current?: IDocumentRoute;
-  labels: ILabels;
-  routes: readonly IDocumentRoute[];
+  current?: IDocumentRoute
+  labels: ILabels
+  routes: readonly IDocumentRoute[]
 }) {
   return (
     <Dialog.Root>
@@ -159,7 +161,7 @@ function MobileNavigation({
         <Navigation current={current} mobile routes={routes} />
       </DialogSurface>
     </Dialog.Root>
-  );
+  )
 }
 
 function LocaleSwitcher({
@@ -168,21 +170,21 @@ function LocaleSwitcher({
   route,
   routes,
 }: {
-  config: IRuntimeConfig;
-  label: string;
-  route?: IDocumentRoute;
-  routes: readonly IDocumentRoute[];
+  config: IRuntimeConfig
+  label: string
+  route?: IDocumentRoute
+  routes: readonly IDocumentRoute[]
 }) {
   const translations = route
     ? routes.filter((candidate) => candidate.slug === route.slug)
-    : routes.filter((candidate) => candidate.slug === "/");
-  if (translations.length < 2) return null;
+    : routes.filter((candidate) => candidate.slug === '/')
+  if (translations.length < 2) return null
 
   function handleChange(event: ChangeEvent<HTMLSelectElement>) {
-    window.location.assign(event.target.value);
+    window.location.assign(event.target.value)
   }
 
-  const value = withBase(config.base, route?.path ?? translations[0]?.path ?? "/");
+  const value = withBase(config.base, route?.path ?? translations[0]?.path ?? '/')
 
   return (
     <div className="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background transition-colors hover:bg-muted focus-within:ring-2 focus-within:ring-ring">
@@ -200,15 +202,15 @@ function LocaleSwitcher({
         ))}
       </select>
     </div>
-  );
+  )
 }
 
 function ThemeToggle({ label }: { label: string }) {
   function handleClick() {
-    const current = document.documentElement.dataset.theme;
-    const next = current === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
-    localStorage.setItem("doctrine-theme", next);
+    const current = document.documentElement.dataset.theme
+    const next = current === 'dark' ? 'light' : 'dark'
+    document.documentElement.dataset.theme = next
+    localStorage.setItem('doctrine-theme', next)
   }
 
   return (
@@ -221,67 +223,67 @@ function ThemeToggle({ label }: { label: string }) {
       <Sun aria-hidden="true" className="theme-icon-light size-4" />
       <Moon aria-hidden="true" className="theme-icon-dark size-4" />
     </Button>
-  );
+  )
 }
 
 function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILabels }) {
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<IPagefindResultData[]>([]);
-  const [status, setStatus] = useState<"idle" | "loading" | "ready">("idle");
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState<IPagefindResultData[]>([])
+  const [status, setStatus] = useState<'idle' | 'loading' | 'ready'>('idle')
 
   function handleOpenChange(nextOpen: boolean) {
-    setOpen(nextOpen);
+    setOpen(nextOpen)
   }
 
   function handleQueryChange(event: ChangeEvent<HTMLInputElement>) {
-    setQuery(event.target.value);
+    setQuery(event.target.value)
   }
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
-        event.preventDefault();
-        setOpen((value) => !value);
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setOpen((value) => !value)
       }
     }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   useEffect(() => {
-    const value = query.trim();
+    const value = query.trim()
     if (!value) {
-      setResults([]);
-      setStatus("idle");
-      return;
+      setResults([])
+      setStatus('idle')
+      return
     }
-    let cancelled = false;
+    let cancelled = false
     const timer = window.setTimeout(() => {
-      setStatus("loading");
+      setStatus('loading')
       loadPagefind(config.base)
         .then((pagefind) => pagefind.search(value))
         .then((response) =>
           Promise.all(response.results.slice(0, 8).map((result) => result.data())),
         )
         .then((nextResults) => {
-          if (cancelled) return;
-          setResults(nextResults);
-          setStatus("ready");
+          if (cancelled) return
+          setResults(nextResults)
+          setStatus('ready')
         })
         .catch((error: unknown) => {
-          console.error(error);
+          console.error(error)
           if (!cancelled) {
-            setResults([]);
-            setStatus("ready");
+            setResults([])
+            setStatus('ready')
           }
-        });
-    }, 120);
+        })
+    }, 120)
     return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-    };
-  }, [config.base, query]);
+      cancelled = true
+      window.clearTimeout(timer)
+    }
+  }, [config.base, query])
 
   return (
     <Dialog.Root onOpenChange={handleOpenChange} open={open}>
@@ -316,8 +318,8 @@ function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILab
           </Dialog.Close>
         </div>
         <div aria-live="polite" className="max-h-[55vh] min-h-24 overflow-y-auto p-2">
-          {status === "loading" && <p className="p-4 text-sm text-muted-foreground">…</p>}
-          {status === "ready" && results.length === 0 && (
+          {status === 'loading' && <p className="p-4 text-sm text-muted-foreground">…</p>}
+          {status === 'ready' && results.length === 0 && (
             <p className="p-4 text-sm text-muted-foreground">{labels.noResults}</p>
           )}
           {results.map((result) => (
@@ -332,20 +334,20 @@ function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILab
         </div>
       </DialogSurface>
     </Dialog.Root>
-  );
+  )
 }
 
 export function App({ Content, components, config, route, routes }: IAppProps) {
-  const locale = route?.locale ?? config.locales.default;
-  const labels = labelsFor(locale);
-  const localeRoutes = routes.filter((candidate) => candidate.locale === locale);
-  const home = localeRoutes.find((candidate) => candidate.slug === "/") ?? localeRoutes[0];
-  const siteTitle = localizedText(config.title, locale, config.locales.default);
+  const locale = route?.locale ?? config.locales.default
+  const labels = labelsFor(locale)
+  const localeRoutes = routes.filter((candidate) => candidate.locale === locale)
+  const home = localeRoutes.find((candidate) => candidate.slug === '/') ?? localeRoutes[0]
+  const siteTitle = localizedText(config.title, locale, config.locales.default)
   const mdxComponents: IDoctrineComponents = {
     a: MdxLink,
     ...builtinMdxComponents,
     ...components,
-  };
+  }
 
   return (
     <BaseContext value={config.base}>
@@ -362,7 +364,7 @@ export function App({ Content, components, config, route, routes }: IAppProps) {
           <a
             className="min-w-0 flex-1 truncate font-semibold tracking-tight"
             data-slot="brand"
-            href={withBase(config.base, home?.path ?? "/")}
+            href={withBase(config.base, home?.path ?? '/')}
           >
             {siteTitle}
           </a>
@@ -395,7 +397,7 @@ export function App({ Content, components, config, route, routes }: IAppProps) {
               <p className="mt-4 text-muted-foreground">{labels.notFoundDescription}</p>
               <a
                 className="mt-8 inline-block font-medium underline underline-offset-4"
-                href={withBase(config.base, home?.path ?? "/")}
+                href={withBase(config.base, home?.path ?? '/')}
               >
                 {siteTitle}
               </a>
@@ -404,5 +406,5 @@ export function App({ Content, components, config, route, routes }: IAppProps) {
         </main>
       </div>
     </BaseContext>
-  );
+  )
 }

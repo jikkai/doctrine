@@ -82,12 +82,12 @@ pnpm exec doctrine dev docs --host 0.0.0.0 --port 4173
 Create `doctrine.config.ts` at the project root:
 
 ```ts
-import { defineConfig } from "@amamo/doctrine";
+import { defineConfig } from '@amamo/doctrine'
 
 export default defineConfig({
-  title: "Acme documentation",
-  description: "Product guides and API notes for Acme.",
-});
+  title: 'Acme documentation',
+  description: 'Product guides and API notes for Acme.',
+})
 ```
 
 The config file is optional. Without it, Doctrine uses `Documentation` as the site title and `en`

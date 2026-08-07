@@ -1,23 +1,23 @@
-import { hydrateRoot } from "react-dom/client";
+import { hydrateRoot } from 'react-dom/client'
 
-import components from "virtual:doctrine/components";
-import { documents } from "virtual:doctrine/content";
-import config from "virtual:doctrine/config";
-import "virtual:doctrine/styles.css";
-import "virtual:doctrine/custom-styles.css";
+import components from 'virtual:doctrine/components'
+import { documents } from 'virtual:doctrine/content'
+import config from 'virtual:doctrine/config'
+import 'virtual:doctrine/styles.css'
+import 'virtual:doctrine/custom-styles.css'
 
-import { App } from "./app.js";
-import { createDocumentRoutes, findDocumentRoute } from "./content.js";
-import { withoutBase } from "./url.js";
+import { App } from './app.js'
+import { createDocumentRoutes, findDocumentRoute } from './content.js'
+import { withoutBase } from './url.js'
 
 async function main(): Promise<void> {
-  const root = document.getElementById("doctrine-root");
-  if (!root) throw new Error("Doctrine root element is missing");
+  const root = document.getElementById('doctrine-root')
+  if (!root) throw new Error('Doctrine root element is missing')
 
-  const routes = createDocumentRoutes(documents, config);
-  const pathname = withoutBase(config.base, window.location.pathname);
-  const route = pathname ? findDocumentRoute(routes, pathname) : undefined;
-  const module = route ? await route.document.load() : undefined;
+  const routes = createDocumentRoutes(documents, config)
+  const pathname = withoutBase(config.base, window.location.pathname)
+  const route = pathname ? findDocumentRoute(routes, pathname) : undefined
+  const module = route ? await route.document.load() : undefined
   hydrateRoot(
     root,
     <App
@@ -27,9 +27,9 @@ async function main(): Promise<void> {
       route={route}
       routes={routes}
     />,
-  );
+  )
 }
 
 main().catch((error: unknown) => {
-  console.error(error);
-});
+  console.error(error)
+})

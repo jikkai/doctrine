@@ -45,19 +45,19 @@ The output is written to `dist` by default.
 Add `doctrine.config.ts` at the project root:
 
 ```ts
-import { defineConfig } from "@amamo/doctrine";
+import { defineConfig } from '@amamo/doctrine'
 
 export default defineConfig({
-  title: "My project",
-  description: "Guides for My project.",
+  title: 'My project',
+  description: 'Guides for My project.',
   locales: {
-    default: "en",
-    names: ["en", "zh-CN"],
-    labels: { en: "English", "zh-CN": "简体中文" },
+    default: 'en',
+    names: ['en', 'zh-CN'],
+    labels: { en: 'English', 'zh-CN': '简体中文' },
   },
-  components: "./docs/components.tsx",
-  styles: "./docs/theme.css",
-});
+  components: './docs/components.tsx',
+  styles: './docs/theme.css',
+})
 ```
 
 Locale variants follow the `@amamo/mdx` filename convention:

@@ -80,12 +80,12 @@ pnpm exec doctrine dev docs --host 0.0.0.0 --port 4173
 在项目根目录创建 `doctrine.config.ts`：
 
 ```ts
-import { defineConfig } from "@amamo/doctrine";
+import { defineConfig } from '@amamo/doctrine'
 
 export default defineConfig({
-  title: "Acme 文档",
-  description: "Acme 的产品指南和 API 说明。",
-});
+  title: 'Acme 文档',
+  description: 'Acme 的产品指南和 API 说明。',
+})
 ```
 
 配置文件不是必需的。没有配置时，Doctrine 使用 `Documentation` 作为网站标题，并只启用 `en` locale。

@@ -7,14 +7,5 @@ export type {
   IStepsProps,
   ITabProps,
   ITabsProps,
-} from "./runtime/components/mdx.js";
-export {
-  Badge,
-  Callout,
-  Card,
-  CardGrid,
-  Step,
-  Steps,
-  Tab,
-  Tabs,
-} from "./runtime/components/mdx.js";
+} from './runtime/components/mdx.js'
+export { Badge, Callout, Card, CardGrid, Step, Steps, Tab, Tabs } from './runtime/components/mdx.js'

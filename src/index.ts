@@ -3,5 +3,5 @@ export type {
   IDoctrineComponents,
   IDoctrineConfig,
   IDoctrineLocaleConfig,
-} from "./config.js";
-export { defineConfig } from "./config.js";
+} from './config.js'
+export { defineConfig } from './config.js'

@@ -1,58 +1,58 @@
-import type { HTMLAttributes, ReactNode } from "react";
-import * as TabsPrimitive from "@base-ui/react/tabs";
-import { CircleCheck, Info, TriangleAlert, XCircle } from "lucide-react";
-import { Children, isValidElement } from "react";
+import type { HTMLAttributes, ReactNode } from 'react'
+import * as TabsPrimitive from '@base-ui/react/tabs'
+import { CircleCheck, Info, TriangleAlert, XCircle } from 'lucide-react'
+import { Children, isValidElement } from 'react'
 
-import type { IDoctrineComponents } from "../../config.js";
+import type { IDoctrineComponents } from '../../config.js'
 
 export interface IBadgeProps extends HTMLAttributes<HTMLSpanElement> {
-  variant?: "default" | "outline";
+  variant?: 'default' | 'outline'
 }
 
-export function Badge({ className, variant = "default", ...props }: IBadgeProps) {
+export function Badge({ className, variant = 'default', ...props }: IBadgeProps) {
   const variantClass =
-    variant === "outline"
-      ? "border-border bg-transparent text-foreground"
-      : "border-transparent bg-accent text-accent-foreground";
+    variant === 'outline'
+      ? 'border-border bg-transparent text-foreground'
+      : 'border-transparent bg-accent text-accent-foreground'
   return (
     <span
-      className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${variantClass} ${className ?? ""}`}
+      className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${variantClass} ${className ?? ''}`}
       {...props}
       data-slot="badge"
     />
-  );
+  )
 }
 
 export interface ICalloutProps extends HTMLAttributes<HTMLElement> {
-  title?: string;
-  variant?: "danger" | "note" | "tip" | "warning";
+  title?: string
+  variant?: 'danger' | 'note' | 'tip' | 'warning'
 }
 
 const CALLOUT_VARIANTS = {
   danger: {
-    className: "border-red-500/40 bg-red-500/10 text-red-950 dark:text-red-100",
+    className: 'border-red-500/40 bg-red-500/10 text-red-950 dark:text-red-100',
     icon: XCircle,
   },
   note: {
-    className: "border-border bg-muted text-foreground",
+    className: 'border-border bg-muted text-foreground',
     icon: Info,
   },
   tip: {
-    className: "border-emerald-500/40 bg-emerald-500/10 text-emerald-950 dark:text-emerald-100",
+    className: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-950 dark:text-emerald-100',
     icon: CircleCheck,
   },
   warning: {
-    className: "border-amber-500/40 bg-amber-500/10 text-amber-950 dark:text-amber-100",
+    className: 'border-amber-500/40 bg-amber-500/10 text-amber-950 dark:text-amber-100',
     icon: TriangleAlert,
   },
-} as const;
+} as const
 
-export function Callout({ children, className, title, variant = "note", ...props }: ICalloutProps) {
-  const definition = CALLOUT_VARIANTS[variant];
-  const Icon = definition.icon;
+export function Callout({ children, className, title, variant = 'note', ...props }: ICalloutProps) {
+  const definition = CALLOUT_VARIANTS[variant]
+  const Icon = definition.icon
   return (
     <aside
-      className={`my-6 flex gap-3 rounded-lg border px-4 py-3 text-sm ${definition.className} ${className ?? ""}`}
+      className={`my-6 flex gap-3 rounded-lg border px-4 py-3 text-sm ${definition.className} ${className ?? ''}`}
       {...props}
       data-slot="callout"
       data-variant={variant}
@@ -63,24 +63,24 @@ export function Callout({ children, className, title, variant = "note", ...props
         <div className="[&>:first-child]:mt-0 [&>:last-child]:mb-0">{children}</div>
       </div>
     </aside>
-  );
+  )
 }
 
 export interface ICardProps extends HTMLAttributes<HTMLDivElement> {
-  title?: string;
+  title?: string
 }
 
 export function Card({ children, className, title, ...props }: ICardProps) {
   return (
     <div
-      className={`rounded-lg border border-border bg-background p-5 ${className ?? ""}`}
+      className={`rounded-lg border border-border bg-background p-5 ${className ?? ''}`}
       {...props}
       data-slot="card"
     >
       {title && <h3 className="mt-0 text-base">{title}</h3>}
       <div className="[&>:first-child]:mt-0 [&>:last-child]:mb-0">{children}</div>
     </div>
-  );
+  )
 }
 
 export interface ICardGridProps extends HTMLAttributes<HTMLDivElement> {}
@@ -88,20 +88,20 @@ export interface ICardGridProps extends HTMLAttributes<HTMLDivElement> {}
 export function CardGrid({ className, ...props }: ICardGridProps) {
   return (
     <div
-      className={`my-6 grid gap-4 sm:grid-cols-2 ${className ?? ""}`}
+      className={`my-6 grid gap-4 sm:grid-cols-2 ${className ?? ''}`}
       {...props}
       data-slot="card-grid"
     />
-  );
+  )
 }
 
 export interface IStepProps extends HTMLAttributes<HTMLLIElement> {
-  title?: string;
+  title?: string
 }
 
 export function Step({ children, className, title, ...props }: IStepProps) {
   return (
-    <li className={`relative pb-6 pl-10 last:pb-0 ${className ?? ""}`} {...props} data-slot="step">
+    <li className={`relative pb-6 pl-10 last:pb-0 ${className ?? ''}`} {...props} data-slot="step">
       <span
         aria-hidden="true"
         className="absolute top-0 left-0 flex size-7 items-center justify-center rounded-full bg-accent text-xs font-semibold text-accent-foreground before:content-[counter(list-item)]"
@@ -109,7 +109,7 @@ export function Step({ children, className, title, ...props }: IStepProps) {
       {title && <h3 className="mt-0 text-base">{title}</h3>}
       <div className="[&>:first-child]:mt-0 [&>:last-child]:mb-0">{children}</div>
     </li>
-  );
+  )
 }
 
 export interface IStepsProps extends HTMLAttributes<HTMLOListElement> {}
@@ -117,37 +117,37 @@ export interface IStepsProps extends HTMLAttributes<HTMLOListElement> {}
 export function Steps({ className, ...props }: IStepsProps) {
   return (
     <ol
-      className={`my-6 ml-3 list-none border-l border-border pl-0 ${className ?? ""}`}
+      className={`my-6 ml-3 list-none border-l border-border pl-0 ${className ?? ''}`}
       {...props}
       data-slot="steps"
     />
-  );
+  )
 }
 
 export interface ITabProps {
-  children: ReactNode;
-  label: ReactNode;
-  value?: string;
+  children: ReactNode
+  label: ReactNode
+  value?: string
 }
 
 export function Tab({ children }: ITabProps) {
-  return children;
+  return children
 }
 
 export interface ITabsProps {
-  children: ReactNode;
-  className?: string;
-  defaultValue?: string;
+  children: ReactNode
+  className?: string
+  defaultValue?: string
 }
 
 export function Tabs({ children, className, defaultValue }: ITabsProps) {
-  const items = Children.toArray(children).filter(isValidElement<ITabProps>);
-  const values = items.map((item, index) => item.props.value ?? String(index));
-  if (items.length === 0) return null;
+  const items = Children.toArray(children).filter(isValidElement<ITabProps>)
+  const values = items.map((item, index) => item.props.value ?? String(index))
+  if (items.length === 0) return null
 
   return (
     <TabsPrimitive.Tabs.Root
-      className={`my-6 ${className ?? ""}`}
+      className={`my-6 ${className ?? ''}`}
       data-slot="tabs"
       defaultValue={defaultValue ?? values[0]}
     >
@@ -177,7 +177,7 @@ export function Tabs({ children, className, defaultValue }: ITabsProps) {
         </TabsPrimitive.Tabs.Panel>
       ))}
     </TabsPrimitive.Tabs.Root>
-  );
+  )
 }
 
 export const builtinMdxComponents = {
@@ -189,4 +189,4 @@ export const builtinMdxComponents = {
   Steps,
   Tab,
   Tabs,
-} satisfies IDoctrineComponents;
+} satisfies IDoctrineComponents

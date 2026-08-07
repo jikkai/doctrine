@@ -1,2 +1,6 @@
+allowBuilds:
+  esbuild: false
+  simple-git-hooks: true
+
 minimumReleaseAgeExclude:
-  - "@amamo/*"
+  - '@amamo/*'

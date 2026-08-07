@@ -14,11 +14,11 @@ Both are optional, and both apply to development, static rendering, and client h
 Set `styles` to a CSS file relative to the project root:
 
 ```ts
-import { defineConfig } from "@amamo/doctrine";
+import { defineConfig } from '@amamo/doctrine'
 
 export default defineConfig({
-  styles: "./docs/theme.css",
-});
+  styles: './docs/theme.css',
+})
 ```
 
 The stylesheet loads after Doctrine's styles. Override only the variables you need:
@@ -33,7 +33,7 @@ The stylesheet loads after Doctrine's styles. Override only the variables you ne
   --doctrine-content-width: 52rem;
 }
 
-[data-theme="dark"] {
+[data-theme='dark'] {
   --doctrine-background: oklch(0.14 0.02 250);
   --doctrine-muted: oklch(0.21 0.02 250);
 }
@@ -64,15 +64,15 @@ Light values belong in `:root`; dark overrides belong in `[data-theme="dark"]`.
 Stable `data-slot` attributes let a theme target the shell without depending on Tailwind classes:
 
 ```css
-[data-slot="header"] {
+[data-slot='header'] {
   box-shadow: 0 1px 0 color-mix(in oklab, var(--doctrine-ring) 25%, transparent);
 }
 
-[data-slot="brand"] {
+[data-slot='brand'] {
   color: var(--doctrine-accent);
 }
 
-[data-slot="content"] {
+[data-slot='content'] {
   letter-spacing: 0.005em;
 }
 ```
@@ -180,23 +180,23 @@ Custom components are merged after built-ins, so the same name replaces the defa
 components can be imported and wrapped instead of reimplemented:
 
 ```tsx
-import type { IDoctrineComponents } from "@amamo/doctrine";
-import type { ComponentProps } from "react";
-import { Callout } from "@amamo/doctrine/components";
+import type { IDoctrineComponents } from '@amamo/doctrine'
+import type { ComponentProps } from 'react'
+import { Callout } from '@amamo/doctrine/components'
 
 function BrandedCallout(props: ComponentProps<typeof Callout>) {
-  return <Callout className="border-brand" {...props} />;
+  return <Callout className="border-brand" {...props} />
 }
 
-export default { Callout: BrandedCallout } satisfies IDoctrineComponents;
+export default { Callout: BrandedCallout } satisfies IDoctrineComponents
 ```
 
 Register the module in `doctrine.config.ts`:
 
 ```ts
 export default defineConfig({
-  components: "./docs/components.tsx",
-});
+  components: './docs/components.tsx',
+})
 ```
 
 Custom components are bundled for Node.js rendering and the browser. Avoid browser globals during

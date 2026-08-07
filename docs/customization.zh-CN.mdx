@@ -13,11 +13,11 @@ Doctrine 提供两条定制路径：用 CSS 调整外观，用 React 组件映�
 将 `styles` 设置为相对项目根目录的 CSS 文件：
 
 ```ts
-import { defineConfig } from "@amamo/doctrine";
+import { defineConfig } from '@amamo/doctrine'
 
 export default defineConfig({
-  styles: "./docs/theme.css",
-});
+  styles: './docs/theme.css',
+})
 ```
 
 该样式表会在 Doctrine 内置样式之后加载。只需覆盖实际需要的变量：
@@ -32,7 +32,7 @@ export default defineConfig({
   --doctrine-content-width: 52rem;
 }
 
-[data-theme="dark"] {
+[data-theme='dark'] {
   --doctrine-background: oklch(0.14 0.02 250);
   --doctrine-muted: oklch(0.21 0.02 250);
 }
@@ -63,15 +63,15 @@ export default defineConfig({
 稳定的 `data-slot` 属性允许主题定位网站外壳，而不依赖 Tailwind class：
 
 ```css
-[data-slot="header"] {
+[data-slot='header'] {
   box-shadow: 0 1px 0 color-mix(in oklab, var(--doctrine-ring) 25%, transparent);
 }
 
-[data-slot="brand"] {
+[data-slot='brand'] {
   color: var(--doctrine-accent);
 }
 
-[data-slot="content"] {
+[data-slot='content'] {
   letter-spacing: 0.005em;
 }
 ```
@@ -173,23 +173,23 @@ export default defineConfig({
 自定义组件在内置组件之后合并，因此同名条目会替换默认实现。可以导入并包装公开组件，不需要重新实现：
 
 ```tsx
-import type { IDoctrineComponents } from "@amamo/doctrine";
-import type { ComponentProps } from "react";
-import { Callout } from "@amamo/doctrine/components";
+import type { IDoctrineComponents } from '@amamo/doctrine'
+import type { ComponentProps } from 'react'
+import { Callout } from '@amamo/doctrine/components'
 
 function BrandedCallout(props: ComponentProps<typeof Callout>) {
-  return <Callout className="border-brand" {...props} />;
+  return <Callout className="border-brand" {...props} />
 }
 
-export default { Callout: BrandedCallout } satisfies IDoctrineComponents;
+export default { Callout: BrandedCallout } satisfies IDoctrineComponents
 ```
 
 在 `doctrine.config.ts` 中注册：
 
 ```ts
 export default defineConfig({
-  components: "./docs/components.tsx",
-});
+  components: './docs/components.tsx',
+})
 ```
 
 自定义组件会同时被打包到 Node.js 渲染和浏览器中。不要在模块初始化或渲染阶段访问浏览器全局变量；应在 effect 或事件处理器中使用。

@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
@@ -24,7 +24,7 @@
   --ring: var(--doctrine-ring);
 }
 
-[data-theme="dark"] {
+[data-theme='dark'] {
   --doctrine-background: oklch(0.16 0 0);
   --doctrine-foreground: oklch(0.96 0 0);
   --doctrine-muted: oklch(0.23 0 0);
@@ -61,7 +61,7 @@
     scroll-padding-top: calc(var(--doctrine-header-height) + 1.5rem);
   }
 
-  html[data-theme="dark"] {
+  html[data-theme='dark'] {
     color-scheme: dark;
   }
 
@@ -82,11 +82,11 @@
 }
 
 .theme-icon-dark,
-[data-theme="dark"] .theme-icon-light {
+[data-theme='dark'] .theme-icon-light {
   display: none;
 }
 
-[data-theme="dark"] .theme-icon-dark {
+[data-theme='dark'] .theme-icon-dark {
   display: inline;
 }
 
@@ -162,8 +162,8 @@
   font-size: 0.875rem;
 }
 
-[data-theme="dark"] .shiki,
-[data-theme="dark"] .shiki span {
+[data-theme='dark'] .shiki,
+[data-theme='dark'] .shiki span {
   color: var(--shiki-dark) !important;
   background-color: var(--shiki-dark-bg) !important;
 }
@@ -184,12 +184,12 @@
   text-align: left;
 }
 
-.doctrine-prose [data-slot="steps"] {
+.doctrine-prose [data-slot='steps'] {
   list-style: none;
 }
 
-.doctrine-prose [data-slot="callout"] p:first-child,
-.doctrine-prose [data-slot="card"] > h3,
-.doctrine-prose [data-slot="step"] > h3 {
+.doctrine-prose [data-slot='callout'] p:first-child,
+.doctrine-prose [data-slot='card'] > h3,
+.doctrine-prose [data-slot='step'] > h3 {
   margin-top: 0;
 }

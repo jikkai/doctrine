@@ -10,27 +10,27 @@ Doctrine works without a config file. Add `doctrine.config.ts` at the project ro
 are not enough:
 
 ```ts
-import { defineConfig } from "@amamo/doctrine";
+import { defineConfig } from '@amamo/doctrine'
 
 export default defineConfig({
   title: {
-    en: "Acme documentation",
-    "zh-CN": "Acme 文档",
+    en: 'Acme documentation',
+    'zh-CN': 'Acme 文档',
   },
   description: {
-    en: "Product guides and API notes.",
-    "zh-CN": "产品指南和 API 说明。",
+    en: 'Product guides and API notes.',
+    'zh-CN': '产品指南和 API 说明。',
   },
-  siteUrl: "https://docs.example.com/",
-  outDir: "dist",
+  siteUrl: 'https://docs.example.com/',
+  outDir: 'dist',
   locales: {
-    default: "en",
-    names: ["en", "zh-CN"],
-    labels: { en: "English", "zh-CN": "简体中文" },
+    default: 'en',
+    names: ['en', 'zh-CN'],
+    labels: { en: 'English', 'zh-CN': '简体中文' },
   },
-  components: "./docs/components.tsx",
-  styles: "./docs/theme.css",
-});
+  components: './docs/components.tsx',
+  styles: './docs/theme.css',
+})
 ```
 
 Doctrine also recognizes `doctrine.config.mts`, `doctrine.config.js`, and
@@ -105,25 +105,25 @@ Set `components` to a module path relative to the project root:
 
 ```ts
 export default defineConfig({
-  components: "./docs/components.tsx",
-});
+  components: './docs/components.tsx',
+})
 ```
 
 The module must default-export a component map:
 
 ```tsx
-import type { IDoctrineComponents } from "@amamo/doctrine";
-import type { ReactNode } from "react";
+import type { IDoctrineComponents } from '@amamo/doctrine'
+import type { ReactNode } from 'react'
 
 function Callout({ children }: { children: ReactNode }) {
   return (
     <aside className="rounded-lg border border-sky-500 bg-sky-50 p-4 dark:bg-sky-950">
       {children}
     </aside>
-  );
+  )
 }
 
-export default { Callout } satisfies IDoctrineComponents;
+export default { Callout } satisfies IDoctrineComponents
 ```
 
 Use the registered name directly in MDX:
