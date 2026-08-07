@@ -1,0 +1,11 @@
+---
+title: GitHub Pages
+description: Deploy Doctrine under a repository subpath.
+order: 3
+---
+
+# GitHub Pages
+
+Run `actions/configure-pages` before the Doctrine build and pass its `base_url` output to `--site-url`. Doctrine derives `/repository/` from that URL and applies it consistently to assets, navigation, search results, canonical URLs, locale links, and the 404 page.
+
+The repository includes a complete workflow in `.github/workflows/deploy-pages.yml`.

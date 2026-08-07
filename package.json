@@ -1,0 +1,62 @@
+{
+  "name": "@amamo/doctrine",
+  "version": "0.1.0",
+  "description": "An MDX-first static documentation site generator",
+  "license": "MIT",
+  "author": "白熱 <sonne@asaki.me>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jikkai/doctrine"
+  },
+  "bin": {
+    "doctrine": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.build.json && node -e \"require('node:fs').cpSync('src/runtime/styles.css', 'dist/runtime/styles.css')\"",
+    "check": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run docs:build",
+    "dev": "pnpm run build && node dist/cli.js dev docs",
+    "docs:build": "pnpm run build && node dist/cli.js build docs --site-url https://jikkai.github.io/doctrine/",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
+    "lint": "oxlint .",
+    "prepack": "pnpm run build",
+    "test": "pnpm run build && vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@amamo/mdx": "0.1.5",
+    "@base-ui/react": "1.7.0",
+    "@tailwindcss/vite": "4.3.3",
+    "@vitejs/plugin-react": "6.0.5",
+    "pagefind": "1.5.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "tailwindcss": "4.3.3",
+    "vite": "8.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "26.1.2",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "oxfmt": "0.62.0",
+    "oxlint": "1.77.0",
+    "typescript": "7.0.2",
+    "vitest": "4.1.10"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
+  "packageManager": "pnpm@11.20.0"
+}

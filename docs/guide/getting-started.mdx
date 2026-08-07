@@ -1,0 +1,22 @@
+---
+title: Getting started
+description: Install Doctrine and serve an MDX directory.
+order: 2
+---
+
+# Getting started
+
+Create a `docs` directory and add an `index.mdx` file with a `title` in its frontmatter.
+
+```sh
+pnpm add @amamo/doctrine
+pnpm exec doctrine dev docs
+```
+
+Build the static site with its final public URL:
+
+```sh
+pnpm exec doctrine build docs --site-url https://example.com/project/
+```
+
+The URL pathname becomes the asset and navigation base. Output still goes directly to `dist`, so the example above creates `dist/index.html`, not `dist/project/index.html`.

@@ -1,0 +1,22 @@
+---
+title: 开始使用
+description: 安装 Doctrine，并直接提供一个 MDX 目录。
+order: 2
+---
+
+# 开始使用
+
+创建 `docs` 目录，并添加一个在 frontmatter 中包含 `title` 的 `index.mdx` 文件。
+
+```sh
+pnpm add @amamo/doctrine
+pnpm exec doctrine dev docs
+```
+
+构建时提供最终公开网址：
+
+```sh
+pnpm exec doctrine build docs --site-url https://example.com/project/
+```
+
+网址的 pathname 会成为资源和导航的基础路径；产物仍直接写入 `dist`，不会额外嵌套一层 `project` 目录。

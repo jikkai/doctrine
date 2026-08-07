@@ -1,0 +1,172 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  --background: oklch(0.99 0 0);
+  --foreground: oklch(0.18 0 0);
+  --muted: oklch(0.96 0 0);
+  --muted-foreground: oklch(0.48 0 0);
+  --border: oklch(0.9 0 0);
+  --ring: oklch(0.55 0 0);
+}
+
+[data-theme="dark"] {
+  --background: oklch(0.16 0 0);
+  --foreground: oklch(0.96 0 0);
+  --muted: oklch(0.23 0 0);
+  --muted-foreground: oklch(0.68 0 0);
+  --border: oklch(0.3 0 0);
+  --ring: oklch(0.65 0 0);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    background: var(--background);
+    color: var(--foreground);
+    color-scheme: light;
+    scroll-padding-top: 5rem;
+  }
+
+  html[data-theme="dark"] {
+    color-scheme: dark;
+  }
+
+  body {
+    min-width: 20rem;
+    margin: 0;
+    background: var(--background);
+    color: var(--foreground);
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+    text-rendering: optimizeLegibility;
+  }
+
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+}
+
+.theme-icon-dark,
+[data-theme="dark"] .theme-icon-light {
+  display: none;
+}
+
+[data-theme="dark"] .theme-icon-dark {
+  display: inline;
+}
+
+.doctrine-prose {
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.doctrine-prose :where(h1, h2, h3, h4) {
+  scroll-margin-top: 5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+.doctrine-prose h1 {
+  margin: 0 0 1.5rem;
+  font-size: clamp(2.25rem, 6vw, 3.5rem);
+}
+
+.doctrine-prose h2 {
+  margin: 2.75rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 1.75rem;
+}
+
+.doctrine-prose h3 {
+  margin: 2rem 0 0.75rem;
+  font-size: 1.35rem;
+}
+
+.doctrine-prose :where(p, ul, ol, blockquote, pre, table) {
+  margin: 1.1rem 0;
+}
+
+.doctrine-prose :where(ul, ol) {
+  padding-left: 1.5rem;
+}
+
+.doctrine-prose ul {
+  list-style: disc;
+}
+
+.doctrine-prose ol {
+  list-style: decimal;
+}
+
+.doctrine-prose a {
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.doctrine-prose blockquote {
+  border-left: 0.25rem solid var(--border);
+  padding-left: 1rem;
+  color: var(--muted-foreground);
+}
+
+.doctrine-prose :not(pre) > code {
+  border-radius: 0.3rem;
+  background: var(--muted);
+  padding: 0.15rem 0.35rem;
+  font-size: 0.9em;
+}
+
+.doctrine-prose pre {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  font-size: 0.875rem;
+}
+
+[data-theme="dark"] .shiki,
+[data-theme="dark"] .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+}
+
+.doctrine-prose img {
+  max-width: 100%;
+  border-radius: 0.75rem;
+}
+
+.doctrine-prose table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.doctrine-prose :where(th, td) {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.75rem;
+  text-align: left;
+}

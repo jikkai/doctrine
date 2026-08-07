@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.amamo-mdx/
+.doctrine/
+*.tsbuildinfo
+.DS_Store
