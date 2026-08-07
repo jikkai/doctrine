@@ -33,7 +33,7 @@ jobs:
       - id: pages
         uses: actions/configure-pages@v6
       - run: pnpm run build
-      - run: pnpm exec doctrine build docs --site-url "${{ steps.pages.outputs.base_url }}"
+      - run: node dist/cli.js build docs --site-url "${{ steps.pages.outputs.base_url }}"
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
