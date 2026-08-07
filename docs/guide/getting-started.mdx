@@ -1,34 +1,129 @@
 ---
 title: Getting started
-description: Install Doctrine and serve an MDX directory.
+description: Create, preview, and build a Doctrine site from scratch.
 order: 2
 ---
 
 # Getting started
 
-Create a `docs` directory and add an `index.mdx` file with a `title` in its frontmatter.
+This tutorial starts with an empty project and ends with a deployable static site in `dist`.
+
+## 1. Install Doctrine
+
+Doctrine requires Node.js 20.19 or newer. Install it in the project that owns the documentation:
 
 ```sh
 pnpm add @amamo/doctrine
+mkdir docs
+```
+
+Your project now needs only this structure:
+
+```text
+my-project/
+├── docs/
+│   └── index.mdx
+└── package.json
+```
+
+## 2. Write the home page
+
+Create `docs/index.mdx`:
+
+```mdx
+---
+title: Acme documentation
+description: Learn how to use Acme.
+order: 1
+---
+
+# Acme documentation
+
+Choose a guide from the navigation.
+```
+
+`title` is required. `description` is used for page metadata, and `order` controls the navigation
+order.
+
+Add another page at `docs/guide/install.mdx`:
+
+````mdx
+---
+title: Install Acme
+order: 2
+---
+
+# Install Acme
+
+```sh
+pnpm add acme
+```
+````
+
+That file is available at `/guide/install/`.
+
+## 3. Start the development server
+
+```sh
 pnpm exec doctrine dev docs
 ```
 
-Build the static site with its final public URL:
+The default address is `http://localhost:5173`. Changes to MDX content update the development site,
+and search is rebuilt when content changes.
+
+Use another host or port when needed:
 
 ```sh
-pnpm exec doctrine build docs --site-url https://example.com/project/
+pnpm exec doctrine dev docs --host 0.0.0.0 --port 4173
 ```
 
-The URL pathname becomes the asset and navigation base. Output still goes directly to `dist`, so the example above creates `dist/index.html`, not `dist/project/index.html`.
+## 4. Add site metadata
 
-## Custom components
-
-Point `components` at a module from `doctrine.config.ts`:
+Create `doctrine.config.ts` at the project root:
 
 ```ts
+import { defineConfig } from "@amamo/doctrine";
+
 export default defineConfig({
-  components: "./docs/components.tsx",
+  title: "Acme documentation",
+  description: "Product guides and API notes for Acme.",
 });
 ```
 
-The module must default-export a component map. Doctrine includes it in static rendering and client hydration, and scans it for Tailwind classes.
+The config file is optional. Without it, Doctrine uses `Documentation` as the site title and `en`
+as the only locale.
+
+## 5. Build static files
+
+Pass the final public URL to the build:
+
+```sh
+pnpm exec doctrine build docs --site-url https://docs.example.com/
+```
+
+Doctrine writes static HTML, client assets, a 404 page, and the Pagefind index to `dist`:
+
+```text
+dist/
+├── 404.html
+├── assets/
+├── guide/install/index.html
+├── index.html
+└── pagefind/
+```
+
+For a repository site, include its pathname:
+
+```sh
+pnpm exec doctrine build docs --site-url https://user.github.io/acme/
+```
+
+The output still goes directly into `dist`; Doctrine applies `/acme/` to public URLs instead of
+creating `dist/acme`.
+
+## 6. Continue from here
+
+- Review all built-in behavior in [Features](/features/).
+- Customize themes and MDX components with [Customization](/customization/).
+- Add locales and site metadata with [Configuration](/configuration/).
+- Copy the production workflow from [GitHub Pages](/deployment/).

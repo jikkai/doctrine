@@ -12,10 +12,12 @@ import type { IRuntimeConfig } from "./runtime/types.js";
 const CONTENT_ID = "virtual:doctrine/content";
 const COMPONENTS_ID = "virtual:doctrine/components";
 const CONFIG_ID = "virtual:doctrine/config";
+const CUSTOM_STYLES_ID = "virtual:doctrine/custom-styles.css";
 const STYLES_ID = "virtual:doctrine/styles.css";
 const RESOLVED_CONTENT_ID = `\0${CONTENT_ID}`;
 const RESOLVED_COMPONENTS_ID = `\0${COMPONENTS_ID}`;
 const RESOLVED_CONFIG_ID = `\0${CONFIG_ID}`;
+const RESOLVED_CUSTOM_STYLES_ID = `\0${CUSTOM_STYLES_ID}`;
 const RESOLVED_STYLES_ID = `\0${STYLES_ID}`;
 
 export interface IDoctrinePluginOptions {
@@ -75,9 +77,15 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
       name: "doctrine",
       enforce: "pre",
       resolveId(source) {
+        if (source === "@amamo/doctrine/components") {
+          return path.join(options.packageRoot ?? doctrinePackageRoot(), "components.js");
+        }
         if (source === CONTENT_ID) return RESOLVED_CONTENT_ID;
         if (source === COMPONENTS_ID) return RESOLVED_COMPONENTS_ID;
         if (source === CONFIG_ID) return RESOLVED_CONFIG_ID;
+        if (source === CUSTOM_STYLES_ID) {
+          return options.config.styles ?? RESOLVED_CUSTOM_STYLES_ID;
+        }
         if (source === STYLES_ID) return RESOLVED_STYLES_ID;
         return null;
       },
@@ -91,6 +99,7 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
             : "export default {};";
         }
         if (id === RESOLVED_CONFIG_ID) return `export default ${JSON.stringify(runtimeConfig)};`;
+        if (id === RESOLVED_CUSTOM_STYLES_ID) return "";
         if (id === RESOLVED_STYLES_ID) {
           const source = await readFile(styles, "utf8");
           const componentSource = options.config.components

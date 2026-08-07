@@ -1,0 +1,55 @@
+---
+title: CLI reference
+description: Run the Doctrine development server and static build.
+order: 6
+---
+
+# CLI reference
+
+Doctrine exposes two commands. The MDX directory is optional and defaults to `docs`.
+
+```sh
+pnpm exec doctrine dev [directory] [--host localhost] [--port 5173]
+pnpm exec doctrine build [directory] [--site-url https://example.com/docs/] [--out-dir dist]
+```
+
+## `doctrine dev`
+
+Starts the Vite development server with SSR, client hydration, and a development search index.
+
+| Argument or option | Default     | Description                                   |
+| ------------------ | ----------- | --------------------------------------------- |
+| `[directory]`      | `docs`      | Directory containing the MDX files.           |
+| `--host`           | `localhost` | Network interface for the development server. |
+| `--port`           | `5173`      | Development server port, from `0` to `65535`. |
+
+```sh
+pnpm exec doctrine dev
+pnpm exec doctrine dev website --host 0.0.0.0 --port 4173
+```
+
+## `doctrine build`
+
+Generates static HTML, client assets, `404.html`, and the Pagefind search index.
+
+| Argument or option | Default                       | Description                                                     |
+| ------------------ | ----------------------------- | --------------------------------------------------------------- |
+| `[directory]`      | `docs`                        | Directory containing the MDX files.                             |
+| `--site-url`       | config or `http://localhost/` | Final public URL, including any deployment subpath.             |
+| `--out-dir`        | config or `dist`              | Output directory, relative to the project root unless absolute. |
+
+```sh
+pnpm exec doctrine build
+pnpm exec doctrine build website \
+  --site-url https://user.github.io/project/ \
+  --out-dir build
+```
+
+CLI options override the matching values in `doctrine.config.*`. See
+[Configuration](/configuration/) for the complete config reference.
+
+## Help and errors
+
+Run `pnpm exec doctrine --help` to print the command signatures. Unknown commands, unknown options,
+missing values, invalid ports, and missing input directories fail the command with a non-zero exit
+code.

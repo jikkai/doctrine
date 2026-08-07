@@ -1,0 +1,203 @@
+---
+title: Customization
+description: Customize Doctrine themes, layout styles, and built-in MDX components.
+order: 4
+---
+
+# Customization
+
+Doctrine exposes two customization seams: CSS for appearance and a React component map for MDX.
+Both are optional, and both apply to development, static rendering, and client hydration.
+
+## Add a theme stylesheet
+
+Set `styles` to a CSS file relative to the project root:
+
+```ts
+import { defineConfig } from "@amamo/doctrine";
+
+export default defineConfig({
+  styles: "./docs/theme.css",
+});
+```
+
+The stylesheet loads after Doctrine's styles. Override only the variables you need:
+
+```css
+:root {
+  --doctrine-accent: oklch(0.55 0.2 250);
+  --doctrine-accent-foreground: white;
+  --doctrine-ring: oklch(0.55 0.2 250);
+  --doctrine-radius: 0.9rem;
+  --doctrine-font-sans: Inter, sans-serif;
+  --doctrine-content-width: 52rem;
+}
+
+[data-theme="dark"] {
+  --doctrine-background: oklch(0.14 0.02 250);
+  --doctrine-muted: oklch(0.21 0.02 250);
+}
+```
+
+### Theme variables
+
+| Variable                       | Controls                             |
+| ------------------------------ | ------------------------------------ |
+| `--doctrine-background`        | Page and surface background          |
+| `--doctrine-foreground`        | Primary text                         |
+| `--doctrine-muted`             | Muted surfaces and hover states      |
+| `--doctrine-muted-foreground`  | Secondary text                       |
+| `--doctrine-border`            | Borders and separators               |
+| `--doctrine-ring`              | Keyboard focus rings                 |
+| `--doctrine-accent`            | Badges, steps, and selected controls |
+| `--doctrine-accent-foreground` | Text on the accent color             |
+| `--doctrine-radius`            | Shared control and surface radius    |
+| `--doctrine-font-sans`         | Site font stack                      |
+| `--doctrine-content-width`     | Maximum article width                |
+| `--doctrine-sidebar-width`     | Desktop navigation width             |
+| `--doctrine-header-height`     | Sticky header height                 |
+
+Light values belong in `:root`; dark overrides belong in `[data-theme="dark"]`.
+
+## Style layout regions
+
+Stable `data-slot` attributes let a theme target the shell without depending on Tailwind classes:
+
+```css
+[data-slot="header"] {
+  box-shadow: 0 1px 0 color-mix(in oklab, var(--doctrine-ring) 25%, transparent);
+}
+
+[data-slot="brand"] {
+  color: var(--doctrine-accent);
+}
+
+[data-slot="content"] {
+  letter-spacing: 0.005em;
+}
+```
+
+The shell exposes `header`, `header-inner`, `brand`, `navigation`, `sidebar`, `main`, and `content`.
+Built-in MDX components expose their component name in kebab case.
+
+## Built-in MDX components
+
+Built-ins require no imports or registration.
+
+### Callouts and badges
+
+```mdx
+<Callout variant="tip" title="Ready to deploy">
+  Run the production build before uploading `dist`.
+</Callout>
+
+<Badge>Stable</Badge> <Badge variant="outline">Preview</Badge>
+```
+
+`Callout` supports `note`, `tip`, `warning`, and `danger` variants.
+
+<Callout variant="tip" title="Ready to deploy">
+  Run the production build before uploading `dist`.
+</Callout>
+
+<Badge>Stable</Badge> <Badge variant="outline">Preview</Badge>
+
+### Cards
+
+```mdx
+<CardGrid>
+  <Card title="Installation">
+    Start with the [getting-started tutorial](/guide/getting-started/).
+  </Card>
+  <Card title="Deployment">Copy the [GitHub Pages workflow](/deployment/).</Card>
+</CardGrid>
+```
+
+<CardGrid>
+  <Card title="Installation">
+    Start with the [getting-started tutorial](/guide/getting-started/).
+  </Card>
+  <Card title="Deployment">Copy the [GitHub Pages workflow](/deployment/).</Card>
+</CardGrid>
+
+### Steps
+
+```mdx
+<Steps>
+  <Step title="Write">Create an MDX file.</Step>
+  <Step title="Preview">Run the development server.</Step>
+  <Step title="Build">Generate static files.</Step>
+</Steps>
+```
+
+<Steps>
+  <Step title="Write">Create an MDX file.</Step>
+  <Step title="Preview">Run the development server.</Step>
+  <Step title="Build">Generate static files.</Step>
+</Steps>
+
+### Tabs
+
+````mdx
+<Tabs defaultValue="pnpm">
+  <Tab label="pnpm" value="pnpm">
+
+    ```sh
+    pnpm add @amamo/doctrine
+    ```
+
+  </Tab>
+  <Tab label="npm" value="npm">
+
+    ```sh
+    npm install @amamo/doctrine
+    ```
+
+  </Tab>
+</Tabs>
+````
+
+<Tabs defaultValue="pnpm">
+  <Tab label="pnpm" value="pnpm">
+
+    ```sh
+    pnpm add @amamo/doctrine
+    ```
+
+  </Tab>
+  <Tab label="npm" value="npm">
+
+    ```sh
+    npm install @amamo/doctrine
+    ```
+
+  </Tab>
+</Tabs>
+
+## Override a built-in component
+
+Custom components are merged after built-ins, so the same name replaces the default. Public
+components can be imported and wrapped instead of reimplemented:
+
+```tsx
+import type { IDoctrineComponents } from "@amamo/doctrine";
+import type { ComponentProps } from "react";
+import { Callout } from "@amamo/doctrine/components";
+
+function BrandedCallout(props: ComponentProps<typeof Callout>) {
+  return <Callout className="border-brand" {...props} />;
+}
+
+export default { Callout: BrandedCallout } satisfies IDoctrineComponents;
+```
+
+Register the module in `doctrine.config.ts`:
+
+```ts
+export default defineConfig({
+  components: "./docs/components.tsx",
+});
+```
+
+Custom components are bundled for Node.js rendering and the browser. Avoid browser globals during
+module initialization or rendering; access them from effects or event handlers.

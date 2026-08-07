@@ -1,0 +1,71 @@
+---
+title: 功能说明
+description: 了解 Doctrine 的开发、构建、搜索、多语言和主题行为。
+order: 3
+---
+
+# 功能说明
+
+Doctrine 把内容编译器和完整的文档运行时组合在一起。开发、静态渲染和客户端 hydration 使用同一套路由与组件。
+
+<Badge>MDX 优先</Badge>
+
+## Vite 开发服务器
+
+`doctrine dev` 启动一个输出服务端渲染 HTML 的 Vite 服务器。它会监听 MDX 目录，在文件新增或删除时更新内容路由，并在内容变化后重新生成开发搜索索引。
+
+开发服务器和生产构建使用相同的应用外壳与路由模型，因此导航、多语言链接、主题和自定义组件的行为保持一致。
+
+## 静态网站生成
+
+`doctrine build` 会生成客户端 bundle 和 SSR bundle，把每一个文档路由渲染成 HTML，补充静态 `404.html`，并移除仅用于构建的元数据。最终产物可以部署到任意静态托管平台。
+
+每个页面都包含：
+
+- 对应 locale 的 `<html lang>`
+- title 和 description 元数据
+- canonical URL
+- 语言 alternate 链接；存在默认语言页面时还会生成 `x-default`
+- 公共客户端脚本和样式资源
+
+## MDX 内容与路由
+
+Doctrine 使用 `@amamo/mdx` 编译内容。内容目录下的文件路径会成为路由 slug：
+
+```text
+docs/index.mdx                  → /
+docs/reference/config.mdx       → /reference/config/
+docs/reference/config.zh-CN.mdx → /zh-CN/reference/config/
+```
+
+每篇文档都必须包含 `title`。`description` 和数字类型的 `order` 可选。导航先按 locale 排序，再按 `order` 和标题排序。
+
+以 `/` 开头的站内链接会自动带上部署 base path；外部链接会在新标签页中打开。
+
+## 全文搜索
+
+Doctrine 根据最终静态 HTML 生成 Pagefind 索引，因此自定义 MDX 组件渲染出的内容也可以被搜索。只有在输入查询后，搜索弹窗才会加载 Pagefind，并最多显示八条结果。
+
+可以用 <kbd>⌘K</kbd> 或 <kbd>Ctrl+K</kbd> 从键盘打开搜索。
+
+## 多语言
+
+只需配置一次 locale，再通过文件名后缀创建翻译。默认语言保持无前缀路由，其他语言会添加 locale 前缀。
+
+只有当前页面存在其他翻译时，语言按钮才会显示。网站 title 和 description 可以是普通字符串，也可以是 locale 映射。
+
+## 亮色与暗色主题
+
+主题按钮在亮色和暗色之间切换，并把选择写入 `localStorage`。样式加载前，一段内联脚本会应用已保存的主题或系统偏好，避免首屏出现错误主题闪烁。
+
+## 自定义 React 组件
+
+Doctrine 内置 Callout、Badge、Card、Steps 和 Tabs。在 `doctrine.config.ts` 中用 `components` 指向一个 TSX 模块，即可添加组件或替换内置实现。合并后的组件映射同时用于静态渲染和 hydration。Tailwind 会扫描自定义模块，因此其中的 utility class 会进入最终样式。
+
+示例和公开组件导出见[自定义](/zh-CN/customization/)。
+
+## 部署子路径
+
+`siteUrl` 的 pathname 会成为公开 base。Doctrine 会把它应用到 Vite 资源、站内链接、多语言路由、Pagefind 结果、canonical URL 和 404 页面，但不会嵌套输出目录。
+
+可直接使用 [GitHub Pages](/zh-CN/deployment/) 中的工作流。

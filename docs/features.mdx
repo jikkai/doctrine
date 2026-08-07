@@ -1,0 +1,91 @@
+---
+title: Features
+description: Understand Doctrine's development, build, search, localization, and theme behavior.
+order: 3
+---
+
+# Features
+
+Doctrine combines a content compiler with a complete documentation runtime. The same routes and
+components are used during development, static rendering, and client hydration.
+
+<Badge>MDX first</Badge>
+
+## Vite development server
+
+`doctrine dev` starts a Vite server with server-rendered HTML. It watches the MDX directory, updates
+content routes when files are added or removed, and rebuilds the development search index after
+content changes.
+
+The development server uses the same application shell and route model as the production build, so
+navigation, locale links, themes, and custom components behave consistently.
+
+## Static site generation
+
+`doctrine build` creates a client bundle and an SSR bundle, renders every document route to HTML,
+adds a static `404.html`, and removes build-only metadata. The result can be served from any static
+host.
+
+Each page includes:
+
+- its localized `<html lang>` value
+- title and description metadata
+- a canonical URL
+- alternate locale links, including `x-default` when a default-locale page exists
+- the shared client and stylesheet assets
+
+## MDX content and routes
+
+Doctrine uses `@amamo/mdx` to compile content. The path below the content directory becomes the
+route slug:
+
+```text
+docs/index.mdx                 → /
+docs/reference/config.mdx      → /reference/config/
+docs/reference/config.zh-CN.mdx → /zh-CN/reference/config/
+```
+
+Every document requires `title`. `description` and numeric `order` are optional. Navigation is
+sorted by locale, then `order`, then title.
+
+Root-relative links such as `/reference/config/` automatically receive the deployment base path.
+External links open in a new tab.
+
+## Full-text search
+
+Doctrine builds a Pagefind index from the final static HTML. This means search sees the rendered
+content, including output from custom MDX components. The search dialog loads Pagefind only after a
+query is entered and returns up to eight results.
+
+Use <kbd>⌘K</kbd> or <kbd>Ctrl+K</kbd> to open search from the keyboard.
+
+## Localization
+
+Configure locales once and create translated files with a locale suffix. The default locale stays
+at the unprefixed route; other locales receive a prefix.
+
+The language control appears only when the current page has another translation. Site title and
+description can be plain strings or locale maps.
+
+## Light and dark themes
+
+The theme button switches between light and dark modes and stores the selection in
+`localStorage`. Before the stylesheet loads, a small inline script applies the saved theme or the
+operating-system preference, preventing an initial wrong-color flash.
+
+## Custom React components
+
+Doctrine includes callouts, badges, cards, steps, and tabs. Set `components` to a TSX module in
+`doctrine.config.ts` to add more components or replace a built-in. The merged component map is used
+by both static rendering and hydration. Tailwind scans the custom module, so its utility classes are
+included in the generated stylesheet.
+
+See [Customization](/customization/) for examples and public component exports.
+
+## Deployment subpaths
+
+The pathname of `siteUrl` becomes the public base. Doctrine applies it to Vite assets, internal
+links, locale routes, Pagefind results, canonical URLs, and the 404 page without nesting the output
+directory.
+
+See [GitHub Pages](/deployment/) for a ready-to-use workflow.

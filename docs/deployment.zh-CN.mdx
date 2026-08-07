@@ -1,0 +1,88 @@
+---
+title: GitHub Pages
+description: 将 Doctrine 网站部署到 GitHub Pages 仓库子路径。
+order: 7
+---
+
+# GitHub Pages
+
+GitHub Pages 项目网站通常发布在 `https://owner.github.io/repository/`。只要构建时提供最终公开网址，Doctrine 就能正确处理这段仓库子路径。
+
+## 1. 启用 GitHub Actions 部署
+
+打开仓库的 **Settings → Pages**，将 **Source** 设置为 **GitHub Actions**。
+
+## 2. 添加工作流
+
+创建 `.github/workflows/deploy-docs.yml`：
+
+```yaml
+name: Deploy documentation
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  pages: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - id: pages
+        uses: actions/configure-pages@v6
+      - run: pnpm exec doctrine build docs --site-url "${{ steps.pages.outputs.base_url }}"
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+      - id: deployment
+        uses: actions/deploy-pages@v5
+```
+
+如果项目使用其他分支、包管理器版本、MDX 目录或输出目录，请修改对应值。
+
+## 为什么必须使用 `base_url`
+
+`actions/configure-pages` 会返回真实的 Pages 网址，并在需要时包含 `/repository/`。Doctrine 从中取得公开基础路径，并统一应用到：
+
+- CSS 和 JavaScript 资源
+- 导航与语言链接
+- 搜索结果
+- canonical 元数据
+- 生成的 404 页面
+
+构建产物仍然是 `dist/index.html`，而不是 `dist/repository/index.html`；Pages 托管时会加上仓库前缀。
+
+## 自定义域名
+
+配置自定义域名后，同一份工作流仍然适用，因为 `base_url` 会反映 Pages 配置。手动构建时则直接传入最终网址：
+
+```sh
+pnpm exec doctrine build docs --site-url https://docs.example.com/
+```
+
+## 常见问题
+
+- 工作流无法部署：确认 Pages 的 Source 是 **GitHub Actions**，并检查工作流是否具有 `pages: write` 和 `id-token: write` 权限。
+- HTML 能打开但资源或链接返回 404：检查构建命令，确保 `--site-url` 包含完整仓库路径。
+- 上传步骤找不到网站：确保 `path` 与 `--out-dir` 或配置中的 `outDir` 一致。

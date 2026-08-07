@@ -1,0 +1,142 @@
+---
+title: Configuration
+description: Configure metadata, output, locales, frontmatter, and custom MDX components.
+order: 5
+---
+
+# Configuration
+
+Doctrine works without a config file. Add `doctrine.config.ts` at the project root when the defaults
+are not enough:
+
+```ts
+import { defineConfig } from "@amamo/doctrine";
+
+export default defineConfig({
+  title: {
+    en: "Acme documentation",
+    "zh-CN": "Acme 文档",
+  },
+  description: {
+    en: "Product guides and API notes.",
+    "zh-CN": "产品指南和 API 说明。",
+  },
+  siteUrl: "https://docs.example.com/",
+  outDir: "dist",
+  locales: {
+    default: "en",
+    names: ["en", "zh-CN"],
+    labels: { en: "English", "zh-CN": "简体中文" },
+  },
+  components: "./docs/components.tsx",
+  styles: "./docs/theme.css",
+});
+```
+
+Doctrine also recognizes `doctrine.config.mts`, `doctrine.config.js`, and
+`doctrine.config.mjs`.
+
+## Site options
+
+| Option        | Type                               | Default                           | Purpose                                                |
+| ------------- | ---------------------------------- | --------------------------------- | ------------------------------------------------------ |
+| `title`       | `string \| Record<string, string>` | `"Documentation"`                 | Site title and title suffix.                           |
+| `description` | `string \| Record<string, string>` | `"Documentation built from MDX."` | Default page description.                              |
+| `siteUrl`     | `string`                           | `"http://localhost/"`             | Absolute public URL and deployment base.               |
+| `outDir`      | `string`                           | `"dist"`                          | Static output directory, relative to the project root. |
+| `locales`     | `IDoctrineLocaleConfig`            | English only                      | Locale routes and labels.                              |
+| `components`  | `string`                           | none                              | Path to the custom MDX component module.               |
+| `styles`      | `string`                           | none                              | Path to a custom theme or stylesheet.                  |
+
+`--site-url` and `--out-dir` override their config values for one build.
+
+`outDir` must stay inside the project root and outside the MDX content directory. A build clears the
+output directory before writing files.
+
+## Frontmatter
+
+Every MDX file uses this frontmatter shape:
+
+```mdx
+---
+title: Install Acme
+description: Add Acme to an existing project.
+order: 20
+---
+```
+
+| Field         | Required | Purpose                                                                  |
+| ------------- | -------- | ------------------------------------------------------------------------ |
+| `title`       | yes      | Navigation label, document title, and Pagefind title.                    |
+| `description` | no       | Page-specific meta description. Falls back to the site description.      |
+| `order`       | no       | Numeric navigation order. Documents without it sort after ordered pages. |
+
+## Localization
+
+`locales.default` must appear in `locales.names`, locale names must be unique, and each name may
+contain letters, digits, and hyphen-separated segments.
+
+```ts
+locales: {
+  default: "en",
+  names: ["en", "zh-CN", "ja"],
+  labels: {
+    en: "English",
+    "zh-CN": "简体中文",
+    ja: "日本語",
+  },
+}
+```
+
+Create translations with filename suffixes:
+
+```text
+docs/guide/install.mdx       → /guide/install/
+docs/guide/install.zh-CN.mdx → /zh-CN/guide/install/
+docs/guide/install.ja.mdx    → /ja/guide/install/
+```
+
+The language control appears only when another file has the same slug in a different configured
+locale.
+
+## Custom MDX components
+
+Set `components` to a module path relative to the project root:
+
+```ts
+export default defineConfig({
+  components: "./docs/components.tsx",
+});
+```
+
+The module must default-export a component map:
+
+```tsx
+import type { IDoctrineComponents } from "@amamo/doctrine";
+import type { ReactNode } from "react";
+
+function Callout({ children }: { children: ReactNode }) {
+  return (
+    <aside className="rounded-lg border border-sky-500 bg-sky-50 p-4 dark:bg-sky-950">
+      {children}
+    </aside>
+  );
+}
+
+export default { Callout } satisfies IDoctrineComponents;
+```
+
+Use the registered name directly in MDX:
+
+```mdx
+<Callout>Run the migration before deploying.</Callout>
+```
+
+The module is bundled into SSR and the browser, so components must render in Node.js during the
+build. Access browser-only globals from effects or event handlers, not while the module loads or the
+component renders. Tailwind scans the component file automatically.
+
+Custom entries override built-in MDX element mappings with the same name. For example, registering
+`a` replaces Doctrine's default link renderer.
+
+See [Customization](/customization/) for theme variables, built-in components, and wrapper examples.

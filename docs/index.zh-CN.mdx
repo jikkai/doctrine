@@ -1,19 +1,51 @@
 ---
 title: Doctrine
-description: 从一个 MDX 目录生成快速、可搜索的静态文档网站。
+description: 从一个 MDX 目录生成静态、可搜索的文档网站。
 order: 1
 ---
 
-# 从 MDX 目录直接生成文档网站
+# 从 MDX 目录发布文档网站
 
-Doctrine 可以把一个 MDX 目录转换成静态 React 文档网站。开发环境由 Vite SSR 驱动，内容编译则复用 `@amamo/mdx`。
+Doctrine 为一个 MDX 目录补齐开发服务器、静态 HTML、客户端 hydration、搜索、多语言、主题和响应式文档界面。你只需要提供内容和可选的 React 组件，网站构建流程由 Doctrine 负责。
 
-[开始使用](/zh-CN/guide/getting-started/)。
+```sh
+pnpm add @amamo/doctrine
+pnpm exec doctrine dev docs
+```
 
-## 第一期功能
+先用几分钟[构建第一个网站](/zh-CN/guide/getting-started/)，然后查看[功能说明](/zh-CN/features/)和[配置参考](/zh-CN/configuration/)。
 
-- 开发阶段使用 Vite SSR，构建阶段输出静态 HTML
-- 支持多语言路由和元数据
-- 使用 Pagefind 进行全文搜索
-- 支持亮色和暗色主题
-- 可部署到 `/doctrine/` 这样的子路径
+<Callout>
+  React 组件只需注册一次，即可在任意 MDX 文档中使用。Doctrine 的产物是普通静态文件，把 `dist` 部署到
+  GitHub Pages 或任意静态托管平台即可，生产环境不需要 Node.js 服务器。
+</Callout>
+
+## Doctrine 提供什么
+
+- 开发阶段使用 Vite SSR，生产构建输出静态页面
+- 复用 `@amamo/mdx` 的 MDX 编译和文件命名约定
+- 根据最终 HTML 生成 Pagefind 全文搜索索引
+- 多语言路由、元数据、导航和语言切换
+- 持久化亮色与暗色主题，并避免首次渲染闪烁
+- 自定义 React 组件同时用于 SSR 和客户端 hydration
+- 在部署子路径下正确处理资源、链接、搜索结果、canonical URL 和 404 页面
+
+## 你需要提供什么
+
+最少只需要一个 frontmatter 中包含 `title` 的 `.mdx` 文件。只有在需要网站元数据、多语言、自定义输出目录或自定义组件时，才需要添加 `doctrine.config.ts`。
+
+```text
+docs/
+├── index.mdx
+└── guide/
+    └── install.mdx
+```
+
+文件结构会直接成为路由结构：`docs/index.mdx` 对应 `/`，`docs/guide/install.mdx` 对应 `/guide/install/`。
+
+## 接下来
+
+- 跟随[入门教程](/zh-CN/guide/getting-started/)完成一次完整构建。
+- 根据[自定义指南](/zh-CN/customization/)调整主题和内置组件。
+- 在 [CLI 参考](/zh-CN/cli/)中查看命令参数。
+- 根据 [GitHub Pages 指南](/zh-CN/deployment/)处理仓库子路径。

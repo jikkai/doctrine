@@ -1,0 +1,52 @@
+---
+title: CLI 参考
+description: 使用 Doctrine 开发服务器和静态构建命令。
+order: 6
+---
+
+# CLI 参考
+
+Doctrine 提供两个命令。MDX 目录可以省略，默认值是 `docs`。
+
+```sh
+pnpm exec doctrine dev [directory] [--host localhost] [--port 5173]
+pnpm exec doctrine build [directory] [--site-url https://example.com/docs/] [--out-dir dist]
+```
+
+## `doctrine dev`
+
+启动包含 SSR、客户端 hydration 和开发搜索索引的 Vite 开发服务器。
+
+| 参数或选项    | 默认值      | 说明                                    |
+| ------------- | ----------- | --------------------------------------- |
+| `[directory]` | `docs`      | 存放 MDX 文件的目录。                   |
+| `--host`      | `localhost` | 开发服务器监听的网络接口。              |
+| `--port`      | `5173`      | 开发服务器端口，范围为 `0` 到 `65535`。 |
+
+```sh
+pnpm exec doctrine dev
+pnpm exec doctrine dev website --host 0.0.0.0 --port 4173
+```
+
+## `doctrine build`
+
+生成静态 HTML、客户端资源、`404.html` 和 Pagefind 搜索索引。
+
+| 参数或选项    | 默认值                     | 说明                               |
+| ------------- | -------------------------- | ---------------------------------- |
+| `[directory]` | `docs`                     | 存放 MDX 文件的目录。              |
+| `--site-url`  | 配置或 `http://localhost/` | 最终公开网址，需要包含部署子路径。 |
+| `--out-dir`   | 配置或 `dist`              | 输出目录；相对路径基于项目根目录。 |
+
+```sh
+pnpm exec doctrine build
+pnpm exec doctrine build website \
+  --site-url https://user.github.io/project/ \
+  --out-dir build
+```
+
+CLI 选项会覆盖 `doctrine.config.*` 中的对应配置。完整配置见[配置参考](/zh-CN/configuration/)。
+
+## 帮助与错误
+
+运行 `pnpm exec doctrine --help` 可以查看命令格式。未知命令、未知选项、缺少选项值、非法端口或不存在的输入目录都会让命令以非零状态码退出。

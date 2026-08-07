@@ -1,22 +1,58 @@
 ---
 title: Doctrine
-description: Build a fast, searchable documentation site from an MDX directory.
+description: Build a static, searchable documentation site from an MDX directory.
 order: 1
 ---
 
-# Documentation from MDX, without a framework-shaped project
+# Ship documentation from an MDX directory
 
-Doctrine turns one MDX directory into a static React documentation site. Vite powers development and the client build, while `@amamo/mdx` owns content compilation.
+Doctrine gives an MDX directory a development server, static HTML, client hydration, search,
+localization, themes, and a responsive documentation shell. You provide content and optional React
+components; Doctrine owns the site pipeline.
 
-[Start building](/guide/getting-started/) or read about [GitHub Pages deployment](/deployment/).
+```sh
+pnpm add @amamo/doctrine
+pnpm exec doctrine dev docs
+```
 
-<Callout>Register React components once and use them directly from any MDX document.</Callout>
+[Build your first site](/guide/getting-started/) in a few minutes, then review the
+[feature set](/features/) and [configuration reference](/configuration/).
 
-## Included in the first release
+<Callout>
+  Register React components once and use them in any MDX document. Doctrine builds plain static
+  files, so you can deploy `dist` to GitHub Pages or any static host without a production Node.js
+  server.
+</Callout>
 
-- Vite SSR during development and static HTML at build time
-- Locale-aware routes and metadata
-- Pagefind full-text search
-- Light and dark themes
-- Custom React components in MDX
-- Deployment below a subpath such as `/doctrine/`
+## What Doctrine includes
+
+- Vite SSR during development and static generation for production
+- MDX compilation and filename conventions from `@amamo/mdx`
+- Pagefind full-text search generated from the final HTML
+- Locale-aware routes, metadata, navigation, and language switching
+- Persistent light and dark themes without an initial color flash
+- Custom React components shared by SSR and client hydration
+- Correct assets, links, search results, canonical URLs, and 404 pages under a deployment subpath
+
+## What you provide
+
+At minimum, create one `.mdx` file with a `title` in its frontmatter. Add
+`doctrine.config.ts` only when you need site metadata, localization, a custom output directory, or
+custom components.
+
+```text
+docs/
+├── index.mdx
+└── guide/
+    └── install.mdx
+```
+
+The file tree becomes the route tree: `docs/index.mdx` is `/`, and
+`docs/guide/install.mdx` is `/guide/install/`.
+
+## Next steps
+
+- Follow the [getting-started tutorial](/guide/getting-started/).
+- Customize themes and built-ins with the [customization guide](/customization/).
+- Read the [CLI reference](/cli/) for command options.
+- Use the [GitHub Pages guide](/deployment/) for repository subpaths.

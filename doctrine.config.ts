@@ -11,5 +11,6 @@ export default defineConfig({
     labels: { en: "English", "zh-CN": "简体中文" },
     names: ["en", "zh-CN"],
   },
+  styles: "./docs/theme.css",
   title: "@amamo/doctrine",
 });

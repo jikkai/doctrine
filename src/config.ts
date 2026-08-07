@@ -23,6 +23,7 @@ export interface IDoctrineConfig {
   locales?: IDoctrineLocaleConfig;
   outDir?: string;
   siteUrl?: string;
+  styles?: string;
   title?: DoctrineLocalizedText;
 }
 
@@ -35,6 +36,7 @@ export interface INormalizedDoctrineConfig {
   outDir: string;
   root: string;
   siteUrl: string;
+  styles?: string;
   title: DoctrineLocalizedText;
 }
 
@@ -83,24 +85,33 @@ export async function normalizeDoctrineConfig(
 
   const locales = normalizeLocales(config.locales);
   const siteUrl = normalizeSiteUrl(options.siteUrl ?? config.siteUrl ?? "http://localhost/");
-  const components = config.components ? path.resolve(root, config.components) : undefined;
-  if (components) {
-    const componentsStat = await stat(components).catch(() => undefined);
-    if (!componentsStat?.isFile())
-      throw new Error(`Components module does not exist: ${components}`);
-  }
+  const components = await resolveOptionalFile(root, config.components, "Components module");
+  const styles = await resolveOptionalFile(root, config.styles, "Stylesheet");
 
   return {
     base: new URL(siteUrl).pathname,
-    components: components ? realpathSync.native(components) : undefined,
+    components,
     contentDirectory: realpathSync.native(contentDirectory),
     description: config.description ?? "Documentation built from MDX.",
     locales,
     outDir: path.resolve(root, options.outDir ?? config.outDir ?? "dist"),
     root,
     siteUrl,
+    styles,
     title: config.title ?? "Documentation",
   };
+}
+
+async function resolveOptionalFile(
+  root: string,
+  value: string | undefined,
+  label: string,
+): Promise<string | undefined> {
+  if (!value) return undefined;
+  const file = path.resolve(root, value);
+  const fileStat = await stat(file).catch(() => undefined);
+  if (!fileStat?.isFile()) throw new Error(`${label} does not exist: ${file}`);
+  return realpathSync.native(file);
 }
 
 function normalizeLocales(config: IDoctrineLocaleConfig | undefined): IDoctrineLocaleConfig {

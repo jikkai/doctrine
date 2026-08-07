@@ -1,15 +1,9 @@
 import type { IDoctrineComponents } from "@amamo/doctrine";
-import type { ReactNode } from "react";
+import type { ComponentProps } from "react";
+import { Callout } from "@amamo/doctrine/components";
 
-function Callout({ children }: { children: ReactNode }) {
-  return (
-    <aside
-      className="my-6 rounded-lg border border-border bg-muted px-4 py-3 text-sm"
-      data-doctrine-callout="true"
-    >
-      {children}
-    </aside>
-  );
+function BrandedCallout(props: ComponentProps<typeof Callout>) {
+  return <Callout data-doctrine-callout="true" {...props} />;
 }
 
-export default { Callout } satisfies IDoctrineComponents;
+export default { Callout: BrandedCallout } satisfies IDoctrineComponents;

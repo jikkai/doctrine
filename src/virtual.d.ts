@@ -12,4 +12,6 @@ declare module "virtual:doctrine/components" {
   export default components;
 }
 
+declare module "virtual:doctrine/custom-styles.css" {}
+
 declare module "virtual:doctrine/styles.css" {}

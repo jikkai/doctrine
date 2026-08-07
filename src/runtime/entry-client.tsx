@@ -4,6 +4,7 @@ import components from "virtual:doctrine/components";
 import { documents } from "virtual:doctrine/content";
 import config from "virtual:doctrine/config";
 import "virtual:doctrine/styles.css";
+import "virtual:doctrine/custom-styles.css";
 
 import { App } from "./app.js";
 import { createDocumentRoutes, findDocumentRoute } from "./content.js";

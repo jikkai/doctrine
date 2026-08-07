@@ -1,11 +1,96 @@
 ---
 title: GitHub Pages
-description: Deploy Doctrine under a repository subpath.
-order: 3
+description: Deploy a Doctrine site at a GitHub Pages repository subpath.
+order: 7
 ---
 
 # GitHub Pages
 
-Run `actions/configure-pages` before the Doctrine build and pass its `base_url` output to `--site-url`. Doctrine derives `/repository/` from that URL and applies it consistently to assets, navigation, search results, canonical URLs, locale links, and the 404 page.
+GitHub Pages project sites are normally served from `https://owner.github.io/repository/`. Doctrine
+supports that repository subpath as long as the build receives the final public URL.
 
-The repository includes a complete workflow in `.github/workflows/deploy-pages.yml`.
+## 1. Enable GitHub Actions deployment
+
+Open the repository's **Settings → Pages** and set **Source** to **GitHub Actions**.
+
+## 2. Add the workflow
+
+Create `.github/workflows/deploy-docs.yml`:
+
+```yaml
+name: Deploy documentation
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  pages: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - id: pages
+        uses: actions/configure-pages@v6
+      - run: pnpm exec doctrine build docs --site-url "${{ steps.pages.outputs.base_url }}"
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+      - id: deployment
+        uses: actions/deploy-pages@v5
+```
+
+Change the branch, package manager version, MDX directory, or output directory if your project uses
+different values.
+
+## Why `base_url` matters
+
+`actions/configure-pages` returns the actual Pages URL, including `/repository/` when required.
+Doctrine derives its public base path from that URL and applies it to:
+
+- CSS and JavaScript assets
+- navigation and locale links
+- search results
+- canonical metadata
+- the generated 404 page
+
+The artifact still contains `dist/index.html`, not `dist/repository/index.html`. The Pages host adds
+the repository prefix when serving it.
+
+## Custom domains
+
+The same workflow works with a configured custom domain because `base_url` reflects the Pages
+configuration. For a manual build, pass the final URL yourself:
+
+```sh
+pnpm exec doctrine build docs --site-url https://docs.example.com/
+```
+
+## Troubleshooting
+
+- If the workflow cannot deploy, confirm that Pages uses **GitHub Actions** as its source and that
+  the workflow has `pages: write` and `id-token: write` permissions.
+- If the HTML loads but assets or links return 404, inspect the build command and make sure
+  `--site-url` includes the full repository path.
+- If the artifact upload cannot find the site, keep `path` aligned with `--out-dir` or the configured
+  `outDir`.

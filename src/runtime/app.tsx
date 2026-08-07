@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 import type { IDoctrineComponents } from "../config.js";
 import type { IDocumentRoute, IMdxContentProps, IRuntimeConfig } from "./types.js";
+import { builtinMdxComponents } from "./components/mdx.js";
 import { Button } from "./components/ui/button.js";
 import { DialogSurface } from "./components/ui/dialog-surface.js";
 import { localizedText } from "./i18n.js";
@@ -110,7 +111,7 @@ function Navigation({
 }) {
   const base = useContext(BaseContext);
   return (
-    <nav aria-label="Documentation" className={mobile ? "p-4" : "py-6 pr-5"}>
+    <nav aria-label="Documentation" className={mobile ? "p-4" : "py-6 pr-5"} data-slot="navigation">
       <ul className="space-y-1">
         {routes.map((route) => (
           <li key={route.path}>
@@ -340,18 +341,27 @@ export function App({ Content, components, config, route, routes }: IAppProps) {
   const localeRoutes = routes.filter((candidate) => candidate.locale === locale);
   const home = localeRoutes.find((candidate) => candidate.slug === "/") ?? localeRoutes[0];
   const siteTitle = localizedText(config.title, locale, config.locales.default);
-  const mdxComponents: IDoctrineComponents = { a: MdxLink, ...components };
+  const mdxComponents: IDoctrineComponents = {
+    a: MdxLink,
+    ...builtinMdxComponents,
+    ...components,
+  };
 
   return (
     <BaseContext value={config.base}>
       <header
-        className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur"
+        className="sticky top-0 z-40 h-[var(--doctrine-header-height)] border-b border-border bg-background/90 backdrop-blur"
         data-pagefind-ignore
+        data-slot="header"
       >
-        <div className="mx-auto flex h-14 max-w-screen-2xl items-center gap-2 px-3 sm:gap-3 sm:px-4 lg:px-8">
+        <div
+          className="mx-auto flex h-full max-w-screen-2xl items-center gap-2 px-3 sm:gap-3 sm:px-4 lg:px-8"
+          data-slot="header-inner"
+        >
           <MobileNavigation current={route} labels={labels} routes={localeRoutes} />
           <a
             className="min-w-0 flex-1 truncate font-semibold tracking-tight"
+            data-slot="brand"
             href={withBase(config.base, home?.path ?? "/")}
           >
             {siteTitle}
@@ -361,16 +371,21 @@ export function App({ Content, components, config, route, routes }: IAppProps) {
           <ThemeToggle label={labels.theme} />
         </div>
       </header>
-      <div className="mx-auto grid max-w-screen-2xl grid-cols-1 px-4 lg:grid-cols-[16rem_minmax(0,1fr)] lg:px-8">
+      <div className="mx-auto grid max-w-screen-2xl grid-cols-1 px-4 lg:grid-cols-[var(--doctrine-sidebar-width)_minmax(0,1fr)] lg:px-8">
         <aside
-          className="sticky top-14 hidden h-[calc(100vh-3.5rem)] overflow-y-auto border-r border-border lg:block"
+          className="sticky top-[var(--doctrine-header-height)] hidden h-[calc(100vh-var(--doctrine-header-height))] overflow-y-auto border-r border-border lg:block"
           data-pagefind-ignore
+          data-slot="sidebar"
         >
           <Navigation current={route} routes={localeRoutes} />
         </aside>
-        <main className="min-w-0 px-0 py-10 sm:px-6 lg:px-12 lg:py-14">
+        <main className="min-w-0 px-0 py-10 sm:px-6 lg:px-12 lg:py-14" data-slot="main">
           {route && Content ? (
-            <article className="doctrine-prose mx-auto max-w-3xl" data-pagefind-body>
+            <article
+              className="doctrine-prose mx-auto max-w-[var(--doctrine-content-width)]"
+              data-pagefind-body
+              data-slot="content"
+            >
               <Content components={mdxComponents} />
             </article>
           ) : (
