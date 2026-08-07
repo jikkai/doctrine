@@ -18,7 +18,6 @@ const RESOLVED_CONTENT_ID = `\0${CONTENT_ID}`
 const RESOLVED_COMPONENTS_ID = `\0${COMPONENTS_ID}`
 const RESOLVED_CONFIG_ID = `\0${CONFIG_ID}`
 const RESOLVED_CUSTOM_STYLES_ID = `\0${CUSTOM_STYLES_ID}`
-const RESOLVED_STYLES_ID = `\0${STYLES_ID}`
 
 export interface IDoctrinePluginOptions {
   config: INormalizedDoctrineConfig
@@ -40,7 +39,9 @@ export function runtimeEntry(
 
 export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
   const generatedModule = path.join(options.config.root, '.amamo-mdx/collections.mjs')
+  const resolvedStylesId = path.join(options.config.root, '.doctrine-styles.css')
   const styles = path.join(options.packageRoot ?? doctrinePackageRoot(), 'runtime/styles.css')
+  const runtimeSource = path.join(doctrinePackageRoot(), 'runtime')
   const runtimeConfig: IRuntimeConfig = {
     base: options.config.base,
     description: options.config.description,
@@ -86,7 +87,7 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
         if (source === CUSTOM_STYLES_ID) {
           return options.config.styles ?? RESOLVED_CUSTOM_STYLES_ID
         }
-        if (source === STYLES_ID) return RESOLVED_STYLES_ID
+        if (source === STYLES_ID) return resolvedStylesId
         return null
       },
       async load(id) {
@@ -100,12 +101,12 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
         }
         if (id === RESOLVED_CONFIG_ID) return `export default ${JSON.stringify(runtimeConfig)};`
         if (id === RESOLVED_CUSTOM_STYLES_ID) return ''
-        if (id === RESOLVED_STYLES_ID) {
+        if (id === resolvedStylesId) {
           const source = await readFile(styles, 'utf8')
           const componentSource = options.config.components
-            ? `\n@source ${JSON.stringify(options.config.components)};`
+            ? `\n@source ${JSON.stringify(cssSourcePath(options.config.root, options.config.components))};`
             : ''
-          return `${source}\n@source ${JSON.stringify(path.dirname(styles))};\n@source ${JSON.stringify(options.config.contentDirectory)};${componentSource}\n`
+          return `${source}\n@source ${JSON.stringify(cssSourcePath(options.config.root, runtimeSource))};\n@source ${JSON.stringify(cssSourcePath(options.config.root, options.config.contentDirectory))};${componentSource}\n`
         }
         return null
       },
@@ -128,6 +129,11 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
       },
     },
   ]
+}
+
+function cssSourcePath(root: string, source: string): string {
+  const relative = path.relative(root, source).split(path.sep).join('/')
+  return relative.startsWith('.') ? relative : `./${relative}`
 }
 
 function isContentFile(file: string, directory: string): boolean {

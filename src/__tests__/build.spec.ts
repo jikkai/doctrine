@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
 import { existsSync } from 'node:fs'
-import { readFile, rm } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import { promisify } from 'node:util'
 import path from 'node:path'
 
@@ -59,5 +60,39 @@ test('builds localized static pages and search below a GitHub Pages subpath', as
     assert.equal(existsSync(path.join(outDir, 'doctrine/index.html')), false)
   } finally {
     await rm(outDir, { force: true, recursive: true })
+  }
+}, 60_000)
+
+test('includes runtime utilities when built outside the package root', async () => {
+  const packageRoot = process.cwd()
+  const root = await mkdtemp(path.join(tmpdir(), 'doctrine-consumer-'))
+  const outDir = path.join(root, 'dist')
+  try {
+    await symlink(
+      path.join(packageRoot, 'node_modules'),
+      path.join(root, 'node_modules'),
+      'junction',
+    )
+    await mkdir(path.join(root, 'docs'))
+    await writeFile(
+      path.join(root, 'docs/index.mdx'),
+      '---\ntitle: External consumer\n---\n\n# External consumer\n',
+    )
+    await execFileAsync(
+      process.execPath,
+      [path.join(packageRoot, 'dist/cli.js'), 'build', 'docs'],
+      {
+        cwd: root,
+      },
+    )
+
+    const home = await readFile(path.join(outDir, 'index.html'), 'utf8')
+    const stylesheet = home.match(/href="\/(assets\/[^"]+\.css)"/)?.[1]
+    assert.ok(stylesheet)
+    const css = await readFile(path.join(outDir, stylesheet), 'utf8')
+    assert.match(css, /\.sticky\{position:sticky\}/)
+    assert.match(css, /\.hidden\{display:none\}/)
+  } finally {
+    await rm(root, { force: true, recursive: true })
   }
 }, 60_000)
