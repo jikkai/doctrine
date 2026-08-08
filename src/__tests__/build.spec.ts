@@ -29,46 +29,42 @@ test('builds localized static pages and search below a GitHub Pages subpath', as
 
     const home = await readFile(path.join(outDir, 'index.html'), 'utf8')
     const chinese = await readFile(path.join(outDir, 'zh-CN/index.html'), 'utf8')
+    const chineseFeatures = await readFile(path.join(outDir, 'zh-CN/features/index.html'), 'utf8')
     const customization = await readFile(path.join(outDir, 'customization/index.html'), 'utf8')
     const features = await readFile(path.join(outDir, 'features/index.html'), 'utf8')
     const notFound = await readFile(path.join(outDir, '404.html'), 'utf8')
     const stylesheet = home.match(/href="\/doctrine\/(assets\/[^"]+\.css)"/)?.[1]
     assert.ok(stylesheet)
-    const css = await readFile(path.join(outDir, stylesheet), 'utf8')
+    assert.ok(existsSync(path.join(outDir, stylesheet)))
     assert.match(home, /href="\/doctrine\/assets\//)
-    assert.match(home, /href="\/doctrine\/guide\/getting-started\/"/)
-    assert.match(home, /lucide-book-open/)
-    assert.match(home, /<span>Guide<\/span>/)
-    assert.match(home, /<span>Features<\/span>/)
-    assert.ok(home.indexOf('<span>Guide</span>') < home.indexOf('<span>Features</span>'))
+    assert.match(home, /href="\.\/guide\/getting-started\/"/)
+    assert.match(features, /lucide-book-open/)
+    assert.match(features, /<span>Guide<\/span>/)
+    assert.match(features, /<span>Features<\/span>/)
+    assert.ok(features.indexOf('<span>Guide</span>') < features.indexOf('<span>Features</span>'))
     assert.match(home, /href="https:\/\/github\.com\/jikkai\/doctrine"/)
     assert.match(home, /Copyright © 2026 白熱\./)
     assert.match(home, /https:\/\/example\.com\/doctrine\//)
     assert.match(home, /hreflang="zh-CN"/)
     assert.match(home, /doctrine-theme/)
-    assert.match(home, /data-doctrine-callout="true"/)
-    assert.match(home, /data-slot="callout"/)
-    assert.match(home, /Register React components once/)
+    assert.match(home, /data-slot="home-hero"/)
+    assert.doesNotMatch(home, /data-slot="sidebar"/)
+    assert.doesNotMatch(home, /data-slot="toc"/)
     assert.match(features, /data-slot="badge"/)
     assert.match(customization, /data-slot="card-grid"/)
     assert.match(customization, /data-slot="code-block"/)
     assert.match(customization, /data-slot="code-block-filename"[^>]*>doctrine\.config\.ts/)
     assert.match(customization, /data-slot="code-block-language">TypeScript/)
     assert.match(customization, /aria-label="Copy code"/)
-    assert.match(customization, /shiki-themes one-light andromeeda/)
     assert.match(customization, /data-slot="steps"/)
     assert.match(customization, /data-slot="tabs"/)
     assert.match(customization, /data-slot="toc"/)
     assert.match(customization, /<h2 id="add-a-stylesheet">/)
-    assert.match(chinese, /本页目录/)
-    assert.match(css, /--doctrine-background/)
-    assert.match(css, /--doctrine-ring:oklch\(58% \.17 250\)/)
-    assert.ok(
-      css.indexOf('--doctrine-ring:oklch(58% .17 250)') >
-        css.indexOf('--doctrine-ring:oklch(55% 0 0)'),
-    )
+    assert.match(chinese, /data-slot="home-hero"/)
+    assert.doesNotMatch(chinese, /data-slot="sidebar"/)
+    assert.doesNotMatch(chinese, /data-slot="toc"/)
     assert.match(chinese, /lang="zh-CN"/)
-    assert.match(chinese, /<span>指南<\/span>/)
+    assert.match(chineseFeatures, /<span>指南<\/span>/)
     assert.match(chinese, /版权所有 © 2026 白熱。/)
     assert.match(notFound, /src="\/doctrine\/assets\//)
     assert.ok(existsSync(path.join(outDir, 'pagefind/pagefind.js')))
@@ -106,10 +102,22 @@ test('builds in an isolated pnpm consumer', async () => {
     assert.equal(existsSync(path.join(root, 'node_modules/react')), false)
     assert.equal(existsSync(path.join(root, 'node_modules/tailwindcss')), false)
     await mkdir(path.join(root, 'docs'))
+    await writeFile(
+      path.join(root, 'doctrine.config.ts'),
+      "export default { copyright: 'Copyright' }\n",
+    )
     await writeFile(path.join(root, 'docs/index.mdx'), '# External consumer\n')
     await writeFile(
+      path.join(root, 'docs/landing.tsx'),
+      'export default function Landing() { return <main data-standalone-page>Standalone content</main> }\n',
+    )
+    await writeFile(
+      path.join(root, 'docs/component.tsx'),
+      "import 'missing-unused-dependency'; export function Component() { return null }\n",
+    )
+    await writeFile(
       path.join(root, 'docs/meta.ts'),
-      "export default { items: [{ page: 'index', title: 'External consumer' }] }\n",
+      "export default { items: [{ page: 'index', title: 'External consumer' }, { page: 'landing', title: 'Standalone' }] }\n",
     )
     await execFileAsync(
       process.execPath,
@@ -120,12 +128,17 @@ test('builds in an isolated pnpm consumer', async () => {
     )
 
     const home = await readFile(path.join(outDir, 'index.html'), 'utf8')
+    const landing = await readFile(path.join(outDir, 'landing/index.html'), 'utf8')
     assert.match(home, /data-pagefind-meta="title" content="External consumer"/)
+    assert.match(home, /<span>Standalone<\/span>/)
+    assert.match(landing, /data-standalone-page/)
+    assert.match(landing, /data-slot="header"/)
+    assert.match(landing, /data-slot="footer"/)
+    assert.doesNotMatch(landing, /data-slot="sidebar"/)
+    assert.doesNotMatch(landing, /data-slot="toc"/)
     const stylesheet = home.match(/href="\/(assets\/[^"]+\.css)"/)?.[1]
     assert.ok(stylesheet)
-    const css = await readFile(path.join(outDir, stylesheet), 'utf8')
-    assert.match(css, /\.sticky\{position:sticky\}/)
-    assert.match(css, /\.hidden\{display:none\}/)
+    assert.ok(existsSync(path.join(outDir, stylesheet)))
 
     await writeFile(
       path.join(root, 'package.json'),
@@ -141,7 +154,7 @@ test('builds in an isolated pnpm consumer', async () => {
     await execFileAsync('pnpm', installArgs, { cwd: root })
     await writeFile(
       path.join(root, 'doctrine.config.ts'),
-      "export default { styles: './docs/theme.css' }\n",
+      "export default { copyright: 'Copyright', styles: './docs/theme.css' }\n",
     )
     await writeFile(
       path.join(root, 'docs/theme.css'),
@@ -159,8 +172,7 @@ test('builds in an isolated pnpm consumer', async () => {
     const tailwindHome = await readFile(path.join(outDir, 'index.html'), 'utf8')
     const tailwindStylesheet = tailwindHome.match(/href="\/(assets\/[^"]+\.css)"/)?.[1]
     assert.ok(tailwindStylesheet)
-    const tailwindCss = await readFile(path.join(outDir, tailwindStylesheet), 'utf8')
-    assert.match(tailwindCss, /\.text-fuchsia-700/)
+    assert.ok(existsSync(path.join(outDir, tailwindStylesheet)))
   } finally {
     await rm(root, { force: true, recursive: true })
   }

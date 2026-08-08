@@ -403,6 +403,19 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
     ...components,
   }
 
+  function renderFooter() {
+    if (!copyright) return null
+    return (
+      <footer
+        className="mx-auto max-w-[var(--doctrine-content-width)] border-t border-border py-8 text-center text-sm text-muted-foreground"
+        data-pagefind-ignore
+        data-slot="footer"
+      >
+        {copyright}
+      </footer>
+    )
+  }
+
   return (
     <BaseContext value={config.base}>
       <header
@@ -446,55 +459,58 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
           <ThemeToggle label={labels.theme} />
         </div>
       </header>
-      <div className="mx-auto grid max-w-screen-2xl grid-cols-1 px-4 lg:grid-cols-[var(--doctrine-sidebar-width)_minmax(0,1fr)] lg:px-8 xl:grid-cols-[var(--doctrine-sidebar-width)_minmax(0,1fr)_14rem]">
-        <aside
-          className="sticky top-[var(--doctrine-header-height)] hidden h-[calc(100vh-var(--doctrine-header-height))] overflow-y-auto border-r border-border lg:block"
-          data-pagefind-ignore
-          data-slot="sidebar"
-        >
-          <Navigation current={route} icons={icons} items={navigation} routes={localeRoutes} />
-        </aside>
-        <div className="min-w-0">
-          <main className="px-0 py-10 sm:px-6 lg:px-12 lg:py-14" data-slot="main">
-            {route && Content && (
-              <TableOfContents label={labels.onThisPage} mobile routePath={route.path} />
-            )}
-            {route && Content ? (
-              <article
-                className="doctrine-prose mx-auto max-w-[var(--doctrine-content-width)]"
-                data-pagefind-body
-                data-slot="content"
-              >
-                <DoctrineLocaleContext value={locale}>
-                  <Content components={mdxComponents} />
-                </DoctrineLocaleContext>
-              </article>
-            ) : (
-              <div className="mx-auto max-w-3xl py-20 text-center">
-                <p className="text-sm font-medium text-muted-foreground">404</p>
-                <h1 className="mt-3 text-4xl font-bold tracking-tight">{labels.notFound}</h1>
-                <p className="mt-4 text-muted-foreground">{labels.notFoundDescription}</p>
-                <a
-                  className="mt-8 inline-block font-medium underline underline-offset-4"
-                  href={withBase(config.base, home?.path ?? '/')}
-                >
-                  {siteTitle}
-                </a>
-              </div>
-            )}
+      {route?.standalone && Content ? (
+        <>
+          <main data-pagefind-body data-slot="standalone-page">
+            <DoctrineLocaleContext value={locale}>
+              <Content />
+            </DoctrineLocaleContext>
           </main>
-          {copyright && (
-            <footer
-              className="mx-auto max-w-[var(--doctrine-content-width)] border-t border-border py-8 text-center text-sm text-muted-foreground"
-              data-pagefind-ignore
-              data-slot="footer"
-            >
-              {copyright}
-            </footer>
-          )}
+          {renderFooter()}
+        </>
+      ) : (
+        <div className="mx-auto grid max-w-screen-2xl grid-cols-1 px-4 lg:grid-cols-[var(--doctrine-sidebar-width)_minmax(0,1fr)] lg:px-8 xl:grid-cols-[var(--doctrine-sidebar-width)_minmax(0,1fr)_14rem]">
+          <aside
+            className="sticky top-[var(--doctrine-header-height)] hidden h-[calc(100vh-var(--doctrine-header-height))] overflow-y-auto border-r border-border lg:block"
+            data-pagefind-ignore
+            data-slot="sidebar"
+          >
+            <Navigation current={route} icons={icons} items={navigation} routes={localeRoutes} />
+          </aside>
+          <div className="min-w-0">
+            <main className="px-0 py-10 sm:px-6 lg:px-12 lg:py-14" data-slot="main">
+              {route && Content && (
+                <TableOfContents label={labels.onThisPage} mobile routePath={route.path} />
+              )}
+              {route && Content ? (
+                <article
+                  className="doctrine-prose mx-auto max-w-[var(--doctrine-content-width)]"
+                  data-pagefind-body
+                  data-slot="content"
+                >
+                  <DoctrineLocaleContext value={locale}>
+                    <Content components={mdxComponents} />
+                  </DoctrineLocaleContext>
+                </article>
+              ) : (
+                <div className="mx-auto max-w-3xl py-20 text-center">
+                  <p className="text-sm font-medium text-muted-foreground">404</p>
+                  <h1 className="mt-3 text-4xl font-bold tracking-tight">{labels.notFound}</h1>
+                  <p className="mt-4 text-muted-foreground">{labels.notFoundDescription}</p>
+                  <a
+                    className="mt-8 inline-block font-medium underline underline-offset-4"
+                    href={withBase(config.base, home?.path ?? '/')}
+                  >
+                    {siteTitle}
+                  </a>
+                </div>
+              )}
+            </main>
+            {renderFooter()}
+          </div>
+          {route && Content && <TableOfContents label={labels.onThisPage} routePath={route.path} />}
         </div>
-        {route && Content && <TableOfContents label={labels.onThisPage} routePath={route.path} />}
-      </div>
+      )}
     </BaseContext>
   )
 }

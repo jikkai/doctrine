@@ -51,6 +51,7 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
   let navigation: Promise<ILoadedDoctrineNavigation> | undefined = Promise.resolve({
     icons: options.config.navigationIcons,
     navigation: options.config.navigation,
+    tsxPages: options.config.tsxPages,
   })
 
   function currentNavigation(): Promise<ILoadedDoctrineNavigation> {
@@ -119,7 +120,12 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
       },
       async load(id) {
         if (id === RESOLVED_CONTENT_ID) {
-          return `import { collections } from ${JSON.stringify(generatedModule)}; export const documents = collections.docs ?? [];`
+          const { tsxPages } = await currentNavigation()
+          const pages = tsxPages.map(
+            (page) =>
+              `{ derived: {}, frontmatter: {}, key: ${JSON.stringify(page.documentKey)}, locale: ${JSON.stringify(page.locale)}, load: () => import(${JSON.stringify(page.file)}), slug: ${JSON.stringify(page.slug)}, standalone: true }`,
+          )
+          return `import { collections } from ${JSON.stringify(generatedModule)}; export const documents = [...(collections.docs ?? []), ${pages.join(',')}];`
         }
         if (id === RESOLVED_COMPONENTS_ID) {
           return options.config.components
@@ -158,7 +164,7 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
         const invalidateNavigation = (reload: boolean) => {
           navigation = undefined
           options.onContentChange?.()
-          for (const id of [RESOLVED_CONFIG_ID, RESOLVED_ICONS_ID]) {
+          for (const id of [RESOLVED_CONFIG_ID, RESOLVED_CONTENT_ID, RESOLVED_ICONS_ID]) {
             const module = server.moduleGraph.getModuleById(id)
             if (module) server.moduleGraph.invalidateModule(module)
           }
@@ -166,18 +172,22 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
         }
         const handleAdd = (file: string) => {
           if (isNavigationFile(file, options.config)) invalidateNavigation(true)
+          else if (isTsxFile(file, options.config.contentDirectory)) invalidateNavigation(true)
           else if (isContentFile(file, options.config.contentDirectory)) {
             invalidateNavigation(false)
           }
         }
         const handleChange = (file: string) => {
           if (isNavigationFile(file, options.config)) invalidateNavigation(true)
-          else if (isContentFile(file, options.config.contentDirectory)) {
+          else if (isTsxFile(file, options.config.contentDirectory)) {
+            options.onContentChange?.()
+          } else if (isContentFile(file, options.config.contentDirectory)) {
             options.onContentChange?.()
           }
         }
         const handleUnlink = (file: string) => {
           if (isNavigationFile(file, options.config)) invalidateNavigation(true)
+          else if (isTsxFile(file, options.config.contentDirectory)) invalidateNavigation(true)
           else if (isContentFile(file, options.config.contentDirectory)) {
             invalidateNavigation(false)
           }
@@ -219,6 +229,11 @@ function usesTailwind(root: string): boolean {
 function isContentFile(file: string, directory: string): boolean {
   const relative = path.relative(directory, file)
   return !relative.startsWith('..') && !path.isAbsolute(relative) && file.endsWith('.mdx')
+}
+
+function isTsxFile(file: string, directory: string): boolean {
+  const relative = path.relative(directory, file)
+  return !relative.startsWith('..') && !path.isAbsolute(relative) && file.endsWith('.tsx')
 }
 
 function isNavigationFile(file: string, config: INormalizedDoctrineConfig): boolean {

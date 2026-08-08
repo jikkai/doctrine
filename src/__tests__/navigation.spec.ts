@@ -16,11 +16,19 @@ test('loads ordered navigation from the nearest locale config', async () => {
       writeFile(path.join(root, 'package.json'), JSON.stringify({ type: 'module' })),
       writeFile(path.join(docs, 'index.mdx'), '# Home\n'),
       writeFile(path.join(docs, 'index.zh-CN.mdx'), '# 首页\n'),
+      writeFile(
+        path.join(docs, 'landing.tsx'),
+        'export default function Landing() { return <h1>Landing</h1> }\n',
+      ),
+      writeFile(
+        path.join(docs, 'component.tsx'),
+        'export function Component() { return <span>Component</span> }\n',
+      ),
       writeFile(path.join(docs, 'guide/start.mdx'), '# Start\n'),
       writeFile(path.join(docs, 'guide/start.zh-CN.mdx'), '# 开始\n'),
       writeFile(
         path.join(docs, 'meta.ts'),
-        "export default { items: [{ directory: 'guide' }, { page: 'index', title: 'Home', icon: 'House' }] }\n",
+        "export default { items: [{ directory: 'guide' }, { page: 'index', title: 'Home', icon: 'House' }, { page: 'landing', title: 'Landing' }] }\n",
       ),
       writeFile(
         path.join(docs, 'meta.zh-CN.ts'),
@@ -53,6 +61,7 @@ test('loads ordered navigation from the nearest locale config', async () => {
           type: 'directory',
         },
         { documentKey: 'en:/', icon: 'House', title: 'Home', type: 'page' },
+        { documentKey: 'en:landing', title: 'Landing', type: 'page' },
       ],
       'zh-CN': [
         { documentKey: 'zh-CN:/', title: '首页', type: 'page' },
@@ -64,6 +73,14 @@ test('loads ordered navigation from the nearest locale config', async () => {
         },
       ],
     })
+    assert.deepEqual(result.tsxPages, [
+      {
+        documentKey: 'en:landing',
+        file: path.join(docs, 'landing.tsx'),
+        locale: 'en',
+        slug: '/landing/',
+      },
+    ])
   } finally {
     await rm(root, { force: true, recursive: true })
   }

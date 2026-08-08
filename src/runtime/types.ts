@@ -34,6 +34,7 @@ export interface IGeneratedDocument {
   load: () => Promise<IDocumentModule>
   locale?: string
   slug?: string
+  standalone?: boolean
 }
 
 export interface IDocumentRoute {
@@ -42,6 +43,7 @@ export interface IDocumentRoute {
   locale: string
   path: string
   slug: string
+  standalone: boolean
   title: string
 }
 

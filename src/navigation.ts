@@ -1,4 +1,4 @@
-import { readdir } from 'node:fs/promises'
+import { readdir, stat } from 'node:fs/promises'
 import path from 'node:path'
 
 import { loadConfigFromFile } from 'vite'
@@ -56,6 +56,14 @@ export interface ILoadDoctrineNavigationOptions {
 export interface ILoadedDoctrineNavigation {
   icons: string[]
   navigation: DoctrineNavigation
+  tsxPages: IDoctrineTsxPage[]
+}
+
+export interface IDoctrineTsxPage {
+  documentKey: string
+  file: string
+  locale: string
+  slug: string
 }
 
 interface IDocumentFile {
@@ -74,11 +82,16 @@ export async function loadDoctrineNavigation(
   const documents = await findDocuments(options.contentDirectory, options.locales)
   const icons = new Set<string>()
   const navigation: Record<string, readonly DoctrineNavigationNode[]> = {}
+  const tsxPages = new Map<string, IDoctrineTsxPage>()
 
   await Promise.all(
     options.locales.names.map(async (locale) => {
       const localeDocuments = documents.filter((document) => document.locale === locale)
-      if (localeDocuments.length === 0) {
+      const rootConfig = path.join(
+        options.contentDirectory,
+        locale === options.locales.default ? 'meta.ts' : `meta.${locale}.ts`,
+      )
+      if (localeDocuments.length === 0 && !(await isFile(rootConfig))) {
         navigation[locale] = []
         return
       }
@@ -93,16 +106,26 @@ export async function loadDoctrineNavigation(
           directories,
           documentKeys,
           icons,
+          tsxPages,
           options,
         )
       ).items
-      if (options.command === 'build' && documentKeys.size !== localeDocuments.length) {
+      if (
+        options.command === 'build' &&
+        localeDocuments.some((document) => !documentKeys.has(documentKeyFor(document)))
+      ) {
         throw new Error(`Navigation for ${locale} does not include every MDX document`)
       }
     }),
   )
 
-  return { icons: [...icons].toSorted(), navigation }
+  return {
+    icons: [...icons].toSorted(),
+    navigation,
+    tsxPages: [...tsxPages.values()].toSorted((left, right) =>
+      left.documentKey.localeCompare(right.documentKey),
+    ),
+  }
 }
 
 async function loadDirectory(
@@ -113,6 +136,7 @@ async function loadDirectory(
   directories: ReadonlySet<string>,
   documentKeys: Set<string>,
   icons: Set<string>,
+  tsxPages: Map<string, IDoctrineTsxPage>,
   options: ILoadDoctrineNavigationOptions,
 ): Promise<{ items: readonly DoctrineNavigationNode[]; icon?: string; title?: string }> {
   const directory = path.join(options.contentDirectory, relativeDirectory)
@@ -143,10 +167,16 @@ async function loadDirectory(
     config.items.map(async (item): Promise<DoctrineNavigationNode | undefined> => {
       if ('page' in item) {
         const document = pages.get(item.page)
-        if (!document) {
+        const tsxFile = await findTsxPage(directory, item.page, locale, options.locales.default)
+        if (document && tsxFile) {
+          throw new Error(
+            `Navigation page ${JSON.stringify(item.page)} matches both MDX and TSX in ${displayPath(options, directory)}`,
+          )
+        }
+        if (!document && !tsxFile) {
           if (options.command === 'serve') return undefined
           throw new Error(
-            `Navigation page ${JSON.stringify(item.page)} does not match an ${locale} MDX file in ${displayPath(options, directory)}`,
+            `Navigation page ${JSON.stringify(item.page)} does not match an ${locale} MDX or TSX file in ${displayPath(options, directory)}`,
           )
         }
         if (referencedPages.has(item.page)) {
@@ -155,11 +185,20 @@ async function loadDirectory(
           )
         }
         referencedPages.add(item.page)
-        const documentKey = documentKeyFor(document)
+        const identity = document ?? { directory: relativeDirectory, locale, page: item.page }
+        const documentKey = documentKeyFor(identity)
         if (documentKeys.has(documentKey)) {
           throw new Error(`Duplicate document route: ${documentKey}`)
         }
         documentKeys.add(documentKey)
+        if (tsxFile) {
+          tsxPages.set(documentKey, {
+            documentKey,
+            file: tsxFile,
+            locale,
+            slug: documentSlugFor(identity),
+          })
+        }
         addIcon(item.icon, icons, configFile, options)
         return {
           documentKey,
@@ -170,7 +209,10 @@ async function loadDirectory(
       }
 
       const childRelativeDirectory = joinRelative(relativeDirectory, item.directory)
-      if (!childDirectories.has(childRelativeDirectory)) {
+      if (
+        !childDirectories.has(childRelativeDirectory) &&
+        !(await isDirectory(path.join(options.contentDirectory, childRelativeDirectory)))
+      ) {
         if (options.command === 'serve') return undefined
         throw new Error(
           `Navigation directory ${JSON.stringify(item.directory)} does not match an ${locale} content directory in ${displayPath(options, directory)}`,
@@ -190,6 +232,7 @@ async function loadDirectory(
         directories,
         documentKeys,
         icons,
+        tsxPages,
         options,
       )
       return {
@@ -306,7 +349,7 @@ function validateDirectoryConfig(
     if ('page' in item) {
       if (typeof item.page !== 'string' || !item.page || item.page.includes('/')) {
         throw new Error(
-          `Navigation page must be a direct MDX basename: ${displayPath(options, file)}`,
+          `Navigation page must be a direct MDX or TSX basename: ${displayPath(options, file)}`,
         )
       }
       if (typeof item.title !== 'string' || !item.title.trim()) {
@@ -361,9 +404,33 @@ function addIcon(
 }
 
 function documentKeyFor(document: IDocumentFile): string {
+  return `${document.locale}:${documentSlugFor(document).replace(/^\//, '').replace(/\/$/, '') || '/'}`
+}
+
+function documentSlugFor(document: IDocumentFile): string {
   const page = document.page === 'index' || document.page === 'page' ? '' : document.page
   const slug = [document.directory, page].filter(Boolean).join('/') || '/'
-  return `${document.locale}:${slug}`
+  return slug === '/' ? slug : `/${slug}/`
+}
+
+async function findTsxPage(
+  directory: string,
+  page: string,
+  locale: string,
+  defaultLocale: string,
+): Promise<string | undefined> {
+  const name = locale === defaultLocale ? `${page}.tsx` : `${page}.${locale}.tsx`
+  const file = path.join(directory, name)
+  const value = await stat(file).catch(() => undefined)
+  return value?.isFile() ? file : undefined
+}
+
+async function isDirectory(directory: string): Promise<boolean> {
+  return (await stat(directory).catch(() => undefined))?.isDirectory() ?? false
+}
+
+async function isFile(file: string): Promise<boolean> {
+  return (await stat(file).catch(() => undefined))?.isFile() ?? false
 }
 
 function parentDirectory(directory: string): string {

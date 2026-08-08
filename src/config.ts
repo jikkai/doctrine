@@ -5,7 +5,7 @@ import path from 'node:path'
 import type { ElementType } from 'react'
 import { loadConfigFromFile } from 'vite'
 
-import type { DoctrineNavigation } from './navigation.js'
+import type { DoctrineNavigation, IDoctrineTsxPage } from './navigation.js'
 import { loadDoctrineNavigation } from './navigation.js'
 
 export type DoctrineLocalizedText = string | Readonly<Record<string, string>>
@@ -49,6 +49,7 @@ export interface INormalizedDoctrineConfig {
   siteUrl: string
   styles?: string
   title: DoctrineLocalizedText
+  tsxPages: IDoctrineTsxPage[]
 }
 
 export interface INormalizeOptions {
@@ -102,7 +103,11 @@ export async function normalizeDoctrineConfig(
     : undefined
   const components = await resolveOptionalFile(root, config.components, 'Components module')
   const styles = await resolveOptionalFile(root, config.styles, 'Stylesheet')
-  const { icons: navigationIcons, navigation } = await loadDoctrineNavigation({
+  const {
+    icons: navigationIcons,
+    navigation,
+    tsxPages,
+  } = await loadDoctrineNavigation({
     command: options.command,
     contentDirectory,
     locales,
@@ -128,6 +133,7 @@ export async function normalizeDoctrineConfig(
     siteUrl,
     styles,
     title: config.title ?? 'Documentation',
+    tsxPages,
   }
 }
 

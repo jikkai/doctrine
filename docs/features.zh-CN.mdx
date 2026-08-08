@@ -53,6 +53,23 @@ basename 会变成带结尾斜杠的路由。
 导航只来自就近元数据。每个条目只能命名直属页面或直属子目录；数组定义准确顺序、页面标题、
 分组标题和可选图标。生产构建会拒绝遗漏、重复或不存在的引用。
 
+页面条目也可以指向同目录的 `.tsx` 文件。Doctrine 只 import 最近语言导航文件明确列出的 TSX，
+未列出的文件仍是普通组件，不会被当作页面解析。TSX 页面沿用导航标题和路由，但只放进共享的
+顶部导航与页脚，不渲染文档侧栏、正文排版或本页目录。同一 locale 下，MDX 与 TSX 不能使用
+相同的页面 basename。
+
+```ts
+export default {
+  items: [{ page: 'landing', title: '落地页' }],
+}
+```
+
+```tsx
+export default function LandingPage() {
+  return <main>在这里构建任意 React 布局。</main>
+}
+```
+
 Doctrine 默认的 MDX 链接组件会给根相对链接补上部署 base。外部 `https://...` 链接在新标签页
 打开。注册自定义 `a` 组件会替换这套行为。
 
@@ -94,9 +111,9 @@ optional dependencies 中声明 `tailwindcss` 时，Doctrine 才启用对应 Vit
 
 ## 信任边界
 
-静态产物不会让源码失去执行能力。MDX 可以包含 ESM 和 JavaScript 表达式；
-`doctrine.config.*`、导航模块和自定义组件也都是可执行模块。它们可能在加载配置、打包、SSR 或
-hydration 时运行。只能构建你愿意授予构建机器与部署网站权限的可信源码。
+静态产物不会让源码失去执行能力。MDX 可以包含 ESM 和 JavaScript 表达式；被导航引用的 TSX
+页面、`doctrine.config.*`、导航模块和自定义组件也都是可执行模块。它们可能在加载配置、打包、
+SSR 或 hydration 时运行。只能构建你愿意授予构建机器与部署网站权限的可信源码。
 
 内置 frontmatter schema 只校验可选字符串 `description`，它不是沙箱。编译器的详细边界见
 [`@amamo/mdx` 安全模型](https://jikkai.github.io/mdx/security/)。

@@ -9,8 +9,8 @@ subpath-safe assets without requiring a production Node.js server.
 - Node.js 20.19 or newer.
 - A [native target supported by `@amamo/mdx`](https://jikkai.github.io/mdx/native-targets/).
   Doctrine has no JavaScript fallback for MDX compilation.
-- Trusted MDX and configuration authors. MDX, config files, navigation files, and custom components
-  can execute JavaScript during the build.
+- Trusted content and configuration authors. MDX, referenced TSX pages, config files, navigation
+  files, and custom components can execute JavaScript during the build.
 
 ## Quick start
 
@@ -84,6 +84,11 @@ docs/guide/meta.zh-CN.ts
 
 The default locale uses `/guide/install/`; the translated page uses
 `/zh-CN/guide/install/`. Navigation modules own page titles, icons, child directories, and order.
+
+A page entry can also name a same-directory `.tsx` file. Only TSX files listed by the matching
+locale navigation module become routes; every other TSX file remains an ordinary component. These
+pages render inside Doctrine's header and footer without the documentation sidebar, prose layout,
+or table of contents.
 
 ## What the build does
 

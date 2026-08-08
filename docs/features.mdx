@@ -58,6 +58,24 @@ Navigation comes only from colocated metadata. Each item names either a direct p
 directory; arrays define exact order, page titles, group titles, and optional icons. A production
 build rejects missing, duplicate, and nonexistent references.
 
+A page entry may resolve to a same-directory `.tsx` file instead of MDX. Doctrine imports only TSX
+files named by the nearest locale navigation file, so unlisted files remain ordinary components and
+are not parsed as pages. A TSX page uses its navigation title and route, but renders only inside the
+shared header and footer without the documentation sidebar, prose styles, or table of contents. An
+MDX file and TSX file cannot share the same page basename and locale.
+
+```ts
+export default {
+  items: [{ page: 'landing', title: 'Landing page' }],
+}
+```
+
+```tsx
+export default function LandingPage() {
+  return <main>Build any React layout here.</main>
+}
+```
+
 Doctrine's default MDX link component adds the deployment base to root-relative links. External
 `https://...` links open in a new tab. Registering a custom `a` component replaces this behavior.
 
@@ -105,9 +123,9 @@ output directory.
 ## Trust boundary
 
 Static output does not make source code inert. MDX may contain ESM and JavaScript expressions;
-`doctrine.config.*`, navigation modules, and custom components are executable modules. They can run
-during config loading, bundling, SSR, or hydration. Build only sources you trust with the privileges
-of the build machine and deployed site.
+referenced TSX pages, `doctrine.config.*`, navigation modules, and custom components are executable
+modules. They can run during config loading, bundling, SSR, or hydration. Build only sources you
+trust with the privileges of the build machine and deployed site.
 
 The built-in frontmatter schema validates only an optional string `description`; it is not a sandbox.
 See the [`@amamo/mdx` security model](https://jikkai.github.io/mdx/security/) for the compiler's

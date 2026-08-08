@@ -29,6 +29,7 @@ export function createDocumentRoutes(
         locale,
         path: documentRoutePath(locale, config.locales.default, slug),
         slug,
+        standalone: document.standalone === true,
         title: page.title,
       })
     }
