@@ -21,6 +21,11 @@ export default defineConfig({
     'zh-CN': '产品指南和 API 说明。',
   },
   siteUrl: 'https://docs.example.com/',
+  githubUrl: 'https://github.com/acme/docs',
+  copyright: {
+    en: 'Copyright © 2026 Acme.',
+    'zh-CN': '版权所有 © 2026 Acme。',
+  },
   outDir: 'dist',
   locales: {
     default: 'en',
@@ -41,6 +46,8 @@ Doctrine 也识别 `doctrine.config.mts`、`doctrine.config.js` 和 `doctrine.co
 | `title`       | `string \| Record<string, string>` | `"Documentation"`                 | 网站标题和页面 title 后缀。    |
 | `description` | `string \| Record<string, string>` | `"Documentation built from MDX."` | 默认页面描述。                 |
 | `siteUrl`     | `string`                           | `"http://localhost/"`             | 绝对公开 URL 和部署 base。     |
+| `githubUrl`   | `string`                           | 无                                | 顶部 GitHub 图标指向的链接。   |
+| `copyright`   | `string \| Record<string, string>` | 无                                | Footer 中可本地化的版权文案。  |
 | `outDir`      | `string`                           | `"dist"`                          | 相对项目根目录的静态输出目录。 |
 | `locales`     | `IDoctrineLocaleConfig`            | 仅英语                            | 多语言路由和显示名称。         |
 | `components`  | `string`                           | 无                                | 自定义 MDX 组件模块路径。      |

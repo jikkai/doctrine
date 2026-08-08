@@ -8,8 +8,10 @@ import type {
 
 export interface IRuntimeConfig {
   base: string
+  copyright?: DoctrineLocalizedText
   description: DoctrineLocalizedText
   dev: boolean
+  githubUrl?: string
   locales: IDoctrineLocaleConfig
   siteUrl: string
   title: DoctrineLocalizedText

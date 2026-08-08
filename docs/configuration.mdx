@@ -22,6 +22,11 @@ export default defineConfig({
     'zh-CN': '产品指南和 API 说明。',
   },
   siteUrl: 'https://docs.example.com/',
+  githubUrl: 'https://github.com/acme/docs',
+  copyright: {
+    en: 'Copyright © 2026 Acme.',
+    'zh-CN': '版权所有 © 2026 Acme。',
+  },
   outDir: 'dist',
   locales: {
     default: 'en',
@@ -43,6 +48,8 @@ Doctrine also recognizes `doctrine.config.mts`, `doctrine.config.js`, and
 | `title`       | `string \| Record<string, string>` | `"Documentation"`                 | Site title and title suffix.                           |
 | `description` | `string \| Record<string, string>` | `"Documentation built from MDX."` | Default page description.                              |
 | `siteUrl`     | `string`                           | `"http://localhost/"`             | Absolute public URL and deployment base.               |
+| `githubUrl`   | `string`                           | none                              | GitHub link shown as an icon in the header.            |
+| `copyright`   | `string \| Record<string, string>` | none                              | Localizable copyright text shown in the footer.        |
 | `outDir`      | `string`                           | `"dist"`                          | Static output directory, relative to the project root. |
 | `locales`     | `IDoctrineLocaleConfig`            | English only                      | Locale routes and labels.                              |
 | `components`  | `string`                           | none                              | Path to the custom MDX component module.               |

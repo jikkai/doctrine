@@ -19,7 +19,9 @@ export interface IDoctrineComponents {
 
 export interface IDoctrineConfig {
   components?: string
+  copyright?: DoctrineLocalizedText
   description?: DoctrineLocalizedText
+  githubUrl?: string
   locales?: IDoctrineLocaleConfig
   outDir?: string
   siteUrl?: string
@@ -31,7 +33,9 @@ export interface INormalizedDoctrineConfig {
   base: string
   components?: string
   contentDirectory: string
+  copyright?: DoctrineLocalizedText
   description: DoctrineLocalizedText
+  githubUrl?: string
   locales: IDoctrineLocaleConfig
   outDir: string
   root: string
@@ -85,6 +89,9 @@ export async function normalizeDoctrineConfig(
 
   const locales = normalizeLocales(config.locales)
   const siteUrl = normalizeSiteUrl(options.siteUrl ?? config.siteUrl ?? 'http://localhost/')
+  const githubUrl = config.githubUrl
+    ? normalizeExternalUrl(config.githubUrl, 'githubUrl')
+    : undefined
   const components = await resolveOptionalFile(root, config.components, 'Components module')
   const styles = await resolveOptionalFile(root, config.styles, 'Stylesheet')
 
@@ -92,7 +99,9 @@ export async function normalizeDoctrineConfig(
     base: new URL(siteUrl).pathname,
     components,
     contentDirectory: realpathSync.native(contentDirectory),
+    copyright: config.copyright,
     description: config.description ?? 'Documentation built from MDX.',
+    githubUrl,
     locales,
     outDir: path.resolve(root, options.outDir ?? config.outDir ?? 'dist'),
     root,
@@ -141,5 +150,13 @@ function normalizeSiteUrl(value: string): string {
   }
   if (url.search || url.hash) throw new Error('siteUrl must not include a query or fragment')
   url.pathname = `/${url.pathname.split('/').filter(Boolean).join('/')}${url.pathname === '/' ? '' : '/'}`
+  return url.href
+}
+
+function normalizeExternalUrl(value: string, label: string): string {
+  const url = new URL(value)
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    throw new Error(`${label} must use http or https`)
+  }
   return url.href
 }

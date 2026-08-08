@@ -343,6 +343,9 @@ export function App({ Content, components, config, route, routes }: IAppProps) {
   const localeRoutes = routes.filter((candidate) => candidate.locale === locale)
   const home = localeRoutes.find((candidate) => candidate.slug === '/') ?? localeRoutes[0]
   const siteTitle = localizedText(config.title, locale, config.locales.default)
+  const copyright = config.copyright
+    ? localizedText(config.copyright, locale, config.locales.default)
+    : undefined
   const mdxComponents: IDoctrineComponents = {
     a: MdxLink,
     ...builtinMdxComponents,
@@ -369,6 +372,19 @@ export function App({ Content, components, config, route, routes }: IAppProps) {
             {siteTitle}
           </a>
           <SearchDialog config={config} labels={labels} />
+          {config.githubUrl && (
+            <a
+              aria-label="GitHub"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              href={config.githubUrl}
+              rel="noreferrer"
+              target="_blank"
+            >
+              <svg aria-hidden="true" className="size-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.3c-3.3.7-4-1.4-4-1.4-.5-1.4-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.7.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3Z" />
+              </svg>
+            </a>
+          )}
           <LocaleSwitcher config={config} label={labels.language} route={route} routes={routes} />
           <ThemeToggle label={labels.theme} />
         </div>
@@ -381,29 +397,40 @@ export function App({ Content, components, config, route, routes }: IAppProps) {
         >
           <Navigation current={route} routes={localeRoutes} />
         </aside>
-        <main className="min-w-0 px-0 py-10 sm:px-6 lg:px-12 lg:py-14" data-slot="main">
-          {route && Content ? (
-            <article
-              className="doctrine-prose mx-auto max-w-[var(--doctrine-content-width)]"
-              data-pagefind-body
-              data-slot="content"
-            >
-              <Content components={mdxComponents} />
-            </article>
-          ) : (
-            <div className="mx-auto max-w-3xl py-20 text-center">
-              <p className="text-sm font-medium text-muted-foreground">404</p>
-              <h1 className="mt-3 text-4xl font-bold tracking-tight">{labels.notFound}</h1>
-              <p className="mt-4 text-muted-foreground">{labels.notFoundDescription}</p>
-              <a
-                className="mt-8 inline-block font-medium underline underline-offset-4"
-                href={withBase(config.base, home?.path ?? '/')}
+        <div className="min-w-0">
+          <main className="px-0 py-10 sm:px-6 lg:px-12 lg:py-14" data-slot="main">
+            {route && Content ? (
+              <article
+                className="doctrine-prose mx-auto max-w-[var(--doctrine-content-width)]"
+                data-pagefind-body
+                data-slot="content"
               >
-                {siteTitle}
-              </a>
-            </div>
+                <Content components={mdxComponents} />
+              </article>
+            ) : (
+              <div className="mx-auto max-w-3xl py-20 text-center">
+                <p className="text-sm font-medium text-muted-foreground">404</p>
+                <h1 className="mt-3 text-4xl font-bold tracking-tight">{labels.notFound}</h1>
+                <p className="mt-4 text-muted-foreground">{labels.notFoundDescription}</p>
+                <a
+                  className="mt-8 inline-block font-medium underline underline-offset-4"
+                  href={withBase(config.base, home?.path ?? '/')}
+                >
+                  {siteTitle}
+                </a>
+              </div>
+            )}
+          </main>
+          {copyright && (
+            <footer
+              className="mx-auto max-w-[var(--doctrine-content-width)] border-t border-border py-8 text-center text-sm text-muted-foreground"
+              data-pagefind-ignore
+              data-slot="footer"
+            >
+              {copyright}
+            </footer>
           )}
-        </main>
+        </div>
       </div>
     </BaseContext>
   )

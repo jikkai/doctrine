@@ -38,6 +38,8 @@ test('builds localized static pages and search below a GitHub Pages subpath', as
     const css = await readFile(path.join(outDir, stylesheet), 'utf8')
     assert.match(home, /href="\/doctrine\/assets\//)
     assert.match(home, /href="\/doctrine\/guide\/getting-started\/"/)
+    assert.match(home, /href="https:\/\/github\.com\/jikkai\/doctrine"/)
+    assert.match(home, /Copyright © 2026 白熱\./)
     assert.match(home, /https:\/\/example\.com\/doctrine\//)
     assert.match(home, /hreflang="zh-CN"/)
     assert.match(home, /doctrine-theme/)
@@ -55,6 +57,7 @@ test('builds localized static pages and search below a GitHub Pages subpath', as
         css.indexOf('--doctrine-ring:oklch(55% 0 0)'),
     )
     assert.match(chinese, /lang="zh-CN"/)
+    assert.match(chinese, /版权所有 © 2026 白熱。/)
     assert.match(notFound, /src="\/doctrine\/assets\//)
     assert.ok(existsSync(path.join(outDir, 'pagefind/pagefind.js')))
     assert.equal(existsSync(path.join(outDir, 'doctrine/index.html')), false)

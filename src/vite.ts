@@ -44,8 +44,10 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
   const runtimeSource = path.join(doctrinePackageRoot(), 'runtime')
   const runtimeConfig: IRuntimeConfig = {
     base: options.config.base,
+    copyright: options.config.copyright,
     description: options.config.description,
     dev: options.dev,
+    githubUrl: options.config.githubUrl,
     locales: options.config.locales,
     siteUrl: options.config.siteUrl,
     title: options.config.title,
