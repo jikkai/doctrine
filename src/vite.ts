@@ -77,6 +77,13 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
       },
     },
     generatedDirectory: path.dirname(generatedModule),
+    highlight: {
+      provider: 'shiki',
+      themes: {
+        dark: 'andromeeda',
+        light: 'one-light',
+      },
+    },
     root: options.config.root,
   }
   const mdxPlugin = amamoMdx(amamoConfig) as unknown as Plugin

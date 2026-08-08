@@ -1,11 +1,12 @@
-export type {
-  IBadgeProps,
-  ICalloutProps,
-  ICardGridProps,
-  ICardProps,
-  IStepProps,
-  IStepsProps,
-  ITabProps,
-  ITabsProps,
-} from './runtime/components/mdx.js'
-export { Badge, Callout, Card, CardGrid, Step, Steps, Tab, Tabs } from './runtime/components/mdx.js'
+export type { IBadgeProps } from './runtime/components/mdx/badge.js'
+export { Badge } from './runtime/components/mdx/badge.js'
+export type { ICalloutProps } from './runtime/components/mdx/callout.js'
+export { Callout } from './runtime/components/mdx/callout.js'
+export type { ICardGridProps, ICardProps } from './runtime/components/mdx/card.js'
+export { Card, CardGrid } from './runtime/components/mdx/card.js'
+export type { ICodeBlockProps } from './runtime/components/mdx/code-block.js'
+export { CodeBlock } from './runtime/components/mdx/code-block.js'
+export type { IStepProps, IStepsProps } from './runtime/components/mdx/steps.js'
+export { Step, Steps } from './runtime/components/mdx/steps.js'
+export type { ITabProps, ITabsProps } from './runtime/components/mdx/tabs.js'
+export { Tab, Tabs } from './runtime/components/mdx/tabs.js'

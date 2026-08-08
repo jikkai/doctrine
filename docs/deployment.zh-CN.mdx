@@ -1,16 +1,28 @@
 ---
-description: 将 Doctrine 网站部署到 GitHub Pages 仓库子路径。
+description: 使用正确的仓库 base path 构建 Doctrine 网站并部署到 GitHub Pages。
 ---
 
-# GitHub Pages
+# 部署到 GitHub Pages
 
-GitHub Pages 项目网站通常发布在 `https://owner.github.io/repository/`。只要构建时提供最终公开网址，Doctrine 就能正确处理这段仓库子路径。
+GitHub Pages 项目网站通常位于 `https://owner.github.io/repository/`。只要构建收到最终公开 URL，
+Doctrine 就能处理这段子路径。
 
-## 1. 启用 GitHub Actions 部署
+## 1. 在本地验证生产构建
 
-打开仓库的 **Settings → Pages**，将 **Source** 设置为 **GitHub Actions**。
+添加 CI 前，先使用相同的公开地址结构：
 
-## 2. 添加工作流
+```sh
+pnpm exec doctrine build docs --site-url https://owner.github.io/repository/
+```
+
+如果要检查导航与搜索，请通过静态服务器打开生成的 `dist/index.html`。不要使用 `file:` URL；
+module script 和 Pagefind 都需要 HTTP 服务。
+
+## 2. 启用 Actions 部署
+
+打开仓库的 **Settings → Pages**，把 **Source** 设置为 **GitHub Actions**。
+
+## 3. 添加工作流
 
 创建 `.github/workflows/deploy-docs.yml`：
 
@@ -41,10 +53,10 @@ jobs:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 11.20.0
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - id: pages
@@ -57,30 +69,37 @@ jobs:
         uses: actions/deploy-pages@v5
 ```
 
-如果项目使用其他分支、包管理器版本、MDX 目录或输出目录，请修改对应值。
+这些版本与本仓库验证过的 Pages 工具链一致。请按使用方项目修改分支、包管理器、内容目录或
+输出目录，并让上传 `path` 与 `--out-dir` 或 `outDir` 保持一致。
 
-## 为什么必须使用 `base_url`
+## 为什么 `base_url` 很重要
 
-`actions/configure-pages` 会返回真实的 Pages 网址，并在需要时包含 `/repository/`。Doctrine 从中取得公开基础路径，并统一应用到：
+`actions/configure-pages` 返回配置后的 Pages URL：项目网站会包含 `/repository/`，自定义域名也会
+反映在这里。Doctrine 归一化该 URL，再把 pathname 用于：
 
-- CSS 和 JavaScript 资源
-- 导航与语言链接
-- 搜索结果
-- canonical 元数据
-- 生成的 404 页面
+- CSS 与 JavaScript 资源
+- 默认 MDX 链接与导航
+- 语言路由与切换
+- Pagefind 请求和结果链接
+- canonical 与 alternate 元数据
+- `404.html` 引用的脚本和样式
 
-构建产物仍然是 `dist/index.html`，而不是 `dist/repository/index.html`；Pages 托管时会加上仓库前缀。
+Artifact 仍包含 `dist/index.html`，而不是 `dist/repository/index.html`。GitHub Pages 在服务
+artifact 时添加仓库前缀。
 
-## 自定义域名
+## 自定义域名与其他静态托管
 
-配置自定义域名后，同一份工作流仍然适用，因为 `base_url` 会反映 Pages 配置。手动构建时则直接传入最终网址：
-
-```sh
-pnpm exec doctrine build docs --site-url https://docs.example.com/
-```
+Pages 配置自定义域名后，同一工作流仍然适用，因为 `base_url` 会反映该设置。使用其他静态托管
+时，传入其最终 HTTP(S) URL 执行同一个构建，再上传输出目录内容即可。生产环境不需要 Node.js
+进程。
 
 ## 常见问题
 
-- 工作流无法部署：确认 Pages 的 Source 是 **GitHub Actions**，并检查工作流是否具有 `pages: write` 和 `id-token: write` 权限。
-- HTML 能打开但资源或链接返回 404：检查构建命令，确保 `--site-url` 包含完整仓库路径。
-- 上传步骤找不到网站：确保 `path` 与 `--out-dir` 或配置中的 `outDir` 一致。
+- **工作流无法部署：** 确认 Pages 使用 GitHub Actions，并且 job 拥有 `pages: write` 和
+  `id-token: write`。
+- **资源、导航或搜索返回 404：** 确认 `--site-url` 包含完整仓库 pathname，并结束于公开网站
+  root。
+- **Artifact 上传找不到文件：** 让 `path` 与 `--out-dir` 或配置的 `outDir` 一致。
+- **构建拒绝 `outDir`：** 它必须位于项目 root 内、内容目录外，并且不能就是 root。
+- **原生绑定无法加载：** 在 `@amamo/mdx` 支持的平台安装依赖，不要从其他机器复制
+  `node_modules`。

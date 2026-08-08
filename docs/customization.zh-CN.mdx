@@ -1,14 +1,15 @@
 ---
-description: 自定义 Doctrine 主题、布局样式和内置 MDX 组件。
+description: 用 CSS 变量、稳定 slot、可选 Tailwind 和 React MDX 组件自定义 Doctrine。
 ---
 
 # 自定义
 
-Doctrine 提供两条定制路径：用 CSS 调整外观，用 React 组件映射扩展 MDX。二者都是可选的，并同时作用于开发环境、静态渲染和客户端 hydration。
+Doctrine 有两个扩展点：用样式表调整外观，用 React 组件映射扩展 MDX。两者都可省略，同时在
+开发与生产中加载，并由服务端渲染和浏览器 hydration 共用。
 
-## 添加主题样式表
+## 添加样式表
 
-将 `styles` 设置为相对项目根目录的 CSS 文件：
+用 `styles` 指向从项目 root 解析出的现有文件：
 
 ```ts
 import { defineConfig } from '@amamo/doctrine'
@@ -18,7 +19,7 @@ export default defineConfig({
 })
 ```
 
-该样式表会在 Doctrine 内置样式之后加载。只需覆盖实际需要的变量：
+Doctrine 会在预编译运行时 CSS 之后 import 这个文件。只覆盖网站实际需要的值：
 
 ```css
 :root {
@@ -40,25 +41,25 @@ export default defineConfig({
 
 | 变量                           | 控制内容              |
 | ------------------------------ | --------------------- |
-| `--doctrine-background`        | 页面和表面背景        |
+| `--doctrine-background`        | 页面与表面背景        |
 | `--doctrine-foreground`        | 主要文字              |
-| `--doctrine-muted`             | 次要表面和 hover 状态 |
+| `--doctrine-muted`             | 次要表面与 hover 状态 |
 | `--doctrine-muted-foreground`  | 次要文字              |
-| `--doctrine-border`            | 边框和分隔线          |
+| `--doctrine-border`            | 边框与分隔线          |
 | `--doctrine-ring`              | 键盘焦点环            |
-| `--doctrine-accent`            | Badge、步骤和选中控件 |
+| `--doctrine-accent`            | Badge、步骤与选中控件 |
 | `--doctrine-accent-foreground` | 强调色上的文字        |
-| `--doctrine-radius`            | 控件和表面的统一圆角  |
+| `--doctrine-radius`            | 共用表面圆角          |
 | `--doctrine-font-sans`         | 网站字体栈            |
 | `--doctrine-content-width`     | 正文最大宽度          |
 | `--doctrine-sidebar-width`     | 桌面导航宽度          |
-| `--doctrine-header-height`     | 吸顶导航高度          |
+| `--doctrine-header-height`     | 吸顶 header 高度      |
 
-亮色值写在 `:root`，暗色覆盖写在 `[data-theme="dark"]`。
+亮色值写在 `:root`，暗色覆盖写在 `[data-theme='dark']`。
 
-## 调整布局区域
+## 使用稳定布局 slot
 
-稳定的 `data-slot` 属性允许主题定位网站外壳，而不依赖 Tailwind class：
+请定位 `data-slot`，不要依赖生成的 utility class：
 
 ```css
 [data-slot='header'] {
@@ -74,28 +75,72 @@ export default defineConfig({
 }
 ```
 
-网站外壳提供 `header`、`header-inner`、`brand`、`navigation`、`sidebar`、`main` 和 `content`。内置 MDX 组件则使用对应组件名的 kebab-case。
+网站外壳提供 `header`、`header-inner`、`brand`、`navigation`、`sidebar`、`main`、`content` 和
+`footer`。内置组件提供 `badge`、`callout`、`card`、`card-grid`、`step`、`steps`、`tabs`、
+`code-block`、`code-block-header`、`code-block-filename`、`code-block-language`、
+`code-block-copy`、`table-scroll`、`tab-list`、`tab` 和 `tab-panel`。
 
 ## 使用 Tailwind CSS
 
-Doctrine 自带的界面样式已经预编译，消费者不需要安装 Tailwind。如果要在 MDX 或自定义组件中使用 Tailwind utility，请在文档项目中安装：
+Doctrine 自己的界面已经编译，消费者不需要 Tailwind。要在 MDX 或自定义组件中使用 utility，
+请在文档项目根 manifest 声明 Tailwind：
 
 ```sh
 pnpm add -D tailwindcss
 ```
 
-在 `styles` 指定的样式表中导入 Tailwind，并声明需要扫描的文件：
+然后在配置的样式表中启用 Tailwind，并声明扫描范围：
 
 ```css
 @import 'tailwindcss' source(none);
 @source './';
 ```
 
-Doctrine 检测到项目声明了该依赖后才会启用 Tailwind。未安装时，`styles` 就是普通 CSS，开发与构建过程都不会运行 Tailwind。
+Doctrine 会检查根 `package.json` 的 dependencies、dev dependencies 与 optional dependencies。
+其中声明 `tailwindcss` 时，两个命令都会启用 `@tailwindcss/vite`；否则 `styles` 只是普通 CSS。
 
 ## 内置 MDX 组件
 
-内置组件无需导入或注册。
+在 MDX 中无需 import。自定义 wrapper 也可以从 `@amamo/doctrine/components` 导入组件值与
+prop 类型。
+
+| 组件               | 主要 props                                                              |
+| ------------------ | ----------------------------------------------------------------------- |
+| `Badge`            | `variant="default" \| "outline"` 和 span 属性                           |
+| `Callout`          | `variant="note" \| "tip" \| "warning" \| "danger"`、`title`、aside 属性 |
+| `Card`、`CardGrid` | 可选 card `title` 和普通 div 属性                                       |
+| `CodeBlock`        | 可选 `filename`/`language`；包裹 fenced code block                      |
+| `Step`、`Steps`    | 可选 step `title` 和列表属性                                            |
+| `Tab`、`Tabs`      | tab `label`/`value`；tabs `defaultValue`/`className`                    |
+
+`Card` 只是展示容器，不是链接。需要跳转时，请在 Card 内放 Markdown 链接。
+
+### 代码块
+
+Fenced code block 在浅色和深色模式下分别使用 One Light 与 Andromeeda，默认显示检测到的语言并
+提供复制操作。需要同时显示文件名时，用 `CodeBlock` 包裹代码围栏：
+
+````mdx
+<CodeBlock filename="doctrine.config.ts">
+
+```ts
+export default {
+  title: 'Documentation',
+}
+```
+
+</CodeBlock>
+````
+
+<CodeBlock filename="doctrine.config.ts">
+
+```ts
+export default {
+  title: 'Documentation',
+}
+```
+
+</CodeBlock>
 
 ### Callout 与 Badge
 
@@ -107,37 +152,31 @@ Doctrine 检测到项目声明了该依赖后才会启用 Tailwind。未安装�
 <Badge>稳定</Badge> <Badge variant="outline">预览</Badge>
 ```
 
-`Callout` 支持 `note`、`tip`、`warning` 和 `danger`。
-
 <Callout variant="tip" title="可以部署">
   上传 `dist` 前先运行生产构建。
 </Callout>
 
 <Badge>稳定</Badge> <Badge variant="outline">预览</Badge>
 
-### Card
+### Card 与 Steps
 
 ```mdx
 <CardGrid>
   <Card title="安装">从[入门教程](/zh-CN/guide/getting-started/)开始。</Card>
   <Card title="部署">复制 [GitHub Pages 工作流](/zh-CN/deployment/)。</Card>
 </CardGrid>
-```
 
-<CardGrid>
-  <Card title="安装">从[入门教程](/zh-CN/guide/getting-started/)开始。</Card>
-  <Card title="部署">复制 [GitHub Pages 工作流](/zh-CN/deployment/)。</Card>
-</CardGrid>
-
-### Steps
-
-```mdx
 <Steps>
   <Step title="编写">创建 MDX 文件。</Step>
   <Step title="预览">启动开发服务器。</Step>
   <Step title="构建">生成静态文件。</Step>
 </Steps>
 ```
+
+<CardGrid>
+  <Card title="安装">从[入门教程](/zh-CN/guide/getting-started/)开始。</Card>
+  <Card title="部署">复制 [GitHub Pages 工作流](/zh-CN/deployment/)。</Card>
+</CardGrid>
 
 <Steps>
   <Step title="编写">创建 MDX 文件。</Step>
@@ -183,9 +222,10 @@ Doctrine 检测到项目声明了该依赖后才会启用 Tailwind。未安装�
   </Tab>
 </Tabs>
 
-## 覆盖内置组件
+## 注册或覆盖组件
 
-自定义组件在内置组件之后合并，因此同名条目会替换默认实现。可以导入并包装公开组件，不需要重新实现：
+用 `components` 指向默认导出组件映射的模块。自定义条目在内置组件之后合并，因此同名条目会
+替换默认实现：
 
 ```tsx
 import type { IDoctrineComponents } from '@amamo/doctrine'
@@ -199,14 +239,14 @@ function BrandedCallout(props: ComponentProps<typeof Callout>) {
 export default { Callout: BrandedCallout } satisfies IDoctrineComponents
 ```
 
-在 `doctrine.config.ts` 中注册：
-
 ```ts
 export default defineConfig({
   components: './docs/components.tsx',
 })
 ```
 
-请在配置的样式表中定义 `.branded-callout`；也可以按上文启用 Tailwind 后改用 utility class。
+在 `styles` 中定义 `.branded-callout`，或启用 Tailwind 后使用 utility。注册 `a` 会替换 Doctrine
+能够处理 base 的链接组件，因此替代实现需要自行保留所需的子路径和外部链接行为。
 
-自定义组件会同时被打包到 Node.js 渲染和浏览器中。不要在模块初始化或渲染阶段访问浏览器全局变量；应在 effect 或事件处理器中使用。
+自定义模块会在 Node.js SSR 与浏览器中执行。模块初始化和渲染阶段不能使用浏览器专属全局
+变量；请在 effect 或事件处理器中访问它们。

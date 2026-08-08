@@ -1,10 +1,20 @@
 ---
-description: 配置元数据、输出目录、多语言、导航和自定义 MDX 组件。
+description: 配置网站元数据、URL、输出目录、多语言、导航、样式和自定义 MDX 组件。
 ---
 
 # 配置参考
 
-Doctrine 不依赖配置文件。当默认值不够用时，在项目根目录添加 `doctrine.config.ts`：
+Doctrine 不要求根配置文件。存在多个候选文件时，它会从 CLI 工作目录按以下顺序加载第一个：
+
+```text
+doctrine.config.ts
+doctrine.config.mts
+doctrine.config.js
+doctrine.config.mjs
+```
+
+这些文件是可执行的 Vite 配置模块。`defineConfig` 只是 TypeScript 恒等辅助函数，不会沙箱化或
+序列化模块。
 
 ```ts
 import { defineConfig } from '@amamo/doctrine'
@@ -36,30 +46,49 @@ export default defineConfig({
 })
 ```
 
-Doctrine 也识别 `doctrine.config.mts`、`doctrine.config.js` 和 `doctrine.config.mjs`。
-
 ## 网站选项
 
-| 选项          | 类型                               | 默认值                            | 用途                           |
-| ------------- | ---------------------------------- | --------------------------------- | ------------------------------ |
-| `title`       | `string \| Record<string, string>` | `"Documentation"`                 | 网站标题和页面 title 后缀。    |
-| `description` | `string \| Record<string, string>` | `"Documentation built from MDX."` | 默认页面描述。                 |
-| `siteUrl`     | `string`                           | `"http://localhost/"`             | 绝对公开 URL 和部署 base。     |
-| `githubUrl`   | `string`                           | 无                                | 顶部 GitHub 图标指向的链接。   |
-| `copyright`   | `string \| Record<string, string>` | 无                                | Footer 中可本地化的版权文案。  |
-| `iconLibrary` | `string`                           | 无                                | 提供导航图标命名导出的包。     |
-| `outDir`      | `string`                           | `"dist"`                          | 相对项目根目录的静态输出目录。 |
-| `locales`     | `IDoctrineLocaleConfig`            | 仅英语                            | 多语言路由和显示名称。         |
-| `components`  | `string`                           | 无                                | 自定义 MDX 组件模块路径。      |
-| `styles`      | `string`                           | 无                                | 自定义主题或样式表路径。       |
+| 选项          | 类型                               | 默认值                             | 用途                                   |
+| ------------- | ---------------------------------- | ---------------------------------- | -------------------------------------- |
+| `title`       | `string \| Record<string, string>` | `"Documentation"`                  | 品牌文案和页面 title 后缀。            |
+| `description` | `string \| Record<string, string>` | `"Documentation built from MDX."`  | 默认 meta description。                |
+| `siteUrl`     | `string`                           | `"http://localhost/"`              | 绝对公开 URL 和 Vite 部署 base。       |
+| `githubUrl`   | `string`                           | 无                                 | Header 中 GitHub 图标的外部链接。      |
+| `copyright`   | `string \| Record<string, string>` | 无                                 | 可本地化的 footer 文案。               |
+| `iconLibrary` | `string`                           | 无                                 | 提供导航图标命名 React 导出的模块。    |
+| `outDir`      | `string`                           | `"dist"`                           | 静态输出目录。                         |
+| `locales`     | `IDoctrineLocaleConfig`            | `{ default: "en", names: ["en"] }` | 语言路由、导航集合和切换标签。         |
+| `components`  | `string`                           | 无                                 | 自定义 MDX 组件模块。                  |
+| `styles`      | `string`                           | 无                                 | 在 Doctrine CSS 后加载的自定义样式表。 |
 
-`--site-url` 和 `--out-dir` 可以为单次构建覆盖配置文件中的值。
+`title`、`description` 和 `copyright` 可以是所有 locale 共用的字符串，也可以是 locale 映射。映射
+按“当前 locale → `locales.default` → 第一个值”回退。
 
-`outDir` 必须位于项目根目录内，同时不能位于 MDX 内容目录内。构建写入文件前会清空输出目录。
+`siteUrl` 必须使用 HTTP 或 HTTPS，且不能包含 query 或 fragment。Doctrine 会把 pathname 归一化
+为一个开头斜杠和一个结尾斜杠；这个 pathname 就是 `base`。`githubUrl` 也必须使用 HTTP 或
+HTTPS。
+
+## 路径、优先级与生成目录
+
+CLI 工作目录就是项目 root。相对路径从这里解析；绝对路径也可以使用，但仍须满足构建限制。
+
+- 位置参数指定的内容目录默认是 `docs`，必须存在，并会被 canonicalize。
+- `components` 和 `styles` 必须解析到现有文件，并会被 canonicalize。
+- `outDir` 从 root 解析；它必须位于 root 内，不能等于 root，也不能位于内容目录内。
+- 构建时，`--site-url` 和 `--out-dir` 会覆盖配置文件中的对应值。
+
+客户端构建会先清空 `outDir`。不要把它指向源码或其它重要目录。Doctrine 还会创建
+`.amamo-mdx/` 保存生成的内容注册表与缓存记录，并用 `.doctrine/` 保存临时构建文件；两者都
+不应提交。
 
 ## 目录导航
 
-每个包含 MDX 的目录都要为对应 locale 提供一个 `meta` 导航文件。`meta.ts` 属于默认 locale，其他语言使用 `meta.zh-CN.ts` 这样的文件名。数组顺序就是侧栏顺序：
+每个包含对应 locale MDX 的目录都需要匹配的 TypeScript 导航模块：
+
+- 默认 locale 使用 `meta.ts`
+- 目录中存在的其他 locale 使用 `meta.<locale>.ts`
+
+`defineDirectory` 同样只是恒等辅助函数。`items` 数组就是侧栏的准确顺序：
 
 ```ts
 // docs/meta.zh-CN.ts
@@ -74,7 +103,7 @@ export default defineDirectory({
 })
 ```
 
-子目录自行配置它在父级显示的分组文案、图标和直属内容：
+子目录定义分组标题和直属内容：
 
 ```ts
 // docs/guide/meta.zh-CN.ts
@@ -87,71 +116,87 @@ export default defineDirectory({
 })
 ```
 
-`page` 是不包含扩展名和 locale 后缀的直属 MDX 文件名；`directory` 是直属子目录。对应语言的每个页面和子目录都必须出现且只能出现一次。遗漏、重复和不存在的引用都会让构建失败。
+根目录的 `title` 可省略；嵌套导航文件必须提供非空 title。`page` 必须是不含斜杠、扩展名和
+locale 后缀的直属 MDX basename。`directory` 必须是直属子目录名，不能是 `.` 或 `..`。
 
-图标是可选的。只要导航使用了图标，就要把 `iconLibrary` 指向一个以命名导出提供 React 图标组件的包。Doctrine 只为实际配置的图标生成静态导入。
+生产构建要求每个匹配页面和子目录恰好出现一次。重复条目、重复路由、非法结构、遗漏条目或
+不存在的引用都会失败。Serve 模式仍会校验结构与重复项，但会省略暂时不存在的引用，并忽略
+尚未加入导航的新文档。
 
-MDX 不要求 frontmatter。仍可选填字符串类型的 `description` 作为页面描述；未提供时使用网站 description。
+页面条目与嵌套目录都可以使用图标。每个图标名必须符合 Doctrine 的 ASCII identifier 格式：
+首字符只能是 `$`、`_` 或字母，后续可以使用数字；同时它必须是 `iconLibrary` 的命名 React
+组件导出。Doctrine 只静态 import 导航实际使用的名称；缺少导出会导致打包失败。只要配置了
+一个图标，就必须设置 `iconLibrary`。
 
-## 多语言
+## 路由与多语言
 
-`locales.default` 必须包含在 `locales.names` 中；locale 不能重复；名称只能由字母、数字和以连字符分隔的片段组成。
+`locales.default` 必须包含在 `locales.names` 中；名称不能重复，并且只能由连字符分隔的字母与
+数字片段组成。
 
 ```ts
 locales: {
-  default: "en",
-  names: ["en", "zh-CN", "ja"],
+  default: 'en',
+  names: ['en', 'zh-CN', 'ja'],
   labels: {
-    en: "English",
-    "zh-CN": "简体中文",
-    ja: "日本語",
+    en: 'English',
+    'zh-CN': '简体中文',
+    ja: '日本語',
   },
 }
 ```
 
-通过文件名后缀创建翻译：
+翻译通过文件名后缀定义：
 
 ```text
-docs/guide/install.mdx       → /guide/install/
-docs/guide/install.zh-CN.mdx → /zh-CN/guide/install/
-docs/guide/install.ja.mdx    → /ja/guide/install/
+docs/guide/install.mdx       -> /guide/install/
+docs/guide/install.zh-CN.mdx -> /zh-CN/guide/install/
+docs/guide/install.ja.mdx    -> /ja/guide/install/
 ```
 
-与它们对应的导航文件分别是 `docs/guide/meta.ts`、`docs/guide/meta.zh-CN.ts` 和 `docs/guide/meta.ja.ts`。不带后缀的配置属于默认 locale；带后缀的配置只作用于具有相同 locale 后缀的 MDX，不会回退到其他语言的导航配置。
+无后缀文件属于默认 locale。导航文件不会跨 locale fallback；只有另一个已配置 locale 具有相同
+slug 时，语言按钮才会出现。`locales.labels` 缺失的条目直接显示 locale code。
 
-只有另一个已配置 locale 中存在相同 slug 的文件时，页面才会显示语言按钮。
+内置界面文案在名称以 `zh` 开头的 locale 中使用中文，其余使用英文。路由、导航、元数据和
+`<html lang>` 仍使用准确的配置 locale。
 
-## 自定义 MDX 组件
+`index.mdx` 和 `page.mdx` 都映射到所在目录。同一目录、同一 locale 不要同时创建两者，否则会
+产生重复路由。
 
-用 `components` 指定相对项目根目录的模块路径：
+## Frontmatter
 
-```ts
-export default defineConfig({
-  components: './docs/components.tsx',
-})
+Frontmatter 可省略。Doctrine 配置了一个公开字段：
+
+```mdx
+---
+description: 用于 HTML 元数据的页面描述。
+---
 ```
 
-该模块必须默认导出组件映射：
+存在时，`description` 必须是字符串。页面 title 来自导航而不是 frontmatter。MDX 是可执行
+内容；schema 校验不会让不可信文档变安全。
+
+## 自定义组件与样式
+
+`components` 指向默认导出 React 组件映射的模块：
 
 ```tsx
 import type { IDoctrineComponents } from '@amamo/doctrine'
 import type { ReactNode } from 'react'
 
-function Callout({ children }: { children: ReactNode }) {
-  return <aside className="project-callout">{children}</aside>
+interface INoticeProps {
+  children: ReactNode
 }
 
-export default { Callout } satisfies IDoctrineComponents
+function Notice({ children }: INoticeProps) {
+  return <aside className="project-notice">{children}</aside>
+}
+
+export default { Notice } satisfies IDoctrineComponents
 ```
 
-在 MDX 中直接使用注册名：
+该模块同时进入 SSR 与浏览器 bundle。它必须能在 Node.js 中渲染；浏览器专属全局变量只能在
+effect 或事件处理器中使用，不能在模块初始化或渲染阶段访问。自定义名称会覆盖内置组件，包括
+默认的 `a` 链接组件。
 
-```mdx
-<Callout>部署前先执行迁移。</Callout>
-```
-
-该模块会同时进入 SSR 和浏览器 bundle，因此组件必须能在构建阶段的 Node.js 环境中渲染。浏览器专属全局变量应放在 effect 或事件处理函数中使用，不能在模块加载或组件渲染时访问。请在配置的样式表中设置 `project-callout`；如果项目安装了 Tailwind，也可以使用 utility class，详见[自定义](/zh-CN/customization/#使用-tailwind-css)。
-
-自定义条目可以覆盖同名的内置 MDX 元素映射。例如，注册 `a` 会替换 Doctrine 默认的链接渲染器。
-
-主题变量、内置组件和包装覆盖示例见[自定义](/zh-CN/customization/)。
+用 `styles` 设置组件 CSS 和主题变量。如果根 `package.json` 声明了 `tailwindcss`，Doctrine
+还会启用 Tailwind Vite 插件。详见[自定义](/zh-CN/customization/)。

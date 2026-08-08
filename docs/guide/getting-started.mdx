@@ -4,28 +4,23 @@ description: Create, preview, and build a Doctrine site from scratch.
 
 # Getting started
 
-This tutorial starts with an empty project and ends with a deployable static site in `dist`.
+This guide starts with an empty project and ends with a deployable static site in `dist`.
 
-## 1. Install Doctrine
+## 1. Check the build environment
 
-Doctrine requires Node.js 20.19 or newer. Install it in the project that owns the documentation:
+Doctrine requires Node.js 20.19 or newer and a
+[native target supported by `@amamo/mdx`](https://jikkai.github.io/mdx/native-targets/). The native
+compiler has no JavaScript fallback. MDX can execute JavaScript during bundling, prerendering, and
+hydration, so use content and configuration from trusted authors only.
+
+Install the package and create the content directory:
 
 ```sh
 pnpm add @amamo/doctrine
-mkdir docs
+mkdir -p docs/guide
 ```
 
-Your project now needs only this structure:
-
-```text
-my-project/
-├── docs/
-│   ├── meta.ts
-│   └── index.mdx
-└── package.json
-```
-
-## 2. Write the home page
+## 2. Add two pages
 
 Create `docs/index.mdx`:
 
@@ -35,17 +30,7 @@ Create `docs/index.mdx`:
 Choose a guide from the navigation.
 ```
 
-Create `docs/meta.ts`. The array owns the navigation title, icon, and order:
-
-```ts
-import { defineDirectory } from '@amamo/doctrine'
-
-export default defineDirectory({
-  items: [{ page: 'index', title: 'Acme documentation' }, { directory: 'guide' }],
-})
-```
-
-Add another page at `docs/guide/install.mdx`:
+Create `docs/guide/install.mdx`:
 
 ````mdx
 # Install Acme
@@ -55,7 +40,23 @@ pnpm add acme
 ```
 ````
 
-Configure that directory beside its MDX in `docs/guide/meta.ts`:
+Neither page needs frontmatter. An optional string `description` becomes that page's meta
+description.
+
+## 3. Define the navigation
+
+Each directory with MDX for a locale needs the matching navigation module. The root `docs/meta.ts`
+orders the home page and child directory:
+
+```ts
+import { defineDirectory } from '@amamo/doctrine'
+
+export default defineDirectory({
+  items: [{ page: 'index', title: 'Acme documentation' }, { directory: 'guide' }],
+})
+```
+
+Create `docs/guide/meta.ts` beside the nested page:
 
 ```ts
 import { defineDirectory } from '@amamo/doctrine'
@@ -66,26 +67,32 @@ export default defineDirectory({
 })
 ```
 
-That file is available at `/guide/install/`.
+The array controls exact sidebar order. `page` names a direct MDX basename; `directory` names a
+direct child. The production build requires every page and child directory exactly once.
 
-## 3. Start the development server
+## 4. Start development
 
 ```sh
 pnpm exec doctrine dev docs
 ```
 
-The default address is `http://localhost:5173`. Changes to MDX files and nearby navigation metadata
-update the site without restarting the server, and search is rebuilt when either changes.
+Open `http://localhost:5173`. Vite server-renders each request and hydrates it in the browser. MDX
+changes update through the content plugin; adding, removing, or editing navigation metadata refreshes
+the route model without restarting the server.
 
-Use another host or port when needed:
+Development tolerates a brief mismatch while a page and its `meta.ts` entry are saved separately.
+The Pagefind development index is invalidated by content changes and rebuilt lazily on the next
+search request.
+
+Choose another interface or port when needed:
 
 ```sh
 pnpm exec doctrine dev docs --host 0.0.0.0 --port 4173
 ```
 
-## 4. Add site metadata
+## 5. Add optional site metadata
 
-Create `doctrine.config.ts` at the project root:
+Create `doctrine.config.ts` in the directory where the CLI runs:
 
 ```ts
 import { defineConfig } from '@amamo/doctrine'
@@ -93,22 +100,22 @@ import { defineConfig } from '@amamo/doctrine'
 export default defineConfig({
   title: 'Acme documentation',
   description: 'Product guides and API notes for Acme.',
-  iconLibrary: 'lucide-react',
+  githubUrl: 'https://github.com/acme/acme',
 })
 ```
 
-The root config is optional unless the navigation uses icons or the site needs other options.
-Without it, Doctrine uses `Documentation` as the site title and `en` as the only locale.
+Without a config file, the title is `Documentation`, the description is
+`Documentation built from MDX.`, and `en` is the only locale.
 
-## 5. Build static files
+## 6. Build the static site
 
-Pass the final public URL to the build:
+Pass the real public URL, including any repository pathname:
 
 ```sh
 pnpm exec doctrine build docs --site-url https://docs.example.com/
 ```
 
-Doctrine writes static HTML, client assets, a 404 page, and the Pagefind index to `dist`:
+The default output is:
 
 ```text
 dist/
@@ -119,18 +126,14 @@ dist/
 └── pagefind/
 ```
 
-For a repository site, include its pathname:
+Doctrine builds client and SSR bundles, prerenders every navigation route, removes Vite's private
+manifest, and indexes the resulting HTML with Pagefind. A repository URL such as
+`https://user.github.io/acme/` changes public URLs to `/acme/...`; it does not create `dist/acme`.
 
-```sh
-pnpm exec doctrine build docs --site-url https://user.github.io/acme/
-```
+## 7. Keep generated work out of Git
 
-The output still goes directly into `dist`; Doctrine applies `/acme/` to public URLs instead of
-creating `dist/acme`.
+In addition to `dist`, Doctrine uses `.amamo-mdx/` for the generated content registry and cache
+records, and `.doctrine/` for temporary build work. Add all three to the project's ignore file.
 
-## 6. Continue from here
-
-- Review all built-in behavior in [Features](/features/).
-- Customize themes and MDX components with [Customization](/customization/).
-- Add locales and site metadata with [Configuration](/configuration/).
-- Copy the production workflow from [GitHub Pages](/deployment/).
+Continue with [Configuration](/configuration/) for every option, [Customization](/customization/)
+for themes and components, or [GitHub Pages](/deployment/) for a deployment workflow.

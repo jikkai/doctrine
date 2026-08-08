@@ -35,13 +35,33 @@ test('refreshes navigation metadata and MDX routes without restarting', async ()
       { command: 'serve', contentDirectory: 'docs', root },
     )
     server = await dev(config, { host: '127.0.0.1', port: 0 })
+    const optimizedRuntimeDependencies = [
+      '@amamo/doctrine > @base-ui/react/button',
+      '@amamo/doctrine > @base-ui/react/dialog',
+      '@amamo/doctrine > @base-ui/react/tabs',
+      '@amamo/doctrine > lucide-react',
+      '@amamo/doctrine > react-dom/client',
+    ]
+    assert.ok(
+      optimizedRuntimeDependencies.every((dependency) =>
+        server?.config.optimizeDeps.include?.includes(dependency),
+      ),
+    )
+    const watch = server.config.server.watch
+    assert.ok(watch)
+    assert.deepEqual(watch.awaitWriteFinish, {
+      pollInterval: 10,
+      stabilityThreshold: 100,
+    })
     const address = server.httpServer?.address()
     assert.ok(address && typeof address !== 'string')
     const origin = `http://127.0.0.1:${address.port}`
 
     const initial = await fetch(`${origin}/`)
     assert.equal(initial.status, 200)
-    assert.match(await initial.text(), /<span>Home<\/span>/)
+    const initialHtml = await initial.text()
+    assert.match(initialHtml, /<span>Home<\/span>/)
+    assert.match(initialHtml, /<link rel="stylesheet" href="\/@fs\/[^"]+\/runtime\/styles\.css">/)
 
     await writeFile(
       path.join(docs, 'meta.ts'),

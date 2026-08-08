@@ -1,12 +1,18 @@
 # @amamo/doctrine
 
-Turn an MDX directory into a static React documentation site. Doctrine provides Vite-powered
-development, static generation, Pagefind search, localization, light and dark themes, custom React
-components, built-in MDX components, and subpath-safe deployment.
+Build an MDX directory into a static React documentation site. Doctrine provides a Vite development
+server, prerendered HTML, Pagefind search, localized navigation, light and dark themes, and
+subpath-safe assets without requiring a production Node.js server.
+
+## Requirements
+
+- Node.js 20.19 or newer.
+- A [native target supported by `@amamo/mdx`](https://jikkai.github.io/mdx/native-targets/).
+  Doctrine has no JavaScript fallback for MDX compilation.
+- Trusted MDX and configuration authors. MDX, config files, navigation files, and custom components
+  can execute JavaScript during the build.
 
 ## Quick start
-
-Doctrine requires Node.js 20.19 or newer.
 
 ```sh
 pnpm add @amamo/doctrine
@@ -21,7 +27,7 @@ Create `docs/index.mdx`:
 The first page is ready.
 ```
 
-Create the navigation for the default locale in `docs/meta.ts`:
+Create `docs/meta.ts` to make the page part of the navigation:
 
 ```ts
 import { defineDirectory } from '@amamo/doctrine'
@@ -31,23 +37,20 @@ export default defineDirectory({
 })
 ```
 
-Start the development server:
+Preview and build:
 
 ```sh
 pnpm exec doctrine dev docs
-```
-
-Build static files with the final public URL:
-
-```sh
 pnpm exec doctrine build docs --site-url https://example.com/project/
 ```
 
-The output is written to `dist` by default.
+Development defaults to `http://localhost:5173`. Production output defaults to `dist`; pass the
+real public URL so assets, canonical links, locale routes, search results, and `404.html` use the
+correct deployment base.
 
 ## Configuration
 
-Add `doctrine.config.ts` at the project root:
+`doctrine.config.ts` is optional. Add it at the project root when the defaults are not enough:
 
 ```ts
 import { defineConfig } from '@amamo/doctrine'
@@ -57,18 +60,16 @@ export default defineConfig({
   description: 'Guides for My project.',
   githubUrl: 'https://github.com/acme/my-project',
   copyright: 'Copyright © 2026 Acme.',
-  iconLibrary: 'lucide-react',
   locales: {
     default: 'en',
     names: ['en', 'zh-CN'],
     labels: { en: 'English', 'zh-CN': '简体中文' },
   },
-  components: './docs/components.tsx',
-  styles: './docs/theme.css',
 })
 ```
 
-Locale variants follow the `@amamo/mdx` filename convention:
+Locale variants use filename suffixes. Every directory with content for a locale also has the
+matching navigation module:
 
 ```text
 docs/index.mdx
@@ -82,14 +83,41 @@ docs/guide/meta.zh-CN.ts
 ```
 
 The default locale uses `/guide/install/`; the translated page uses
-`/zh-CN/guide/install/`. Each locale file owns the titles, icons, and array order for the MDX files
-and child directories beside it.
+`/zh-CN/guide/install/`. Navigation modules own page titles, icons, child directories, and order.
+
+## What the build does
+
+```text
+CLI + doctrine.config.* + meta*.ts
+  -> normalize paths, URLs, locales, and navigation
+  -> Vite + @amamo/mdx compile content and client/SSR bundles
+  -> React prerenders every navigation route
+  -> Doctrine writes HTML, assets, and 404.html
+  -> Pagefind indexes the final HTML
+```
+
+Doctrine keeps the generated content registry and cache records in `.amamo-mdx/`, and temporary
+build work in `.doctrine/`. Treat both as generated directories and keep them out of version control.
+
+## Package surfaces
+
+| Import                       | Public API                                                              |
+| ---------------------------- | ----------------------------------------------------------------------- |
+| `@amamo/doctrine`            | `defineConfig`, `defineDirectory`, and their public configuration types |
+| `@amamo/doctrine/components` | `Badge`, `Callout`, `Card`, `CardGrid`, `Step`, `Steps`, `Tab`, `Tabs`  |
+| `doctrine`                   | `dev` and `build` CLI commands                                          |
 
 ## Documentation
 
 - [Getting started](https://jikkai.github.io/doctrine/guide/getting-started/)
-- [Features](https://jikkai.github.io/doctrine/features/)
+- [Features and runtime behavior](https://jikkai.github.io/doctrine/features/)
 - [Customization](https://jikkai.github.io/doctrine/customization/)
 - [Configuration](https://jikkai.github.io/doctrine/configuration/)
 - [CLI reference](https://jikkai.github.io/doctrine/cli/)
 - [GitHub Pages deployment](https://jikkai.github.io/doctrine/deployment/)
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) to work on Doctrine itself.
+
+## License
+
+MIT

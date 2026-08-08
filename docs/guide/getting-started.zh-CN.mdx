@@ -4,28 +4,23 @@ description: 从零创建、预览并构建一个 Doctrine 网站。
 
 # 入门教程
 
-这份教程从空项目开始，最终会在 `dist` 中得到可以直接部署的静态网站。
+这份指南从空项目开始，最终会在 `dist` 中得到可以直接部署的静态网站。
 
-## 1. 安装 Doctrine
+## 1. 检查构建环境
 
-Doctrine 需要 Node.js 20.19 或更高版本。在文档所属项目中安装：
+Doctrine 需要 Node.js 20.19 或更新版本，并且机器必须属于 `@amamo/mdx` 的
+[受支持原生目标](https://jikkai.github.io/mdx/native-targets/)。原生编译器没有 JavaScript
+fallback。MDX 可以在打包、预渲染和 hydration 时执行 JavaScript，因此只能使用可信作者提供的
+内容与配置。
+
+安装包并创建内容目录：
 
 ```sh
 pnpm add @amamo/doctrine
-mkdir docs
+mkdir -p docs/guide
 ```
 
-项目最少只需要这些文件：
-
-```text
-my-project/
-├── docs/
-│   ├── meta.ts
-│   └── index.mdx
-└── package.json
-```
-
-## 2. 编写首页
+## 2. 添加两篇页面
 
 创建 `docs/index.mdx`：
 
@@ -35,17 +30,7 @@ my-project/
 从导航中选择一篇指南。
 ```
 
-创建 `docs/meta.ts`，用数组配置导航文案、图标和顺序：
-
-```ts
-import { defineDirectory } from '@amamo/doctrine'
-
-export default defineDirectory({
-  items: [{ page: 'index', title: 'Acme documentation' }, { directory: 'guide' }],
-})
-```
-
-再添加 `docs/guide/install.mdx`：
+创建 `docs/guide/install.mdx`：
 
 ````mdx
 # 安装 Acme
@@ -55,36 +40,56 @@ pnpm add acme
 ```
 ````
 
-在同级的 `docs/guide/meta.ts` 中配置这个目录：
+页面不要求 frontmatter。可选的字符串 `description` 会成为该页面的 meta description。
+
+## 3. 定义导航
+
+每个含有对应 locale MDX 的目录都需要匹配的导航模块。根目录的 `docs/meta.ts` 负责首页和
+子目录的顺序：
 
 ```ts
 import { defineDirectory } from '@amamo/doctrine'
 
 export default defineDirectory({
-  title: 'Guide',
-  items: [{ page: 'install', title: 'Install Acme' }],
+  items: [{ page: 'index', title: 'Acme 文档' }, { directory: 'guide' }],
 })
 ```
 
-该文件对应 `/guide/install/`。
+在嵌套页面旁创建 `docs/guide/meta.ts`：
 
-## 3. 启动开发服务器
+```ts
+import { defineDirectory } from '@amamo/doctrine'
+
+export default defineDirectory({
+  title: '指南',
+  items: [{ page: 'install', title: '安装 Acme' }],
+})
+```
+
+数组决定侧栏的准确顺序。`page` 是直属 MDX basename；`directory` 是直属子目录。生产构建要求
+每个页面和子目录恰好出现一次。
+
+## 4. 启动开发服务器
 
 ```sh
 pnpm exec doctrine dev docs
 ```
 
-默认地址是 `http://localhost:5173`。修改 MDX 文件或就近的导航配置后，网站无需重启即可更新，搜索索引也会随之重新生成。
+打开 `http://localhost:5173`。Vite 会服务端渲染每次请求，再在浏览器 hydration。MDX 修改由
+内容插件更新；新增、删除或编辑导航元数据会刷新路由模型，不需要重启服务器。
 
-需要其他 host 或端口时：
+当页面与 `meta.ts` 条目分两次保存时，开发模式可以容忍短暂的不一致。内容变化会让开发
+Pagefind 索引失效，下一次搜索请求才会惰性重建它。
+
+需要其他监听地址或端口时：
 
 ```sh
 pnpm exec doctrine dev docs --host 0.0.0.0 --port 4173
 ```
 
-## 4. 添加网站元数据
+## 5. 添加可选的网站元数据
 
-在项目根目录创建 `doctrine.config.ts`：
+在 CLI 运行目录创建 `doctrine.config.ts`：
 
 ```ts
 import { defineConfig } from '@amamo/doctrine'
@@ -92,21 +97,22 @@ import { defineConfig } from '@amamo/doctrine'
 export default defineConfig({
   title: 'Acme 文档',
   description: 'Acme 的产品指南和 API 说明。',
-  iconLibrary: 'lucide-react',
+  githubUrl: 'https://github.com/acme/acme',
 })
 ```
 
-只有导航使用图标或网站需要其他选项时，根配置文件才是必需的。没有配置时，Doctrine 使用 `Documentation` 作为网站标题，并只启用 `en` locale。
+没有配置文件时，title 是 `Documentation`，description 是
+`Documentation built from MDX.`，并且只启用 `en` locale。
 
-## 5. 构建静态文件
+## 6. 构建静态网站
 
-构建时提供最终公开网址：
+传入真实公开网址，包括可能存在的仓库路径：
 
 ```sh
 pnpm exec doctrine build docs --site-url https://docs.example.com/
 ```
 
-Doctrine 会把静态 HTML、客户端资源、404 页面和 Pagefind 索引写入 `dist`：
+默认产物为：
 
 ```text
 dist/
@@ -117,17 +123,14 @@ dist/
 └── pagefind/
 ```
 
-仓库网站需要在 URL 中包含仓库路径：
+Doctrine 会构建客户端与 SSR bundle、预渲染全部导航路由、移除 Vite 私有 manifest，再由
+Pagefind 索引最终 HTML。`https://user.github.io/acme/` 这样的仓库网址会把公开 URL 改为
+`/acme/...`，而不会创建 `dist/acme`。
 
-```sh
-pnpm exec doctrine build docs --site-url https://user.github.io/acme/
-```
+## 7. 不要提交生成目录
 
-产物仍直接写入 `dist`。Doctrine 会把 `/acme/` 应用到公开 URL，而不是创建 `dist/acme`。
+除了 `dist`，Doctrine 还用 `.amamo-mdx/` 保存生成的内容注册表与缓存记录，并用 `.doctrine/`
+保存临时构建文件。请把三个目录都加入项目的 ignore 文件。
 
-## 6. 下一步
-
-- 在[功能说明](/zh-CN/features/)中查看内置能力。
-- 根据[自定义](/zh-CN/customization/)调整主题和 MDX 组件。
-- 根据[配置参考](/zh-CN/configuration/)添加多语言和网站元数据。
-- 从 [GitHub Pages](/zh-CN/deployment/)复制生产工作流。
+继续阅读[配置参考](/zh-CN/configuration/)了解全部选项、[自定义](/zh-CN/customization/)配置主题
+和组件，或使用 [GitHub Pages](/zh-CN/deployment/) 的部署工作流。

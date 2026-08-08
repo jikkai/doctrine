@@ -81,8 +81,15 @@ export async function dev(
     const pathname = withoutBase(config.base, url.pathname)
     if (!pathname) return false
     const module = (await server.ssrLoadModule(runtimeEntry('server'))) as IServerBundle
-    const script = `/@fs/${runtimeEntry('client').split(path.sep).join('/').replace(/^\//, '')}`
-    const html = await module.renderPage(pathname, { scripts: [script], styles: [] })
+    const clientEntry = runtimeEntry('client')
+    const styles = [
+      devAssetUrl(path.join(path.dirname(clientEntry), 'styles.css')),
+      ...(config.styles ? [devAssetUrl(config.styles)] : []),
+    ]
+    const html = await module.renderPage(pathname, {
+      scripts: [devAssetUrl(clientEntry)],
+      styles,
+    })
     const transformed = await server.transformIndexHtml(url.pathname, html)
     response.statusCode = module.getRoutePaths().includes(normalizeRoutePath(pathname)) ? 200 : 404
     response.setHeader('Content-Type', 'text/html; charset=utf-8')
@@ -119,17 +126,39 @@ export async function dev(
     appType: 'custom',
     base: config.base,
     configFile: false,
+    optimizeDeps: {
+      include: [
+        '@amamo/doctrine > @base-ui/react/button',
+        '@amamo/doctrine > @base-ui/react/dialog',
+        '@amamo/doctrine > @base-ui/react/tabs',
+        '@amamo/doctrine > lucide-react',
+        '@amamo/doctrine > react-dom/client',
+      ],
+    },
     plugins: [
       react(),
       ...doctrinePlugins({ config, dev: true, onContentChange: markSearchDirty }),
       htmlPlugin,
     ],
     root: config.root,
-    server: { host: options.host, port: options.port },
+    server: {
+      host: options.host,
+      port: options.port,
+      watch: {
+        awaitWriteFinish: {
+          pollInterval: 10,
+          stabilityThreshold: 100,
+        },
+      },
+    },
   })
   await server.listen()
   server.printUrls()
   return server
+}
+
+function devAssetUrl(file: string): string {
+  return `/@fs/${file.split(path.sep).join('/').replace(/^\//, '')}`
 }
 
 function contentType(file: string): string {

@@ -1,58 +1,72 @@
 ---
-description: Build a static, searchable documentation site from an MDX directory.
+description: Build a searchable, localized static documentation site from an MDX directory.
 ---
 
-# Ship documentation from an MDX directory
+# Ship an MDX directory as a static documentation site
 
-Doctrine gives an MDX directory a development server, static HTML, client hydration, search,
-localization, themes, and a responsive documentation shell. You provide content and optional React
-components; Doctrine owns the site pipeline.
+Doctrine turns MDX files and colocated navigation metadata into prerendered HTML, a hydrated React
+interface, and a Pagefind search index. Development runs through Vite; production output is ordinary
+static files.
 
 ```sh
 pnpm add @amamo/doctrine
 pnpm exec doctrine dev docs
 ```
 
-[Build your first site](/guide/getting-started/) in a few minutes, then review the
-[feature set](/features/) and [configuration reference](/configuration/).
-
-<Callout>
-  Register React components once and use them in any MDX document. Doctrine builds plain static
-  files, so you can deploy `dist` to GitHub Pages or any static host without a production Node.js
-  server.
+<Callout variant="tip" title="Static output, executable input">
+  Register React components once and use them in any MDX document. The deployed `dist` directory
+  needs no Node.js server, but the build must only process MDX, config, and component code you
+  trust.
 </Callout>
 
-## What Doctrine includes
+## From source to site
 
-- Vite SSR during development and static generation for production
-- MDX compilation and filename conventions from `@amamo/mdx`
-- Pagefind full-text search generated from the final HTML
-- Locale-aware routes, metadata, navigation, and language switching
-- Persistent light and dark themes without an initial color flash
-- Custom React components shared by SSR and client hydration
-- Correct assets, links, search results, canonical URLs, and 404 pages under a deployment subpath
+```text
+MDX + meta.ts + doctrine.config.ts
+  -> config and navigation normalization
+  -> @amamo/mdx content compilation
+  -> Vite client and SSR bundles
+  -> React prerender for every navigation route
+  -> HTML + assets + 404.html
+  -> Pagefind index from the final HTML
+```
+
+The same runtime shell renders development requests, production pages, and client hydration. Routes,
+locale links, custom components, and theme behavior therefore share one implementation.
+
+## What Doctrine owns
+
+- Vite SSR development with MDX and navigation watching
+- strict production navigation validation
+- route generation from directories, page basenames, and locale suffixes
+- localized titles, descriptions, canonical URLs, and alternate links
+- lazy development search and a production Pagefind index
+- responsive navigation, search, GitHub link, locale switcher, and persistent theme
+- custom CSS and React component registration
+- deployment bases for repository subpaths
 
 ## What you provide
 
-At minimum, create one `.mdx` file and a colocated `meta.ts` navigation file. Add
-`doctrine.config.ts` only when you need site metadata, localization, icons, a custom output
-directory, or custom components.
+The smallest site has one document and one navigation file:
 
 ```text
 docs/
 ├── index.mdx
-├── meta.ts
-└── guide/
-    ├── install.mdx
-    └── meta.ts
+└── meta.ts
 ```
 
-The file tree becomes the route tree: `docs/index.mdx` is `/`, and
-`docs/guide/install.mdx` is `/guide/install/`.
+`docs/index.mdx` maps to `/`. A nested `docs/guide/install.mdx` maps to `/guide/install/`, provided
+the root and nested `meta.ts` files include that directory and page. Production builds reject missing,
+duplicate, or nonexistent navigation entries.
 
-## Next steps
+Doctrine depends on the native `@amamo/mdx` compiler. Use Node.js 20.19 or newer on a
+[supported target](https://jikkai.github.io/mdx/native-targets/); there is no JavaScript fallback.
 
-- Follow the [getting-started tutorial](/guide/getting-started/).
-- Customize themes and built-ins with the [customization guide](/customization/).
-- Read the [CLI reference](/cli/) for command options.
-- Use the [GitHub Pages guide](/deployment/) for repository subpaths.
+## Choose the next page
+
+- [Getting started](/guide/getting-started/) builds a complete site.
+- [Features](/features/) explains development, production, search, and localization behavior.
+- [Configuration](/configuration/) lists every option and validation rule.
+- [Customization](/customization/) covers themes, Tailwind, and MDX components.
+- [CLI reference](/cli/) documents the two commands.
+- [GitHub Pages](/deployment/) provides a subpath-safe workflow.

@@ -1,40 +1,48 @@
 ---
-description: Run the Doctrine development server and static build.
+description: Run Doctrine's Vite development server and static production build.
 ---
 
 # CLI reference
 
-Doctrine exposes two commands. The MDX directory is optional and defaults to `docs`.
+The `doctrine` binary exposes two commands. It treats the current working directory as the project
+root, loads `doctrine.config.*` from there, and resolves a relative content directory from that root.
 
 ```sh
 pnpm exec doctrine dev [directory] [--host localhost] [--port 5173]
 pnpm exec doctrine build [directory] [--site-url https://example.com/docs/] [--out-dir dist]
 ```
 
+`[directory]` defaults to `docs` and must exist.
+
 ## `doctrine dev`
 
-Starts the Vite development server with SSR, client hydration, and a development search index.
+Starts a custom Vite server with SSR, client hydration, file watching, and an in-memory development
+search index.
 
-| Argument or option | Default     | Description                                   |
-| ------------------ | ----------- | --------------------------------------------- |
-| `[directory]`      | `docs`      | Directory containing the MDX files.           |
-| `--host`           | `localhost` | Network interface for the development server. |
-| `--port`           | `5173`      | Development server port, from `0` to `65535`. |
+| Argument or option | Default     | Meaning                                                |
+| ------------------ | ----------- | ------------------------------------------------------ |
+| `[directory]`      | `docs`      | MDX content directory, relative to the project root.   |
+| `--host`           | `localhost` | Interface passed to Vite.                              |
+| `--port`           | `5173`      | Integer port from `0` through `65535`; `0` is dynamic. |
 
 ```sh
 pnpm exec doctrine dev
 pnpm exec doctrine dev website --host 0.0.0.0 --port 4173
 ```
 
+The command keeps running until the server is stopped. MDX and navigation changes update the site;
+the Pagefind development data is rebuilt lazily after the next search request.
+
 ## `doctrine build`
 
-Generates static HTML, client assets, `404.html`, and the Pagefind search index.
+Builds the client and SSR bundles, prerenders every navigation route, writes `404.html`, and creates
+the Pagefind index.
 
-| Argument or option | Default                       | Description                                                     |
-| ------------------ | ----------------------------- | --------------------------------------------------------------- |
-| `[directory]`      | `docs`                        | Directory containing the MDX files.                             |
-| `--site-url`       | config or `http://localhost/` | Final public URL, including any deployment subpath.             |
-| `--out-dir`        | config or `dist`              | Output directory, relative to the project root unless absolute. |
+| Argument or option | Default                       | Meaning                                                     |
+| ------------------ | ----------------------------- | ----------------------------------------------------------- |
+| `[directory]`      | `docs`                        | MDX content directory, relative to the project root.        |
+| `--site-url`       | config or `http://localhost/` | Final HTTP(S) URL, including any deployment pathname.       |
+| `--out-dir`        | config or `dist`              | Output path resolved from the root unless already absolute. |
 
 ```sh
 pnpm exec doctrine build
@@ -43,11 +51,20 @@ pnpm exec doctrine build website \
   --out-dir build
 ```
 
-CLI options override the matching values in `doctrine.config.*`. See
-[Configuration](/configuration/) for the complete config reference.
+CLI values override `siteUrl` and `outDir` from the root config for that invocation. The output must
+remain inside the project root, cannot equal the root, and cannot be inside the MDX directory. The
+client build empties it before writing.
 
-## Help and errors
+On success, Doctrine prints the number of document routes and the resolved output path. The route
+count does not include the shared 404 page.
 
-Run `pnpm exec doctrine --help` to print the command signatures. Unknown commands, unknown options,
-missing values, invalid ports, and missing input directories fail the command with a non-zero exit
-code.
+## Help and failures
+
+```sh
+pnpm exec doctrine --help
+```
+
+The CLI exits non-zero for unknown commands or options, repeated positional directories, missing
+option values, invalid ports, missing input directories, invalid config/navigation, unsafe output,
+compilation failures, or search-index failures. Errors are printed as messages without a custom error
+code contract.

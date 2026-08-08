@@ -1,15 +1,16 @@
 ---
-description: Customize Doctrine themes, layout styles, and built-in MDX components.
+description: Customize Doctrine with CSS variables, stable slots, optional Tailwind, and React MDX components.
 ---
 
 # Customization
 
-Doctrine exposes two customization seams: CSS for appearance and a React component map for MDX.
-Both are optional, and both apply to development, static rendering, and client hydration.
+Doctrine has two extension points: a stylesheet for appearance and a React component map for MDX.
+Both are optional, load in development and production, and are shared by server rendering and browser
+hydration.
 
-## Add a theme stylesheet
+## Add a stylesheet
 
-Set `styles` to a CSS file relative to the project root:
+Set `styles` to an existing file resolved from the project root:
 
 ```ts
 import { defineConfig } from '@amamo/doctrine'
@@ -19,7 +20,7 @@ export default defineConfig({
 })
 ```
 
-The stylesheet loads after Doctrine's styles. Override only the variables you need:
+Doctrine imports this file after its precompiled runtime CSS. Override only what the site needs:
 
 ```css
 :root {
@@ -49,17 +50,17 @@ The stylesheet loads after Doctrine's styles. Override only the variables you ne
 | `--doctrine-ring`              | Keyboard focus rings                 |
 | `--doctrine-accent`            | Badges, steps, and selected controls |
 | `--doctrine-accent-foreground` | Text on the accent color             |
-| `--doctrine-radius`            | Shared control and surface radius    |
+| `--doctrine-radius`            | Shared surface radius                |
 | `--doctrine-font-sans`         | Site font stack                      |
 | `--doctrine-content-width`     | Maximum article width                |
 | `--doctrine-sidebar-width`     | Desktop navigation width             |
 | `--doctrine-header-height`     | Sticky header height                 |
 
-Light values belong in `:root`; dark overrides belong in `[data-theme="dark"]`.
+Put light values in `:root` and dark overrides in `[data-theme='dark']`.
 
-## Style layout regions
+## Target stable layout slots
 
-Stable `data-slot` attributes let a theme target the shell without depending on Tailwind classes:
+Use `data-slot` instead of depending on generated utility classes:
 
 ```css
 [data-slot='header'] {
@@ -75,31 +76,75 @@ Stable `data-slot` attributes let a theme target the shell without depending on 
 }
 ```
 
-The shell exposes `header`, `header-inner`, `brand`, `navigation`, `sidebar`, `main`, and `content`.
-Built-in MDX components expose their component name in kebab case.
+The shell exposes `header`, `header-inner`, `brand`, `navigation`, `sidebar`, `main`, `content`, and
+`footer`. Built-ins expose `badge`, `callout`, `card`, `card-grid`, `code-block`,
+`code-block-header`, `code-block-filename`, `code-block-language`, `code-block-copy`, `step`,
+`steps`, `table-scroll`, `tabs`, `tab-list`, `tab`, and `tab-panel`.
 
 ## Use Tailwind CSS
 
-Doctrine ships its own interface as precompiled CSS, so consumers do not need Tailwind. To use
-Tailwind utilities in MDX or custom components, install it in the documentation project:
+Doctrine's own interface is already compiled, so consumers do not need Tailwind. To use utilities
+inside MDX or custom components, declare Tailwind in the documentation project's root manifest:
 
 ```sh
 pnpm add -D tailwindcss
 ```
 
-Import Tailwind from the stylesheet configured with `styles` and choose the files it should scan:
+Then opt the configured stylesheet into Tailwind and state what it should scan:
 
 ```css
 @import 'tailwindcss' source(none);
 @source './';
 ```
 
-Doctrine detects the declared dependency and enables Tailwind for that project. Without it,
-`styles` remains ordinary CSS and Doctrine does not run Tailwind during development or builds.
+Doctrine checks the root `package.json` dependencies, dev dependencies, and optional dependencies.
+When one declares `tailwindcss`, it enables `@tailwindcss/vite` in both commands. Without that
+declaration, `styles` remains ordinary CSS.
 
 ## Built-in MDX components
 
-Built-ins require no imports or registration.
+Importing is unnecessary inside MDX. Values and prop types are also public from
+`@amamo/doctrine/components` for custom wrappers.
+
+| Component          | Main props                                                                    |
+| ------------------ | ----------------------------------------------------------------------------- |
+| `Badge`            | `variant="default" \| "outline"` and span attributes                          |
+| `Callout`          | `variant="note" \| "tip" \| "warning" \| "danger"`, `title`, aside attributes |
+| `Card`, `CardGrid` | optional card `title` and normal div attributes                               |
+| `CodeBlock`        | optional `filename`/`language`; wrap a fenced code block                      |
+| `Step`, `Steps`    | optional step `title` and list attributes                                     |
+| `Tab`, `Tabs`      | tab `label`/`value`; tabs `defaultValue`/`className`                          |
+
+`Card` is a presentation container, not a link. Put a Markdown link inside when the card should lead
+somewhere.
+
+### Code blocks
+
+Fenced code blocks use One Light and Andromeeda for light and dark mode. They show the detected
+language and include a copy action automatically. Wrap a fence with `CodeBlock` when it also needs a
+filename:
+
+````mdx
+<CodeBlock filename="doctrine.config.ts">
+
+```ts
+export default {
+  title: 'Documentation',
+}
+```
+
+</CodeBlock>
+````
+
+<CodeBlock filename="doctrine.config.ts">
+
+```ts
+export default {
+  title: 'Documentation',
+}
+```
+
+</CodeBlock>
 
 ### Callouts and badges
 
@@ -111,41 +156,31 @@ Built-ins require no imports or registration.
 <Badge>Stable</Badge> <Badge variant="outline">Preview</Badge>
 ```
 
-`Callout` supports `note`, `tip`, `warning`, and `danger` variants.
-
 <Callout variant="tip" title="Ready to deploy">
   Run the production build before uploading `dist`.
 </Callout>
 
 <Badge>Stable</Badge> <Badge variant="outline">Preview</Badge>
 
-### Cards
+### Cards and steps
 
 ```mdx
 <CardGrid>
-  <Card title="Installation">
-    Start with the [getting-started tutorial](/guide/getting-started/).
-  </Card>
-  <Card title="Deployment">Copy the [GitHub Pages workflow](/deployment/).</Card>
-</CardGrid>
-```
-
-<CardGrid>
-  <Card title="Installation">
-    Start with the [getting-started tutorial](/guide/getting-started/).
-  </Card>
+  <Card title="Installation">Start with [Getting started](/guide/getting-started/).</Card>
   <Card title="Deployment">Copy the [GitHub Pages workflow](/deployment/).</Card>
 </CardGrid>
 
-### Steps
-
-```mdx
 <Steps>
   <Step title="Write">Create an MDX file.</Step>
   <Step title="Preview">Run the development server.</Step>
   <Step title="Build">Generate static files.</Step>
 </Steps>
 ```
+
+<CardGrid>
+  <Card title="Installation">Start with [Getting started](/guide/getting-started/).</Card>
+  <Card title="Deployment">Copy the [GitHub Pages workflow](/deployment/).</Card>
+</CardGrid>
 
 <Steps>
   <Step title="Write">Create an MDX file.</Step>
@@ -191,10 +226,10 @@ Built-ins require no imports or registration.
   </Tab>
 </Tabs>
 
-## Override a built-in component
+## Register or override components
 
-Custom components are merged after built-ins, so the same name replaces the default. Public
-components can be imported and wrapped instead of reimplemented:
+Set `components` to a module with a default component map. Custom entries merge after the built-ins,
+so equal names replace them:
 
 ```tsx
 import type { IDoctrineComponents } from '@amamo/doctrine'
@@ -208,16 +243,15 @@ function BrandedCallout(props: ComponentProps<typeof Callout>) {
 export default { Callout: BrandedCallout } satisfies IDoctrineComponents
 ```
 
-Register the module in `doctrine.config.ts`:
-
 ```ts
 export default defineConfig({
   components: './docs/components.tsx',
 })
 ```
 
-Define `.branded-callout` in the configured stylesheet, or use a Tailwind utility after enabling
-Tailwind as described above.
+Define `.branded-callout` in `styles`, or use utilities after enabling Tailwind. Registering `a`
+replaces Doctrine's base-aware link component, so the replacement must preserve any desired subpath
+and external-link behavior.
 
-Custom components are bundled for Node.js rendering and the browser. Avoid browser globals during
-module initialization or rendering; access them from effects or event handlers.
+Custom modules are executable in both Node.js SSR and the browser. Keep module initialization and
+rendering free of browser-only globals; use effects or event handlers for browser access.

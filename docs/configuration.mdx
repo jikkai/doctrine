@@ -1,11 +1,21 @@
 ---
-description: Configure metadata, output, locales, navigation, and custom MDX components.
+description: Configure site metadata, URLs, output, locales, navigation, styles, and custom MDX components.
 ---
 
 # Configuration
 
-Doctrine works without a config file. Add `doctrine.config.ts` at the project root when the defaults
-are not enough:
+Doctrine works without a root config file. When present, it loads the first matching file in this
+order from the CLI working directory:
+
+```text
+doctrine.config.ts
+doctrine.config.mts
+doctrine.config.js
+doctrine.config.mjs
+```
+
+These are executable Vite config modules. `defineConfig` is a TypeScript identity helper; it does not
+sandbox or serialize the module.
 
 ```ts
 import { defineConfig } from '@amamo/doctrine'
@@ -37,34 +47,51 @@ export default defineConfig({
 })
 ```
 
-Doctrine also recognizes `doctrine.config.mts`, `doctrine.config.js`, and
-`doctrine.config.mjs`.
-
 ## Site options
 
-| Option        | Type                               | Default                           | Purpose                                                |
-| ------------- | ---------------------------------- | --------------------------------- | ------------------------------------------------------ |
-| `title`       | `string \| Record<string, string>` | `"Documentation"`                 | Site title and title suffix.                           |
-| `description` | `string \| Record<string, string>` | `"Documentation built from MDX."` | Default page description.                              |
-| `siteUrl`     | `string`                           | `"http://localhost/"`             | Absolute public URL and deployment base.               |
-| `githubUrl`   | `string`                           | none                              | GitHub link shown as an icon in the header.            |
-| `copyright`   | `string \| Record<string, string>` | none                              | Localizable copyright text shown in the footer.        |
-| `iconLibrary` | `string`                           | none                              | Package providing named navigation icon exports.       |
-| `outDir`      | `string`                           | `"dist"`                          | Static output directory, relative to the project root. |
-| `locales`     | `IDoctrineLocaleConfig`            | English only                      | Locale routes and labels.                              |
-| `components`  | `string`                           | none                              | Path to the custom MDX component module.               |
-| `styles`      | `string`                           | none                              | Path to a custom theme or stylesheet.                  |
+| Option        | Type                               | Default                            | Purpose                                                  |
+| ------------- | ---------------------------------- | ---------------------------------- | -------------------------------------------------------- |
+| `title`       | `string \| Record<string, string>` | `"Documentation"`                  | Brand text and page-title suffix.                        |
+| `description` | `string \| Record<string, string>` | `"Documentation built from MDX."`  | Fallback meta description.                               |
+| `siteUrl`     | `string`                           | `"http://localhost/"`              | Absolute public URL and Vite deployment base.            |
+| `githubUrl`   | `string`                           | none                               | External link shown as the GitHub header icon.           |
+| `copyright`   | `string \| Record<string, string>` | none                               | Localizable footer text.                                 |
+| `iconLibrary` | `string`                           | none                               | Module with named React icon exports used by navigation. |
+| `outDir`      | `string`                           | `"dist"`                           | Static output directory.                                 |
+| `locales`     | `IDoctrineLocaleConfig`            | `{ default: "en", names: ["en"] }` | Locale routes, navigation sets, and switch labels.       |
+| `components`  | `string`                           | none                               | Custom MDX component module.                             |
+| `styles`      | `string`                           | none                               | Custom stylesheet loaded after Doctrine CSS.             |
 
-`--site-url` and `--out-dir` override their config values for one build.
+`title`, `description`, and `copyright` accept either one value for every locale or a locale map.
+Maps fall back from the current locale to `locales.default`, then to their first value.
 
-`outDir` must stay inside the project root and outside the MDX content directory. A build clears the
-output directory before writing files.
+`siteUrl` must use HTTP or HTTPS and cannot contain a query or fragment. Doctrine normalizes its
+pathname with one leading and one trailing slash; that pathname becomes `base`. `githubUrl` also
+requires HTTP or HTTPS.
+
+## Paths, precedence, and generated work
+
+The CLI working directory is the project root. Relative paths are resolved from it; absolute paths
+are accepted where they still satisfy the build constraints.
+
+- The positional content directory defaults to `docs`, must exist, and is canonicalized.
+- `components` and `styles` must resolve to existing files and are canonicalized.
+- `outDir` is resolved from the root. It must be inside that root, cannot equal the root, and cannot
+  be inside the content directory.
+- `--site-url` and `--out-dir` override the corresponding config values for a build.
+
+The client build empties `outDir` before writing. Never point it at source or another valuable
+directory. Doctrine also creates `.amamo-mdx/` for the generated content registry and cache records,
+plus `.doctrine/` for temporary build work; keep both out of version control.
 
 ## Directory navigation
 
-Every directory containing MDX has one `meta` navigation file per locale. `meta.ts` belongs to the
-default locale, while translations use names such as `meta.zh-CN.ts`. Its array is the exact sidebar
-order:
+Every directory containing MDX for a locale needs the corresponding TypeScript navigation module:
+
+- `meta.ts` for the default locale
+- `meta.<locale>.ts` for every translated locale present in that directory
+
+`defineDirectory` is also an identity helper. The `items` array is the exact sidebar order:
 
 ```ts
 // docs/meta.ts
@@ -79,7 +106,7 @@ export default defineDirectory({
 })
 ```
 
-A child directory owns its own group title, icon, and children:
+A child directory defines the group title and its direct contents:
 
 ```ts
 // docs/guide/meta.ts
@@ -92,84 +119,91 @@ export default defineDirectory({
 })
 ```
 
-`page` is a direct MDX basename without its extension or locale suffix. `directory` is a direct
-child directory. Every matching page and child directory must appear exactly once. Missing,
-duplicate, and nonexistent references fail the build.
+The root `title` is optional; nested navigation files require a non-empty title. `page` must be a
+direct MDX basename without a slash, extension, or locale suffix. `directory` must be a direct child
+name and cannot be `.` or `..`.
 
-Icons are optional. When any navigation item uses one, set `iconLibrary` to a package whose named
-exports are React icon components. Doctrine generates static named imports for only the configured
-icons.
+Production requires every matching page and child directory exactly once. Duplicate entries,
+duplicate routes, invalid shapes, missing entries, and references that do not exist fail the build.
+Serve mode still validates shapes and duplicates but omits temporarily missing references and ignores
+unlisted new documents until navigation catches up.
 
-MDX does not need frontmatter. An optional string `description` is still accepted as page-specific
-metadata; otherwise the site description is used.
+Icons may appear on a page item or nested directory. Every icon name must use Doctrine's ASCII
+identifier form (`$`, `_`, or a letter first; digits allowed later) and be a named React component
+export from `iconLibrary`. Doctrine statically imports only the names present in navigation; a
+missing export fails bundling. `iconLibrary` is required when at least one icon is configured.
 
-## Localization
+## Routes and locales
 
-`locales.default` must appear in `locales.names`, locale names must be unique, and each name may
-contain letters, digits, and hyphen-separated segments.
+`locales.default` must appear in `locales.names`; names must be unique and consist of alphanumeric
+segments separated by hyphens.
 
 ```ts
 locales: {
-  default: "en",
-  names: ["en", "zh-CN", "ja"],
+  default: 'en',
+  names: ['en', 'zh-CN', 'ja'],
   labels: {
-    en: "English",
-    "zh-CN": "简体中文",
-    ja: "日本語",
+    en: 'English',
+    'zh-CN': '简体中文',
+    ja: '日本語',
   },
 }
 ```
 
-Create translations with filename suffixes:
+Translated MDX uses filename suffixes:
 
 ```text
-docs/guide/install.mdx       → /guide/install/
-docs/guide/install.zh-CN.mdx → /zh-CN/guide/install/
-docs/guide/install.ja.mdx    → /ja/guide/install/
+docs/guide/install.mdx       -> /guide/install/
+docs/guide/install.zh-CN.mdx -> /zh-CN/guide/install/
+docs/guide/install.ja.mdx    -> /ja/guide/install/
 ```
 
-The matching navigation files are `docs/guide/meta.ts`, `docs/guide/meta.zh-CN.ts`, and
-`docs/guide/meta.ja.ts`. The un-suffixed file belongs to the default locale; a suffixed file only
-applies to MDX with the same locale suffix. Navigation never falls back to another locale file.
+The unsuffixed file belongs to the default locale. Navigation never falls back between locale files,
+and the language control appears only when another configured locale has the same slug. Missing
+`locales.labels` entries display the locale code.
 
-The language control appears only when another file has the same slug in a different configured
-locale.
+Built-in interface labels are Chinese for locale names beginning with `zh` and English for every
+other locale. The exact configured locale still controls routes, navigation, metadata, and
+`<html lang>`.
 
-## Custom MDX components
+Both `index.mdx` and `page.mdx` map to their containing directory. Do not create both for the same
+locale in one directory because they produce a duplicate route.
 
-Set `components` to a module path relative to the project root:
+## Frontmatter
 
-```ts
-export default defineConfig({
-  components: './docs/components.tsx',
-})
+Frontmatter is optional. Doctrine configures one public field:
+
+```mdx
+---
+description: A page-specific description used in HTML metadata.
+---
 ```
 
-The module must default-export a component map:
+When present, `description` must be a string. Page titles come from navigation, not frontmatter. MDX
+is executable content; schema validation does not make untrusted documents safe.
+
+## Custom components and styles
+
+`components` points to a module whose default export is a React component map:
 
 ```tsx
 import type { IDoctrineComponents } from '@amamo/doctrine'
 import type { ReactNode } from 'react'
 
-function Callout({ children }: { children: ReactNode }) {
-  return <aside className="project-callout">{children}</aside>
+interface INoticeProps {
+  children: ReactNode
 }
 
-export default { Callout } satisfies IDoctrineComponents
+function Notice({ children }: INoticeProps) {
+  return <aside className="project-notice">{children}</aside>
+}
+
+export default { Notice } satisfies IDoctrineComponents
 ```
 
-Use the registered name directly in MDX:
+The module is bundled into both SSR and the browser. It must render in Node.js; access browser-only
+globals from effects or event handlers, not during module initialization or rendering. Custom names
+override built-ins, including the default `a` link component.
 
-```mdx
-<Callout>Run the migration before deploying.</Callout>
-```
-
-The module is bundled into SSR and the browser, so components must render in Node.js during the
-build. Access browser-only globals from effects or event handlers, not while the module loads or the
-component renders. Style `project-callout` in the configured stylesheet. If the project installs
-Tailwind, its utility classes work too; see [Customization](/customization/#use-tailwind-css).
-
-Custom entries override built-in MDX element mappings with the same name. For example, registering
-`a` replaces Doctrine's default link renderer.
-
-See [Customization](/customization/) for theme variables, built-in components, and wrapper examples.
+Use `styles` for component CSS and theme variables. If the root `package.json` declares
+`tailwindcss`, Doctrine also enables the Tailwind Vite plugin. See [Customization](/customization/).

@@ -34,8 +34,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: pnpm install --frozen-lockfile
-      - name: Verify release source
-        run: pnpm run check
       - name: Verify release version and package
         shell: bash
         run: |

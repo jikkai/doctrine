@@ -1,69 +1,102 @@
 ---
-description: 了解 Doctrine 的开发、构建、搜索、多语言和主题行为。
+description: 了解 Doctrine 的开发服务器、静态构建、导航、搜索、多语言和信任边界。
 ---
 
-# 功能说明
+# 功能与运行时行为
 
-Doctrine 把内容编译器和完整的文档运行时组合在一起。开发、静态渲染和客户端 hydration 使用同一套路由与组件。
+Doctrine 在开发 SSR、生产预渲染和浏览器 hydration 中使用同一套路由模型与 React 外壳。两个
+命令的生命周期不同，但渲染的是同一种页面模型。
 
 <Badge>MDX 优先</Badge>
 
-## Vite 开发服务器
+## 开发服务器
 
-`doctrine dev` 启动一个输出服务端渲染 HTML 的 Vite 服务器。它会监听 MDX 目录，在文件新增或删除时更新内容路由，并在内容变化后重新生成开发搜索索引。
+`doctrine dev` 会创建自定义 Vite 服务器。每次收到文档请求时，它加载当前 server entry、查找
+归一化路由、import MDX 模块、渲染 HTML，再交给 Vite 转换后返回。
 
-开发服务器和生产构建使用相同的应用外壳与路由模型，因此导航、多语言链接、主题和自定义组件的行为保持一致。
+Watcher 处理两类相关源码：
+
+- MDX 的新增、修改与删除会更新 `@amamo/mdx` 记录。
+- `meta.ts` 和 `meta.<locale>.ts` 变化会让导航与图标 virtual module 失效，并触发 full reload。
+
+Serve 模式允许相关文件依次保存时出现短暂导航不一致。新页面只有在最近的导航文件引用后才会
+进入路由列表；生产构建则执行严格校验。
 
 ## 静态网站生成
 
-`doctrine build` 会生成客户端 bundle 和 SSR bundle，把每一个文档路由渲染成 HTML，补充静态 `404.html`，并移除仅用于构建的元数据。最终产物可以部署到任意静态托管平台。
+`doctrine build` 会执行完整流水线：
 
-每个页面都包含：
+1. 校验输出安全性、配置、locale 和导航。
+2. 用 Vite 构建浏览器与 SSR environment。
+3. Import SSR entry 并列出文档路由。
+4. 预渲染每条路由和共享的 `404.html`。
+5. 移除 Vite 私有 manifest。
+6. 根据最终输出目录生成 Pagefind 索引。
 
-- 对应 locale 的 `<html lang>`
-- title 和 description 元数据
-- canonical URL
-- 语言 alternate 链接；存在默认语言页面时还会生成 `x-default`
-- 公共客户端脚本和样式资源
+每篇文档页面都包含 `<html lang>`、title、description、canonical URL、匹配的语言 alternate 和
+共享资源。存在默认 locale 翻译时，Doctrine 还会输出 `x-default` alternate。
 
-## MDX 内容与路由
+## 路由与导航
 
-Doctrine 使用 `@amamo/mdx` 编译内容。内容目录下的文件路径会成为路由 slug：
+内容路径会成为路由 slug：
 
 ```text
-docs/index.mdx                  → /
-docs/reference/config.mdx       → /reference/config/
-docs/reference/config.zh-CN.mdx → /zh-CN/reference/config/
+docs/index.mdx                  -> /
+docs/guide/page.mdx             -> /guide/
+docs/reference/config.mdx       -> /reference/config/
+docs/reference/config.zh-CN.mdx -> /zh-CN/reference/config/
 ```
 
-导航元数据不来自 MDX frontmatter。每个目录用 `meta.ts` 配置默认 locale，并可用 `meta.<locale>.ts` 添加其他语言。数组直接定义顺序、文案、图标、页面和直属子目录。
+`index.mdx` 和 `page.mdx` 都代表所在目录，因此同一目录、同一 locale 不能同时使用两者。其他
+basename 会变成带结尾斜杠的路由。
 
-以 `/` 开头的站内链接会自动带上部署 base path；外部链接会在新标签页中打开。
+导航只来自就近元数据。每个条目只能命名直属页面或直属子目录；数组定义准确顺序、页面标题、
+分组标题和可选图标。生产构建会拒绝遗漏、重复或不存在的引用。
 
-## 全文搜索
+Doctrine 默认的 MDX 链接组件会给根相对链接补上部署 base。外部 `https://...` 链接在新标签页
+打开。注册自定义 `a` 组件会替换这套行为。
 
-Doctrine 根据最终静态 HTML 生成 Pagefind 索引，因此自定义 MDX 组件渲染出的内容也可以被搜索。只有在输入查询后，搜索弹窗才会加载 Pagefind，并最多显示八条结果。
+## 搜索
 
-可以用 <kbd>⌘K</kbd> 或 <kbd>Ctrl+K</kbd> 从键盘打开搜索。
+生产搜索会索引渲染后的 HTML，包括自定义 MDX 组件输出的文字。浏览器只在用户输入查询后加载
+Pagefind，短暂等待后最多显示八条结果。<kbd>⌘K</kbd> 和 <kbd>Ctrl+K</kbd> 都能打开搜索。
+
+开发环境不会写永久索引。第一次搜索请求根据当前 SSR 结果在内存中构建 Pagefind 文件。内容或
+导航变化会让缓存失效，下一次搜索请求再重建。
 
 ## 多语言
 
-只需配置一次 locale，再通过文件名后缀创建翻译。默认语言保持无前缀路由，其他语言会添加 locale 前缀。
+默认 locale 没有路由前缀，其他 locale 使用编码后的前缀。只有另一个文档具有相同 slug 时，
+语言按钮才会显示。
 
-只有当前页面存在其他翻译时，语言按钮才会显示。特定语言的导航文件只作用于相同后缀的 MDX，不会回退到其他 locale。网站 title 和 description 可以是普通字符串，也可以是 locale 映射。
+导航文件不会跨 locale fallback。可本地化的网站文字按“当前 locale → 默认 locale → 第一个
+配置值”回退；语言切换标签缺失时直接显示 locale code。
 
-## 亮色与暗色主题
+Doctrine 内置界面文案只区分两组：名称以 `zh` 开头的 locale 使用中文，其余使用英文。内容、
+导航、网站元数据、路由前缀和 `<html lang>` 仍使用完整的配置 locale。
 
-主题按钮在亮色和暗色之间切换，并把选择写入 `localStorage`。样式加载前，一段内联脚本会应用已保存的主题或系统偏好，避免首屏出现错误主题闪烁。
+## 主题与自定义
 
-## 自定义 React 组件
+主题控件把 `light` 或 `dark` 写入 `localStorage`。Head 中的内联脚本会在页面 body 渲染前应用
+已保存选择；首次访问则使用操作系统偏好。
 
-Doctrine 内置 Callout、Badge、Card、Steps 和 Tabs。在 `doctrine.config.ts` 中用 `components` 指向一个 TSX 模块，即可添加组件或替换内置实现。合并后的组件映射同时用于静态渲染和 hydration。自定义组件默认使用普通 CSS；项目自行安装 Tailwind 后，也可以在配置的样式表中启用 utility class。
+Doctrine 提供预编译界面 CSS，以及 `Badge`、`Callout`、`Card`、`CardGrid`、`Step`、`Steps`、
+`Tab` 和 `Tabs`。配置的 CSS 在默认样式之后加载；自定义组件映射在内置映射之后合并，并由 SSR
+和浏览器 hydration 共用。
 
-示例和公开组件导出见[自定义](/zh-CN/customization/)。
+Tailwind 是可选项。只有文档项目根 `package.json` 在 dependencies、dev dependencies 或
+optional dependencies 中声明 `tailwindcss` 时，Doctrine 才启用对应 Vite 插件。
 
 ## 部署子路径
 
-`siteUrl` 的 pathname 会成为公开 base。Doctrine 会把它应用到 Vite 资源、站内链接、多语言路由、Pagefind 结果、canonical URL 和 404 页面，但不会嵌套输出目录。
+`siteUrl` 的 pathname 会成为 Vite 公开 base。Doctrine 把它应用到资源、默认 MDX 链接、语言
+路由、Pagefind 结果、canonical URL 和 404 页资源，但不会嵌套输出目录。
 
-可直接使用 [GitHub Pages](/zh-CN/deployment/) 中的工作流。
+## 信任边界
+
+静态产物不会让源码失去执行能力。MDX 可以包含 ESM 和 JavaScript 表达式；
+`doctrine.config.*`、导航模块和自定义组件也都是可执行模块。它们可能在加载配置、打包、SSR 或
+hydration 时运行。只能构建你愿意授予构建机器与部署网站权限的可信源码。
+
+内置 frontmatter schema 只校验可选字符串 `description`，它不是沙箱。编译器的详细边界见
+[`@amamo/mdx` 安全模型](https://jikkai.github.io/mdx/security/)。

@@ -1,91 +1,114 @@
 ---
-description: Understand Doctrine's development, build, search, localization, and theme behavior.
+description: Understand Doctrine's development server, static build, navigation, search, localization, and trust boundaries.
 ---
 
-# Features
+# Features and runtime behavior
 
-Doctrine combines a content compiler with a complete documentation runtime. The same routes and
-components are used during development, static rendering, and client hydration.
+Doctrine uses one route model and React shell for development SSR, production prerendering, and
+browser hydration. The commands differ in lifecycle, not in the page model they render.
 
 <Badge>MDX first</Badge>
 
-## Vite development server
+## Development server
 
-`doctrine dev` starts a Vite server with server-rendered HTML. It watches the MDX directory, updates
-content routes when files are added or removed, and rebuilds the development search index after
-content changes.
+`doctrine dev` creates a custom Vite server. For each document request it loads the current server
+entry, finds the normalized route, imports the MDX module, renders HTML, and lets Vite transform the
+result before responding.
 
-The development server uses the same application shell and route model as the production build, so
-navigation, locale links, themes, and custom components behave consistently.
+The watcher handles two related sources:
+
+- MDX add, change, and unlink events update `@amamo/mdx` records.
+- `meta.ts` and `meta.<locale>.ts` changes invalidate navigation and icon virtual modules and trigger
+  a full reload.
+
+Serve mode tolerates transient navigation mismatches while related files are saved. A newly added
+page does not enter the route list until its nearest navigation file references it; production is
+strict.
 
 ## Static site generation
 
-`doctrine build` creates a client bundle and an SSR bundle, renders every document route to HTML,
-adds a static `404.html`, and removes build-only metadata. The result can be served from any static
-host.
+`doctrine build` runs the complete pipeline:
 
-Each page includes:
+1. Validate output safety, config, locales, and navigation.
+2. Build browser and SSR environments with Vite.
+3. Import the SSR entry and enumerate document routes.
+4. Prerender each route plus a shared `404.html`.
+5. Remove Vite's private manifest.
+6. Build a Pagefind index from the final output directory.
 
-- its localized `<html lang>` value
-- title and description metadata
-- a canonical URL
-- alternate locale links, including `x-default` when a default-locale page exists
-- the shared client and stylesheet assets
+Every document page includes its `<html lang>`, title, description, canonical URL, matching locale
+alternates, and shared assets. When a default-locale translation exists, Doctrine also emits an
+`x-default` alternate.
 
-## MDX content and routes
+## Routes and navigation
 
-Doctrine uses `@amamo/mdx` to compile content. The path below the content directory becomes the
-route slug:
+The content path becomes the route slug:
 
 ```text
-docs/index.mdx                 → /
-docs/reference/config.mdx      → /reference/config/
-docs/reference/config.zh-CN.mdx → /zh-CN/reference/config/
+docs/index.mdx                  -> /
+docs/guide/page.mdx             -> /guide/
+docs/reference/config.mdx       -> /reference/config/
+docs/reference/config.zh-CN.mdx -> /zh-CN/reference/config/
 ```
 
-Navigation metadata does not come from MDX frontmatter. Each directory has a `meta.ts` for the
-default locale and optional `meta.<locale>.ts` translations. Their arrays define the exact order,
-titles, icons, pages, and child directories.
+Both `index.mdx` and `page.mdx` mean the containing directory, so do not use both for the same locale
+in one directory. Other basenames become a trailing-slash route.
 
-Root-relative links such as `/reference/config/` automatically receive the deployment base path.
-External links open in a new tab.
+Navigation comes only from colocated metadata. Each item names either a direct page or a direct child
+directory; arrays define exact order, page titles, group titles, and optional icons. A production
+build rejects missing, duplicate, and nonexistent references.
 
-## Full-text search
+Doctrine's default MDX link component adds the deployment base to root-relative links. External
+`https://...` links open in a new tab. Registering a custom `a` component replaces this behavior.
 
-Doctrine builds a Pagefind index from the final static HTML. This means search sees the rendered
-content, including output from custom MDX components. The search dialog loads Pagefind only after a
-query is entered and returns up to eight results.
+## Search
 
-Use <kbd>⌘K</kbd> or <kbd>Ctrl+K</kbd> to open search from the keyboard.
+Production search indexes rendered HTML, including text emitted by custom MDX components. The browser
+loads Pagefind after the user enters a query, waits briefly for more input, and shows at most eight
+results. <kbd>⌘K</kbd> and <kbd>Ctrl+K</kbd> open the dialog.
+
+Development does not write a permanent index. The first search request builds Pagefind files in
+memory from current SSR output. Content or navigation changes invalidate that cache; the next search
+request rebuilds it.
 
 ## Localization
 
-Configure locales once and create translated files with a locale suffix. The default locale stays
-at the unprefixed route; other locales receive a prefix.
+The default locale has no route prefix. Other configured locales use an encoded prefix, and the
+language control appears only when another document has the same slug.
 
-The language control appears only when the current page has another translation. A locale-specific
-navigation file applies only to MDX with the same suffix and never falls back to another locale.
-Site title and description can be plain strings or locale maps.
+Navigation never falls back between locale files. Localized site text falls back from the current
+locale to the default locale, then to the first configured value. Locale switch labels fall back to
+the locale code.
 
-## Light and dark themes
+Doctrine's built-in interface labels are Chinese for locale names beginning with `zh` and English
+for every other locale. Content, navigation, site metadata, route prefixes, and `<html lang>` still
+use the exact configured locale.
 
-The theme button switches between light and dark modes and stores the selection in
-`localStorage`. Before the stylesheet loads, a small inline script applies the saved theme or the
-operating-system preference, preventing an initial wrong-color flash.
+## Themes and customization
 
-## Custom React components
+The theme control stores `light` or `dark` in `localStorage`. An inline head script applies the saved
+choice—or the operating-system preference on first visit—before the document body renders.
 
-Doctrine includes callouts, badges, cards, steps, and tabs. Set `components` to a TSX module in
-`doctrine.config.ts` to add more components or replace a built-in. The merged component map is used
-by both static rendering and hydration. Custom components use ordinary CSS by default; projects
-that install Tailwind can opt into utility classes from their configured stylesheet.
+Doctrine ships precompiled interface CSS and built-in `Badge`, `Callout`, `Card`, `CardGrid`, `Step`,
+`Steps`, `Tab`, and `Tabs` components. A configured CSS file loads after the defaults. A custom
+component map is merged after built-ins and is shared by SSR and browser hydration.
 
-See [Customization](/customization/) for examples and public component exports.
+Tailwind is optional. Doctrine enables its Vite plugin only when the documentation project's root
+`package.json` declares `tailwindcss` in dependencies, dev dependencies, or optional dependencies.
 
 ## Deployment subpaths
 
-The pathname of `siteUrl` becomes the public base. Doctrine applies it to Vite assets, internal
-links, locale routes, Pagefind results, canonical URLs, and the 404 page without nesting the output
-directory.
+The pathname of `siteUrl` becomes Vite's public base. Doctrine applies it to assets, default MDX
+links, locale routes, Pagefind results, canonical URLs, and rendered 404 assets without nesting the
+output directory.
 
-See [GitHub Pages](/deployment/) for a ready-to-use workflow.
+## Trust boundary
+
+Static output does not make source code inert. MDX may contain ESM and JavaScript expressions;
+`doctrine.config.*`, navigation modules, and custom components are executable modules. They can run
+during config loading, bundling, SSR, or hydration. Build only sources you trust with the privileges
+of the build machine and deployed site.
+
+The built-in frontmatter schema validates only an optional string `description`; it is not a sandbox.
+See the [`@amamo/mdx` security model](https://jikkai.github.io/mdx/security/) for the compiler's
+detailed boundaries.

@@ -1,17 +1,28 @@
 ---
-description: Deploy a Doctrine site at a GitHub Pages repository subpath.
+description: Build and deploy a Doctrine site to GitHub Pages with the correct repository base path.
 ---
 
-# GitHub Pages
+# Deploy to GitHub Pages
 
-GitHub Pages project sites are normally served from `https://owner.github.io/repository/`. Doctrine
-supports that repository subpath as long as the build receives the final public URL.
+GitHub Pages project sites normally live at `https://owner.github.io/repository/`. Doctrine supports
+that subpath when the build receives the final public URL.
 
-## 1. Enable GitHub Actions deployment
+## 1. Verify the production build locally
 
-Open the repository's **Settings → Pages** and set **Source** to **GitHub Actions**.
+Use the same public shape before adding CI:
 
-## 2. Add the workflow
+```sh
+pnpm exec doctrine build docs --site-url https://owner.github.io/repository/
+```
+
+Open the generated `dist/index.html` through a static server if you want to exercise navigation and
+search. Do not open it with a `file:` URL; module scripts and Pagefind expect HTTP serving.
+
+## 2. Enable Actions deployment
+
+In the repository, open **Settings → Pages** and set **Source** to **GitHub Actions**.
+
+## 3. Add the workflow
 
 Create `.github/workflows/deploy-docs.yml`:
 
@@ -42,10 +53,10 @@ jobs:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 11.20.0
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - id: pages
@@ -58,37 +69,39 @@ jobs:
         uses: actions/deploy-pages@v5
 ```
 
-Change the branch, package manager version, MDX directory, or output directory if your project uses
-different values.
+The versions match this repository's tested Pages toolchain. Change the branch, package manager,
+content directory, or output directory to match the consuming project. Keep the upload `path` aligned
+with `--out-dir` or `outDir`.
 
 ## Why `base_url` matters
 
-`actions/configure-pages` returns the actual Pages URL, including `/repository/` when required.
-Doctrine derives its public base path from that URL and applies it to:
+`actions/configure-pages` returns the configured Pages URL, including `/repository/` for a project
+site or the custom domain when present. Doctrine normalizes that URL and uses its pathname for:
 
 - CSS and JavaScript assets
-- navigation and locale links
-- search results
-- canonical metadata
-- the generated 404 page
+- default MDX links and navigation
+- locale routes and language switching
+- Pagefind requests and result links
+- canonical and alternate metadata
+- scripts and styles referenced by `404.html`
 
-The artifact still contains `dist/index.html`, not `dist/repository/index.html`. The Pages host adds
-the repository prefix when serving it.
+The artifact still contains `dist/index.html`, not `dist/repository/index.html`. GitHub Pages adds the
+repository prefix while serving the artifact.
 
-## Custom domains
+## Custom domains and other static hosts
 
-The same workflow works with a configured custom domain because `base_url` reflects the Pages
-configuration. For a manual build, pass the final URL yourself:
-
-```sh
-pnpm exec doctrine build docs --site-url https://docs.example.com/
-```
+The same workflow works after Pages is configured with a custom domain because `base_url` reflects
+that setting. For another static host, run the same build with its final HTTP(S) URL and upload the
+contents of the output directory. No production Node.js process is required.
 
 ## Troubleshooting
 
-- If the workflow cannot deploy, confirm that Pages uses **GitHub Actions** as its source and that
-  the workflow has `pages: write` and `id-token: write` permissions.
-- If the HTML loads but assets or links return 404, inspect the build command and make sure
-  `--site-url` includes the full repository path.
-- If the artifact upload cannot find the site, keep `path` aligned with `--out-dir` or the configured
-  `outDir`.
+- **Workflow cannot deploy:** confirm Pages uses GitHub Actions and the job has `pages: write` plus
+  `id-token: write`.
+- **Assets, navigation, or search return 404:** ensure `--site-url` includes the complete repository
+  pathname and ends at the public site root.
+- **Artifact upload finds no files:** align `path` with `--out-dir` or configured `outDir`.
+- **Build rejects `outDir`:** keep it inside the project root, outside the content directory, and do
+  not use the root itself.
+- **Native binding cannot load:** run on a platform supported by `@amamo/mdx` and install dependencies
+  on that target instead of copying `node_modules` from another machine.

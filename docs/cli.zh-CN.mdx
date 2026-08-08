@@ -1,40 +1,46 @@
 ---
-description: 使用 Doctrine 开发服务器和静态构建命令。
+description: 使用 Doctrine 的 Vite 开发服务器和静态生产构建。
 ---
 
 # CLI 参考
 
-Doctrine 提供两个命令。MDX 目录可以省略，默认值是 `docs`。
+`doctrine` binary 提供两个命令。它把当前工作目录当作项目 root，从这里加载
+`doctrine.config.*`，并解析相对内容目录。
 
 ```sh
 pnpm exec doctrine dev [directory] [--host localhost] [--port 5173]
 pnpm exec doctrine build [directory] [--site-url https://example.com/docs/] [--out-dir dist]
 ```
 
+`[directory]` 默认是 `docs`，并且必须存在。
+
 ## `doctrine dev`
 
-启动包含 SSR、客户端 hydration 和开发搜索索引的 Vite 开发服务器。
+启动包含 SSR、客户端 hydration、文件监听和内存开发搜索索引的自定义 Vite 服务器。
 
-| 参数或选项    | 默认值      | 说明                                    |
-| ------------- | ----------- | --------------------------------------- |
-| `[directory]` | `docs`      | 存放 MDX 文件的目录。                   |
-| `--host`      | `localhost` | 开发服务器监听的网络接口。              |
-| `--port`      | `5173`      | 开发服务器端口，范围为 `0` 到 `65535`。 |
+| 参数或选项    | 默认值      | 含义                                          |
+| ------------- | ----------- | --------------------------------------------- |
+| `[directory]` | `docs`      | 相对项目 root 的 MDX 内容目录。               |
+| `--host`      | `localhost` | 传给 Vite 的监听接口。                        |
+| `--port`      | `5173`      | `0` 到 `65535` 的整数端口；`0` 表示动态分配。 |
 
 ```sh
 pnpm exec doctrine dev
 pnpm exec doctrine dev website --host 0.0.0.0 --port 4173
 ```
 
+命令会持续运行，直到服务器停止。MDX 和导航变化会更新网站；下一次搜索请求才会惰性重建
+Pagefind 开发数据。
+
 ## `doctrine build`
 
-生成静态 HTML、客户端资源、`404.html` 和 Pagefind 搜索索引。
+构建客户端与 SSR bundle、预渲染全部导航路由、写入 `404.html`，再生成 Pagefind 索引。
 
-| 参数或选项    | 默认值                     | 说明                               |
-| ------------- | -------------------------- | ---------------------------------- |
-| `[directory]` | `docs`                     | 存放 MDX 文件的目录。              |
-| `--site-url`  | 配置或 `http://localhost/` | 最终公开网址，需要包含部署子路径。 |
-| `--out-dir`   | 配置或 `dist`              | 输出目录；相对路径基于项目根目录。 |
+| 参数或选项    | 默认值                     | 含义                                             |
+| ------------- | -------------------------- | ------------------------------------------------ |
+| `[directory]` | `docs`                     | 相对项目 root 的 MDX 内容目录。                  |
+| `--site-url`  | 配置或 `http://localhost/` | 最终 HTTP(S) URL，包括可能存在的部署 pathname。  |
+| `--out-dir`   | 配置或 `dist`              | 从 root 解析的输出路径；已是绝对路径时保持不变。 |
 
 ```sh
 pnpm exec doctrine build
@@ -43,8 +49,17 @@ pnpm exec doctrine build website \
   --out-dir build
 ```
 
-CLI 选项会覆盖 `doctrine.config.*` 中的对应配置。完整配置见[配置参考](/zh-CN/configuration/)。
+CLI 值会为本次调用覆盖根配置中的 `siteUrl` 和 `outDir`。输出目录必须位于项目 root 内，不能
+等于 root，也不能位于 MDX 目录内。客户端构建会先清空该目录。
 
-## 帮助与错误
+成功后，Doctrine 会打印文档路由数量与解析后的输出路径。路由数量不包含共享 404 页面。
 
-运行 `pnpm exec doctrine --help` 可以查看命令格式。未知命令、未知选项、缺少选项值、非法端口或不存在的输入目录都会让命令以非零状态码退出。
+## 帮助与失败
+
+```sh
+pnpm exec doctrine --help
+```
+
+未知命令或选项、重复位置目录、缺少选项值、非法端口、内容目录不存在、配置或导航非法、输出
+不安全、编译失败或搜索索引失败都会让 CLI 以非零状态退出。错误只保证打印消息，不提供自定义
+错误码契约。
