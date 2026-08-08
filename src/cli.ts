@@ -26,6 +26,7 @@ async function main(): Promise<void> {
   const root = process.cwd()
   const userConfig = await loadDoctrineConfig(root, command === 'build' ? 'build' : 'serve')
   const config = await normalizeDoctrineConfig(userConfig, {
+    command: command === 'build' ? 'build' : 'serve',
     contentDirectory: options.directory,
     outDir: options.outDir,
     root,

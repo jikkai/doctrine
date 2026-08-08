@@ -1,7 +1,5 @@
 ---
-title: Doctrine
 description: 从一个 MDX 目录生成静态、可搜索的文档网站。
-order: 1
 ---
 
 # 从 MDX 目录发布文档网站
@@ -32,13 +30,15 @@ pnpm exec doctrine dev docs
 
 ## 你需要提供什么
 
-最少只需要一个 frontmatter 中包含 `title` 的 `.mdx` 文件。只有在需要网站元数据、多语言、自定义输出目录或自定义组件时，才需要添加 `doctrine.config.ts`。
+最少只需要一个 `.mdx` 文件和同目录的 `meta.ts` 导航文件。只有在需要网站元数据、多语言、图标、自定义输出目录或自定义组件时，才需要添加 `doctrine.config.ts`。
 
 ```text
 docs/
 ├── index.mdx
+├── meta.ts
 └── guide/
-    └── install.mdx
+    ├── install.mdx
+    └── meta.ts
 ```
 
 文件结构会直接成为路由结构：`docs/index.mdx` 对应 `/`，`docs/guide/install.mdx` 对应 `/guide/install/`。

@@ -38,6 +38,10 @@ test('builds localized static pages and search below a GitHub Pages subpath', as
     const css = await readFile(path.join(outDir, stylesheet), 'utf8')
     assert.match(home, /href="\/doctrine\/assets\//)
     assert.match(home, /href="\/doctrine\/guide\/getting-started\/"/)
+    assert.match(home, /lucide-book-open/)
+    assert.match(home, /<span>Guide<\/span>/)
+    assert.match(home, /<span>Features<\/span>/)
+    assert.ok(home.indexOf('<span>Guide</span>') < home.indexOf('<span>Features</span>'))
     assert.match(home, /href="https:\/\/github\.com\/jikkai\/doctrine"/)
     assert.match(home, /Copyright © 2026 白熱\./)
     assert.match(home, /https:\/\/example\.com\/doctrine\//)
@@ -57,6 +61,7 @@ test('builds localized static pages and search below a GitHub Pages subpath', as
         css.indexOf('--doctrine-ring:oklch(55% 0 0)'),
     )
     assert.match(chinese, /lang="zh-CN"/)
+    assert.match(chinese, /<span>指南<\/span>/)
     assert.match(chinese, /版权所有 © 2026 白熱。/)
     assert.match(notFound, /src="\/doctrine\/assets\//)
     assert.ok(existsSync(path.join(outDir, 'pagefind/pagefind.js')))
@@ -77,9 +82,10 @@ test('includes runtime utilities when built outside the package root', async () 
       'junction',
     )
     await mkdir(path.join(root, 'docs'))
+    await writeFile(path.join(root, 'docs/index.mdx'), '# External consumer\n')
     await writeFile(
-      path.join(root, 'docs/index.mdx'),
-      '---\ntitle: External consumer\n---\n\n# External consumer\n',
+      path.join(root, 'docs/meta.ts'),
+      "export default { items: [{ page: 'index', title: 'External consumer' }] }\n",
     )
     await execFileAsync(
       process.execPath,
@@ -90,6 +96,7 @@ test('includes runtime utilities when built outside the package root', async () 
     )
 
     const home = await readFile(path.join(outDir, 'index.html'), 'utf8')
+    assert.match(home, /data-pagefind-meta="title" content="External consumer"/)
     const stylesheet = home.match(/href="\/(assets\/[^"]+\.css)"/)?.[1]
     assert.ok(stylesheet)
     const css = await readFile(path.join(outDir, stylesheet), 'utf8')

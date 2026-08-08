@@ -1,7 +1,5 @@
 ---
-title: Doctrine
 description: Build a static, searchable documentation site from an MDX directory.
-order: 1
 ---
 
 # Ship documentation from an MDX directory
@@ -36,15 +34,17 @@ pnpm exec doctrine dev docs
 
 ## What you provide
 
-At minimum, create one `.mdx` file with a `title` in its frontmatter. Add
-`doctrine.config.ts` only when you need site metadata, localization, a custom output directory, or
-custom components.
+At minimum, create one `.mdx` file and a colocated `meta.ts` navigation file. Add
+`doctrine.config.ts` only when you need site metadata, localization, icons, a custom output
+directory, or custom components.
 
 ```text
 docs/
 ├── index.mdx
+├── meta.ts
 └── guide/
-    └── install.mdx
+    ├── install.mdx
+    └── meta.ts
 ```
 
 The file tree becomes the route tree: `docs/index.mdx` is `/`, and

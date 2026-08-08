@@ -18,6 +18,13 @@ declare module 'virtual:doctrine/components' {
   export default components
 }
 
+declare module 'virtual:doctrine/icons' {
+  import type { DoctrineIcons } from './runtime/types.js'
+
+  const icons: DoctrineIcons
+  export default icons
+}
+
 declare module 'virtual:doctrine/custom-styles.css' {}
 
 declare module 'virtual:doctrine/styles.css' {}

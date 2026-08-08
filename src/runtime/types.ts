@@ -1,10 +1,11 @@
-import type { ComponentType } from 'react'
+import type { ComponentProps, ComponentType } from 'react'
 
 import type {
   DoctrineLocalizedText,
   IDoctrineComponents,
   IDoctrineLocaleConfig,
 } from '../config.js'
+import type { DoctrineNavigation } from '../navigation.js'
 
 export interface IRuntimeConfig {
   base: string
@@ -13,6 +14,7 @@ export interface IRuntimeConfig {
   dev: boolean
   githubUrl?: string
   locales: IDoctrineLocaleConfig
+  navigation: DoctrineNavigation
   siteUrl: string
   title: DoctrineLocalizedText
 }
@@ -38,11 +40,14 @@ export interface IDocumentRoute {
   description?: string
   document: IGeneratedDocument
   locale: string
-  order: number
   path: string
   slug: string
   title: string
 }
+
+export type DoctrineIconComponent = ComponentType<ComponentProps<'svg'>>
+
+export type DoctrineIcons = Readonly<Record<string, DoctrineIconComponent>>
 
 export interface IPageAssets {
   scripts: string[]

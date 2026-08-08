@@ -5,6 +5,9 @@ import path from 'node:path'
 import type { ElementType } from 'react'
 import { loadConfigFromFile } from 'vite'
 
+import type { DoctrineNavigation } from './navigation.js'
+import { loadDoctrineNavigation } from './navigation.js'
+
 export type DoctrineLocalizedText = string | Readonly<Record<string, string>>
 
 export interface IDoctrineLocaleConfig {
@@ -22,6 +25,7 @@ export interface IDoctrineConfig {
   copyright?: DoctrineLocalizedText
   description?: DoctrineLocalizedText
   githubUrl?: string
+  iconLibrary?: string
   locales?: IDoctrineLocaleConfig
   outDir?: string
   siteUrl?: string
@@ -36,7 +40,10 @@ export interface INormalizedDoctrineConfig {
   copyright?: DoctrineLocalizedText
   description: DoctrineLocalizedText
   githubUrl?: string
+  iconLibrary?: string
   locales: IDoctrineLocaleConfig
+  navigation: DoctrineNavigation
+  navigationIcons: string[]
   outDir: string
   root: string
   siteUrl: string
@@ -45,6 +52,7 @@ export interface INormalizedDoctrineConfig {
 }
 
 export interface INormalizeOptions {
+  command: 'build' | 'serve'
   contentDirectory: string
   outDir?: string
   root: string
@@ -94,6 +102,15 @@ export async function normalizeDoctrineConfig(
     : undefined
   const components = await resolveOptionalFile(root, config.components, 'Components module')
   const styles = await resolveOptionalFile(root, config.styles, 'Stylesheet')
+  const { icons: navigationIcons, navigation } = await loadDoctrineNavigation({
+    command: options.command,
+    contentDirectory,
+    locales,
+    root,
+  })
+  if (navigationIcons.length > 0 && !config.iconLibrary) {
+    throw new Error('iconLibrary is required when navigation icons are configured')
+  }
 
   return {
     base: new URL(siteUrl).pathname,
@@ -102,7 +119,10 @@ export async function normalizeDoctrineConfig(
     copyright: config.copyright,
     description: config.description ?? 'Documentation built from MDX.',
     githubUrl,
+    iconLibrary: config.iconLibrary,
     locales,
+    navigation,
+    navigationIcons,
     outDir: path.resolve(root, options.outDir ?? config.outDir ?? 'dist'),
     root,
     siteUrl,

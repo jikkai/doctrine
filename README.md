@@ -16,14 +16,19 @@ mkdir docs
 Create `docs/index.mdx`:
 
 ```mdx
----
-title: My documentation
-description: Product guides and API notes.
----
-
 # My documentation
 
 The first page is ready.
+```
+
+Create the navigation for the default locale in `docs/meta.ts`:
+
+```ts
+import { defineDirectory } from '@amamo/doctrine'
+
+export default defineDirectory({
+  items: [{ page: 'index', title: 'My documentation' }],
+})
 ```
 
 Start the development server:
@@ -52,6 +57,7 @@ export default defineConfig({
   description: 'Guides for My project.',
   githubUrl: 'https://github.com/acme/my-project',
   copyright: 'Copyright © 2026 Acme.',
+  iconLibrary: 'lucide-react',
   locales: {
     default: 'en',
     names: ['en', 'zh-CN'],
@@ -66,13 +72,18 @@ Locale variants follow the `@amamo/mdx` filename convention:
 
 ```text
 docs/index.mdx
+docs/meta.ts
 docs/index.zh-CN.mdx
+docs/meta.zh-CN.ts
 docs/guide/install.mdx
+docs/guide/meta.ts
 docs/guide/install.zh-CN.mdx
+docs/guide/meta.zh-CN.ts
 ```
 
 The default locale uses `/guide/install/`; the translated page uses
-`/zh-CN/guide/install/`.
+`/zh-CN/guide/install/`. Each locale file owns the titles, icons, and array order for the MDX files
+and child directories beside it.
 
 ## Documentation
 

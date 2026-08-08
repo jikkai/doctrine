@@ -1,7 +1,5 @@
 ---
-title: Getting started
 description: Create, preview, and build a Doctrine site from scratch.
-order: 2
 ---
 
 # Getting started
@@ -22,6 +20,7 @@ Your project now needs only this structure:
 ```text
 my-project/
 ├── docs/
+│   ├── meta.ts
 │   └── index.mdx
 └── package.json
 ```
@@ -31,34 +30,41 @@ my-project/
 Create `docs/index.mdx`:
 
 ```mdx
----
-title: Acme documentation
-description: Learn how to use Acme.
-order: 1
----
-
 # Acme documentation
 
 Choose a guide from the navigation.
 ```
 
-`title` is required. `description` is used for page metadata, and `order` controls the navigation
-order.
+Create `docs/meta.ts`. The array owns the navigation title, icon, and order:
+
+```ts
+import { defineDirectory } from '@amamo/doctrine'
+
+export default defineDirectory({
+  items: [{ page: 'index', title: 'Acme documentation' }, { directory: 'guide' }],
+})
+```
 
 Add another page at `docs/guide/install.mdx`:
 
 ````mdx
----
-title: Install Acme
-order: 2
----
-
 # Install Acme
 
 ```sh
 pnpm add acme
 ```
 ````
+
+Configure that directory beside its MDX in `docs/guide/meta.ts`:
+
+```ts
+import { defineDirectory } from '@amamo/doctrine'
+
+export default defineDirectory({
+  title: 'Guide',
+  items: [{ page: 'install', title: 'Install Acme' }],
+})
+```
 
 That file is available at `/guide/install/`.
 
@@ -87,11 +93,12 @@ import { defineConfig } from '@amamo/doctrine'
 export default defineConfig({
   title: 'Acme documentation',
   description: 'Product guides and API notes for Acme.',
+  iconLibrary: 'lucide-react',
 })
 ```
 
-The config file is optional. Without it, Doctrine uses `Documentation` as the site title and `en`
-as the only locale.
+The root config is optional unless the navigation uses icons or the site needs other options.
+Without it, Doctrine uses `Documentation` as the site title and `en` as the only locale.
 
 ## 5. Build static files
 

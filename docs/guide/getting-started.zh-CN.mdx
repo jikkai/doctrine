@@ -1,7 +1,5 @@
 ---
-title: 入门教程
 description: 从零创建、预览并构建一个 Doctrine 网站。
-order: 2
 ---
 
 # 入门教程
@@ -22,6 +20,7 @@ mkdir docs
 ```text
 my-project/
 ├── docs/
+│   ├── meta.ts
 │   └── index.mdx
 └── package.json
 ```
@@ -31,33 +30,41 @@ my-project/
 创建 `docs/index.mdx`：
 
 ```mdx
----
-title: Acme 文档
-description: 了解如何使用 Acme。
-order: 1
----
-
 # Acme 文档
 
 从导航中选择一篇指南。
 ```
 
-`title` 必填；`description` 用于页面元数据；`order` 控制导航顺序。
+创建 `docs/meta.ts`，用数组配置导航文案、图标和顺序：
+
+```ts
+import { defineDirectory } from '@amamo/doctrine'
+
+export default defineDirectory({
+  items: [{ page: 'index', title: 'Acme documentation' }, { directory: 'guide' }],
+})
+```
 
 再添加 `docs/guide/install.mdx`：
 
 ````mdx
----
-title: 安装 Acme
-order: 2
----
-
 # 安装 Acme
 
 ```sh
 pnpm add acme
 ```
 ````
+
+在同级的 `docs/guide/meta.ts` 中配置这个目录：
+
+```ts
+import { defineDirectory } from '@amamo/doctrine'
+
+export default defineDirectory({
+  title: 'Guide',
+  items: [{ page: 'install', title: 'Install Acme' }],
+})
+```
 
 该文件对应 `/guide/install/`。
 
@@ -85,10 +92,11 @@ import { defineConfig } from '@amamo/doctrine'
 export default defineConfig({
   title: 'Acme 文档',
   description: 'Acme 的产品指南和 API 说明。',
+  iconLibrary: 'lucide-react',
 })
 ```
 
-配置文件不是必需的。没有配置时，Doctrine 使用 `Documentation` 作为网站标题，并只启用 `en` locale。
+只有导航使用图标或网站需要其他选项时，根配置文件才是必需的。没有配置时，Doctrine 使用 `Documentation` 作为网站标题，并只启用 `en` locale。
 
 ## 5. 构建静态文件
 

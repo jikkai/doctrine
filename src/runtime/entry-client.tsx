@@ -3,6 +3,7 @@ import { hydrateRoot } from 'react-dom/client'
 import components from 'virtual:doctrine/components'
 import { documents } from 'virtual:doctrine/content'
 import config from 'virtual:doctrine/config'
+import icons from 'virtual:doctrine/icons'
 import 'virtual:doctrine/styles.css'
 import 'virtual:doctrine/custom-styles.css'
 
@@ -24,6 +25,7 @@ async function main(): Promise<void> {
       Content={module?.default}
       components={components}
       config={config}
+      icons={icons}
       route={route}
       routes={routes}
     />,

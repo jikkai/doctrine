@@ -1,7 +1,5 @@
 ---
-title: 功能说明
 description: 了解 Doctrine 的开发、构建、搜索、多语言和主题行为。
-order: 3
 ---
 
 # 功能说明
@@ -38,7 +36,7 @@ docs/reference/config.mdx       → /reference/config/
 docs/reference/config.zh-CN.mdx → /zh-CN/reference/config/
 ```
 
-每篇文档都必须包含 `title`。`description` 和数字类型的 `order` 可选。导航先按 locale 排序，再按 `order` 和标题排序。
+导航元数据不来自 MDX frontmatter。每个目录用 `meta.ts` 配置默认 locale，并可用 `meta.<locale>.ts` 添加其他语言。数组直接定义顺序、文案、图标、页面和直属子目录。
 
 以 `/` 开头的站内链接会自动带上部署 base path；外部链接会在新标签页中打开。
 
@@ -52,7 +50,7 @@ Doctrine 根据最终静态 HTML 生成 Pagefind 索引，因此自定义 MDX �
 
 只需配置一次 locale，再通过文件名后缀创建翻译。默认语言保持无前缀路由，其他语言会添加 locale 前缀。
 
-只有当前页面存在其他翻译时，语言按钮才会显示。网站 title 和 description 可以是普通字符串，也可以是 locale 映射。
+只有当前页面存在其他翻译时，语言按钮才会显示。特定语言的导航文件只作用于相同后缀的 MDX，不会回退到其他 locale。网站 title 和 description 可以是普通字符串，也可以是 locale 映射。
 
 ## 亮色与暗色主题
 

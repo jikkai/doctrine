@@ -1,7 +1,5 @@
 ---
-title: Configuration
-description: Configure metadata, output, locales, frontmatter, and custom MDX components.
-order: 5
+description: Configure metadata, output, locales, navigation, and custom MDX components.
 ---
 
 # Configuration
@@ -27,6 +25,7 @@ export default defineConfig({
     en: 'Copyright © 2026 Acme.',
     'zh-CN': '版权所有 © 2026 Acme。',
   },
+  iconLibrary: 'lucide-react',
   outDir: 'dist',
   locales: {
     default: 'en',
@@ -50,6 +49,7 @@ Doctrine also recognizes `doctrine.config.mts`, `doctrine.config.js`, and
 | `siteUrl`     | `string`                           | `"http://localhost/"`             | Absolute public URL and deployment base.               |
 | `githubUrl`   | `string`                           | none                              | GitHub link shown as an icon in the header.            |
 | `copyright`   | `string \| Record<string, string>` | none                              | Localizable copyright text shown in the footer.        |
+| `iconLibrary` | `string`                           | none                              | Package providing named navigation icon exports.       |
 | `outDir`      | `string`                           | `"dist"`                          | Static output directory, relative to the project root. |
 | `locales`     | `IDoctrineLocaleConfig`            | English only                      | Locale routes and labels.                              |
 | `components`  | `string`                           | none                              | Path to the custom MDX component module.               |
@@ -60,23 +60,48 @@ Doctrine also recognizes `doctrine.config.mts`, `doctrine.config.js`, and
 `outDir` must stay inside the project root and outside the MDX content directory. A build clears the
 output directory before writing files.
 
-## Frontmatter
+## Directory navigation
 
-Every MDX file uses this frontmatter shape:
+Every directory containing MDX has one `meta` navigation file per locale. `meta.ts` belongs to the
+default locale, while translations use names such as `meta.zh-CN.ts`. Its array is the exact sidebar
+order:
 
-```mdx
----
-title: Install Acme
-description: Add Acme to an existing project.
-order: 20
----
+```ts
+// docs/meta.ts
+import { defineDirectory } from '@amamo/doctrine'
+
+export default defineDirectory({
+  items: [
+    { page: 'index', title: 'Overview', icon: 'House' },
+    { directory: 'guide' },
+    { page: 'configuration', title: 'Configuration', icon: 'Settings' },
+  ],
+})
 ```
 
-| Field         | Required | Purpose                                                                  |
-| ------------- | -------- | ------------------------------------------------------------------------ |
-| `title`       | yes      | Navigation label, document title, and Pagefind title.                    |
-| `description` | no       | Page-specific meta description. Falls back to the site description.      |
-| `order`       | no       | Numeric navigation order. Documents without it sort after ordered pages. |
+A child directory owns its own group title, icon, and children:
+
+```ts
+// docs/guide/meta.ts
+import { defineDirectory } from '@amamo/doctrine'
+
+export default defineDirectory({
+  title: 'Guide',
+  icon: 'BookOpen',
+  items: [{ page: 'install', title: 'Installation', icon: 'PackagePlus' }],
+})
+```
+
+`page` is a direct MDX basename without its extension or locale suffix. `directory` is a direct
+child directory. Every matching page and child directory must appear exactly once. Missing,
+duplicate, and nonexistent references fail the build.
+
+Icons are optional. When any navigation item uses one, set `iconLibrary` to a package whose named
+exports are React icon components. Doctrine generates static named imports for only the configured
+icons.
+
+MDX does not need frontmatter. An optional string `description` is still accepted as page-specific
+metadata; otherwise the site description is used.
 
 ## Localization
 
@@ -102,6 +127,10 @@ docs/guide/install.mdx       → /guide/install/
 docs/guide/install.zh-CN.mdx → /zh-CN/guide/install/
 docs/guide/install.ja.mdx    → /ja/guide/install/
 ```
+
+The matching navigation files are `docs/guide/meta.ts`, `docs/guide/meta.zh-CN.ts`, and
+`docs/guide/meta.ja.ts`. The un-suffixed file belongs to the default locale; a suffixed file only
+applies to MDX with the same locale suffix. Navigation never falls back to another locale file.
 
 The language control appears only when another file has the same slug in a different configured
 locale.

@@ -1,7 +1,5 @@
 ---
-title: 配置参考
-description: 配置元数据、输出目录、多语言、frontmatter 和自定义 MDX 组件。
-order: 5
+description: 配置元数据、输出目录、多语言、导航和自定义 MDX 组件。
 ---
 
 # 配置参考
@@ -26,6 +24,7 @@ export default defineConfig({
     en: 'Copyright © 2026 Acme.',
     'zh-CN': '版权所有 © 2026 Acme。',
   },
+  iconLibrary: 'lucide-react',
   outDir: 'dist',
   locales: {
     default: 'en',
@@ -48,6 +47,7 @@ Doctrine 也识别 `doctrine.config.mts`、`doctrine.config.js` 和 `doctrine.co
 | `siteUrl`     | `string`                           | `"http://localhost/"`             | 绝对公开 URL 和部署 base。     |
 | `githubUrl`   | `string`                           | 无                                | 顶部 GitHub 图标指向的链接。   |
 | `copyright`   | `string \| Record<string, string>` | 无                                | Footer 中可本地化的版权文案。  |
+| `iconLibrary` | `string`                           | 无                                | 提供导航图标命名导出的包。     |
 | `outDir`      | `string`                           | `"dist"`                          | 相对项目根目录的静态输出目录。 |
 | `locales`     | `IDoctrineLocaleConfig`            | 仅英语                            | 多语言路由和显示名称。         |
 | `components`  | `string`                           | 无                                | 自定义 MDX 组件模块路径。      |
@@ -57,23 +57,41 @@ Doctrine 也识别 `doctrine.config.mts`、`doctrine.config.js` 和 `doctrine.co
 
 `outDir` 必须位于项目根目录内，同时不能位于 MDX 内容目录内。构建写入文件前会清空输出目录。
 
-## Frontmatter
+## 目录导航
 
-每个 MDX 文件使用以下 frontmatter：
+每个包含 MDX 的目录都要为对应 locale 提供一个 `meta` 导航文件。`meta.ts` 属于默认 locale，其他语言使用 `meta.zh-CN.ts` 这样的文件名。数组顺序就是侧栏顺序：
 
-```mdx
----
-title: 安装 Acme
-description: 把 Acme 添加到现有项目。
-order: 20
----
+```ts
+// docs/meta.zh-CN.ts
+import { defineDirectory } from '@amamo/doctrine'
+
+export default defineDirectory({
+  items: [
+    { page: 'index', title: '概览', icon: 'House' },
+    { directory: 'guide' },
+    { page: 'configuration', title: '配置', icon: 'Settings' },
+  ],
+})
 ```
 
-| 字段          | 必填 | 用途                                                  |
-| ------------- | ---- | ----------------------------------------------------- |
-| `title`       | 是   | 导航文字、文档标题和 Pagefind 标题。                  |
-| `description` | 否   | 页面 meta description；未提供时使用网站 description。 |
-| `order`       | 否   | 数字类型的导航顺序；未提供时排在有序文档之后。        |
+子目录自行配置它在父级显示的分组文案、图标和直属内容：
+
+```ts
+// docs/guide/meta.zh-CN.ts
+import { defineDirectory } from '@amamo/doctrine'
+
+export default defineDirectory({
+  title: '指南',
+  icon: 'BookOpen',
+  items: [{ page: 'install', title: '安装', icon: 'PackagePlus' }],
+})
+```
+
+`page` 是不包含扩展名和 locale 后缀的直属 MDX 文件名；`directory` 是直属子目录。对应语言的每个页面和子目录都必须出现且只能出现一次。遗漏、重复和不存在的引用都会让构建失败。
+
+图标是可选的。只要导航使用了图标，就要把 `iconLibrary` 指向一个以命名导出提供 React 图标组件的包。Doctrine 只为实际配置的图标生成静态导入。
+
+MDX 不要求 frontmatter。仍可选填字符串类型的 `description` 作为页面描述；未提供时使用网站 description。
 
 ## 多语言
 
@@ -98,6 +116,8 @@ docs/guide/install.mdx       → /guide/install/
 docs/guide/install.zh-CN.mdx → /zh-CN/guide/install/
 docs/guide/install.ja.mdx    → /ja/guide/install/
 ```
+
+与它们对应的导航文件分别是 `docs/guide/meta.ts`、`docs/guide/meta.zh-CN.ts` 和 `docs/guide/meta.ja.ts`。不带后缀的配置属于默认 locale；带后缀的配置只作用于具有相同 locale 后缀的 MDX，不会回退到其他语言的导航配置。
 
 只有另一个已配置 locale 中存在相同 slug 的文件时，页面才会显示语言按钮。
 

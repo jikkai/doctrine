@@ -16,6 +16,7 @@ export default defineConfig({
     names: ['en', 'zh-CN'],
   },
   githubUrl: 'https://github.com/jikkai/doctrine',
+  iconLibrary: 'lucide-react',
   styles: './docs/theme.css',
   title: '@amamo/doctrine',
 })

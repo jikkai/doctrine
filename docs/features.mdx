@@ -1,7 +1,5 @@
 ---
-title: Features
 description: Understand Doctrine's development, build, search, localization, and theme behavior.
-order: 3
 ---
 
 # Features
@@ -45,8 +43,9 @@ docs/reference/config.mdx      → /reference/config/
 docs/reference/config.zh-CN.mdx → /zh-CN/reference/config/
 ```
 
-Every document requires `title`. `description` and numeric `order` are optional. Navigation is
-sorted by locale, then `order`, then title.
+Navigation metadata does not come from MDX frontmatter. Each directory has a `meta.ts` for the
+default locale and optional `meta.<locale>.ts` translations. Their arrays define the exact order,
+titles, icons, pages, and child directories.
 
 Root-relative links such as `/reference/config/` automatically receive the deployment base path.
 External links open in a new tab.
@@ -64,8 +63,9 @@ Use <kbd>⌘K</kbd> or <kbd>Ctrl+K</kbd> to open search from the keyboard.
 Configure locales once and create translated files with a locale suffix. The default locale stays
 at the unprefixed route; other locales receive a prefix.
 
-The language control appears only when the current page has another translation. Site title and
-description can be plain strings or locale maps.
+The language control appears only when the current page has another translation. A locale-specific
+navigation file applies only to MDX with the same suffix and never falls back to another locale.
+Site title and description can be plain strings or locale maps.
 
 ## Light and dark themes
 

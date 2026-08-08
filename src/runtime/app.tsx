@@ -1,10 +1,11 @@
-import type { ChangeEvent, ComponentProps, ComponentType } from 'react'
+import type { ChangeEvent, ComponentProps, ComponentType, ReactNode } from 'react'
 import { Dialog } from '@base-ui/react/dialog'
 import { Languages, Menu, Moon, Search, Sun, X } from 'lucide-react'
 import { createContext, useContext, useEffect, useState } from 'react'
 
 import type { IDoctrineComponents } from '../config.js'
-import type { IDocumentRoute, IMdxContentProps, IRuntimeConfig } from './types.js'
+import type { DoctrineNavigationNode } from '../navigation.js'
+import type { DoctrineIcons, IDocumentRoute, IMdxContentProps, IRuntimeConfig } from './types.js'
 import { builtinMdxComponents } from './components/mdx.js'
 import { Button } from './components/ui/button.js'
 import { DialogSurface } from './components/ui/dialog-surface.js'
@@ -15,6 +16,7 @@ export interface IAppProps {
   Content?: ComponentType<IMdxContentProps>
   components: IDoctrineComponents
   config: IRuntimeConfig
+  icons: DoctrineIcons
   route?: IDocumentRoute
   routes: readonly IDocumentRoute[]
 }
@@ -104,39 +106,72 @@ function MdxLink({ children, href = '', ...props }: ComponentProps<'a'>) {
 
 function Navigation({
   current,
+  icons,
+  items,
   mobile,
   routes,
 }: {
   current?: IDocumentRoute
+  icons: DoctrineIcons
+  items: readonly DoctrineNavigationNode[]
   mobile?: boolean
   routes: readonly IDocumentRoute[]
 }) {
   const base = useContext(BaseContext)
+
+  function renderItems(nodes: readonly DoctrineNavigationNode[], nested = false): ReactNode {
+    return (
+      <ul className={nested ? 'mt-1 space-y-1 border-l border-border pl-3' : 'space-y-1'}>
+        {nodes.map((item) => {
+          const Icon = item.icon ? icons[item.icon] : undefined
+          if (item.type === 'directory') {
+            return (
+              <li className="pt-3 first:pt-0" key={item.directory}>
+                <div className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-muted-foreground">
+                  {Icon && <Icon aria-hidden="true" className="size-4 shrink-0" />}
+                  <span>{item.title}</span>
+                </div>
+                {renderItems(item.items, true)}
+              </li>
+            )
+          }
+
+          const route = routes.find((candidate) => candidate.document.key === item.documentKey)
+          if (!route) return null
+          return (
+            <li key={item.documentKey}>
+              <a
+                aria-current={current?.path === route.path ? 'page' : undefined}
+                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground aria-[current=page]:bg-muted aria-[current=page]:font-medium aria-[current=page]:text-foreground"
+                href={withBase(base, route.path)}
+              >
+                {Icon && <Icon aria-hidden="true" className="size-4 shrink-0" />}
+                <span>{item.title}</span>
+              </a>
+            </li>
+          )
+        })}
+      </ul>
+    )
+  }
+
   return (
     <nav aria-label="Documentation" className={mobile ? 'p-4' : 'py-6 pr-5'} data-slot="navigation">
-      <ul className="space-y-1">
-        {routes.map((route) => (
-          <li key={route.path}>
-            <a
-              aria-current={current?.path === route.path ? 'page' : undefined}
-              className="block rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground aria-[current=page]:bg-muted aria-[current=page]:font-medium aria-[current=page]:text-foreground"
-              href={withBase(base, route.path)}
-            >
-              {route.title}
-            </a>
-          </li>
-        ))}
-      </ul>
+      {renderItems(items)}
     </nav>
   )
 }
 
 function MobileNavigation({
   current,
+  icons,
+  items,
   labels,
   routes,
 }: {
   current?: IDocumentRoute
+  icons: DoctrineIcons
+  items: readonly DoctrineNavigationNode[]
   labels: ILabels
   routes: readonly IDocumentRoute[]
 }) {
@@ -158,7 +193,7 @@ function MobileNavigation({
             <X aria-hidden="true" className="size-4" />
           </Dialog.Close>
         </div>
-        <Navigation current={current} mobile routes={routes} />
+        <Navigation current={current} icons={icons} items={items} mobile routes={routes} />
       </DialogSurface>
     </Dialog.Root>
   )
@@ -337,10 +372,11 @@ function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILab
   )
 }
 
-export function App({ Content, components, config, route, routes }: IAppProps) {
+export function App({ Content, components, config, icons, route, routes }: IAppProps) {
   const locale = route?.locale ?? config.locales.default
   const labels = labelsFor(locale)
   const localeRoutes = routes.filter((candidate) => candidate.locale === locale)
+  const navigation = config.navigation[locale] ?? []
   const home = localeRoutes.find((candidate) => candidate.slug === '/') ?? localeRoutes[0]
   const siteTitle = localizedText(config.title, locale, config.locales.default)
   const copyright = config.copyright
@@ -363,7 +399,13 @@ export function App({ Content, components, config, route, routes }: IAppProps) {
           className="mx-auto flex h-full max-w-screen-2xl items-center gap-2 px-3 sm:gap-3 sm:px-4 lg:px-8"
           data-slot="header-inner"
         >
-          <MobileNavigation current={route} labels={labels} routes={localeRoutes} />
+          <MobileNavigation
+            current={route}
+            icons={icons}
+            items={navigation}
+            labels={labels}
+            routes={localeRoutes}
+          />
           <a
             className="min-w-0 flex-1 truncate font-semibold tracking-tight"
             data-slot="brand"
@@ -395,7 +437,7 @@ export function App({ Content, components, config, route, routes }: IAppProps) {
           data-pagefind-ignore
           data-slot="sidebar"
         >
-          <Navigation current={route} routes={localeRoutes} />
+          <Navigation current={route} icons={icons} items={navigation} routes={localeRoutes} />
         </aside>
         <div className="min-w-0">
           <main className="px-0 py-10 sm:px-6 lg:px-12 lg:py-14" data-slot="main">

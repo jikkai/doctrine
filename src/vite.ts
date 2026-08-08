@@ -12,11 +12,13 @@ import type { IRuntimeConfig } from './runtime/types.js'
 const CONTENT_ID = 'virtual:doctrine/content'
 const COMPONENTS_ID = 'virtual:doctrine/components'
 const CONFIG_ID = 'virtual:doctrine/config'
+const ICONS_ID = 'virtual:doctrine/icons'
 const CUSTOM_STYLES_ID = 'virtual:doctrine/custom-styles.css'
 const STYLES_ID = 'virtual:doctrine/styles.css'
 const RESOLVED_CONTENT_ID = `\0${CONTENT_ID}`
 const RESOLVED_COMPONENTS_ID = `\0${COMPONENTS_ID}`
 const RESOLVED_CONFIG_ID = `\0${CONFIG_ID}`
+const RESOLVED_ICONS_ID = `\0${ICONS_ID}`
 const RESOLVED_CUSTOM_STYLES_ID = `\0${CUSTOM_STYLES_ID}`
 
 export interface IDoctrinePluginOptions {
@@ -49,6 +51,7 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
     dev: options.dev,
     githubUrl: options.config.githubUrl,
     locales: options.config.locales,
+    navigation: options.config.navigation,
     siteUrl: options.config.siteUrl,
     title: options.config.title,
   }
@@ -62,10 +65,7 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
           type: 'object',
           properties: {
             description: { type: 'string' },
-            order: { type: 'number' },
-            title: { type: 'string' },
           },
-          required: ['title'],
         },
       },
     },
@@ -86,6 +86,7 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
         if (source === CONTENT_ID) return RESOLVED_CONTENT_ID
         if (source === COMPONENTS_ID) return RESOLVED_COMPONENTS_ID
         if (source === CONFIG_ID) return RESOLVED_CONFIG_ID
+        if (source === ICONS_ID) return RESOLVED_ICONS_ID
         if (source === CUSTOM_STYLES_ID) {
           return options.config.styles ?? RESOLVED_CUSTOM_STYLES_ID
         }
@@ -102,6 +103,11 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
             : 'export default {};'
         }
         if (id === RESOLVED_CONFIG_ID) return `export default ${JSON.stringify(runtimeConfig)};`
+        if (id === RESOLVED_ICONS_ID) {
+          if (options.config.navigationIcons.length === 0) return 'export default {};'
+          const names = options.config.navigationIcons.join(', ')
+          return `import { ${names} } from ${JSON.stringify(options.config.iconLibrary)}; export default { ${names} };`
+        }
         if (id === RESOLVED_CUSTOM_STYLES_ID) return ''
         if (id === resolvedStylesId) {
           const source = await readFile(styles, 'utf8')

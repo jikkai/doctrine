@@ -1,3 +1,4 @@
+import type { DoctrineNavigationNode, INormalizedDoctrineNavigationPage } from '../navigation.js'
 import type { IDocumentRoute, IGeneratedDocument, IRuntimeConfig } from './types.js'
 import { documentRoutePath, normalizeRoutePath } from './url.js'
 
@@ -5,28 +6,34 @@ export function createDocumentRoutes(
   documents: readonly IGeneratedDocument[],
   config: IRuntimeConfig,
 ): IDocumentRoute[] {
-  const routes = documents.map((document) => {
-    const locale = document.locale ?? config.locales.default
-    const slug = document.slug ?? '/'
-    const title = document.frontmatter.title
-    const description = document.frontmatter.description
-    const order = document.frontmatter.order
-    if (typeof title !== 'string' || title.length === 0) {
-      throw new Error(`Document ${document.key} must have a title`)
+  const documentsByKey = new Map(documents.map((document) => [document.key, document]))
+  const routes: IDocumentRoute[] = []
+
+  for (const locale of config.locales.names) {
+    for (const page of flattenNavigation(config.navigation[locale] ?? [])) {
+      const document = documentsByKey.get(page.documentKey)
+      if (!document) throw new Error(`Navigation references missing document ${page.documentKey}`)
+      documentsByKey.delete(page.documentKey)
+      const documentLocale = document.locale ?? config.locales.default
+      if (documentLocale !== locale) {
+        throw new Error(`Navigation locale does not match document ${document.key}`)
+      }
+      const slug = document.slug ?? '/'
+      const description = document.frontmatter.description
+      routes.push({
+        description: typeof description === 'string' ? description : undefined,
+        document,
+        locale,
+        path: documentRoutePath(locale, config.locales.default, slug),
+        slug,
+        title: page.title,
+      })
     }
-    if (!config.locales.names.includes(locale)) {
-      throw new Error(`Document ${document.key} uses unconfigured locale ${locale}`)
-    }
-    return {
-      description: typeof description === 'string' ? description : undefined,
-      document,
-      locale,
-      order: typeof order === 'number' && Number.isFinite(order) ? order : Number.MAX_SAFE_INTEGER,
-      path: documentRoutePath(locale, config.locales.default, slug),
-      slug,
-      title,
-    }
-  })
+  }
+
+  if (documentsByKey.size > 0) {
+    throw new Error(`Navigation is missing document ${documentsByKey.keys().next().value}`)
+  }
 
   const paths = new Set<string>()
   for (const route of routes) {
@@ -34,12 +41,13 @@ export function createDocumentRoutes(
     paths.add(route.path)
   }
 
-  return routes.toSorted(
-    (left, right) =>
-      config.locales.names.indexOf(left.locale) - config.locales.names.indexOf(right.locale) ||
-      left.order - right.order ||
-      left.title.localeCompare(right.title, left.locale),
-  )
+  return routes
+}
+
+function flattenNavigation(
+  items: readonly DoctrineNavigationNode[],
+): INormalizedDoctrineNavigationPage[] {
+  return items.flatMap((item) => (item.type === 'page' ? [item] : flattenNavigation(item.items)))
 }
 
 export function findDocumentRoute(
