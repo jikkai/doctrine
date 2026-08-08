@@ -1,7 +1,5 @@
 import type { Readable } from 'node:stream'
-
 import { prerenderToNodeStream } from 'react-dom/static'
-
 import components from 'virtual:doctrine/components'
 import { documents } from 'virtual:doctrine/content'
 import config from 'virtual:doctrine/config'

@@ -1,13 +1,10 @@
 import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { pathToFileURL } from 'node:url'
 import path from 'node:path'
-
-import tailwindcss from '@tailwindcss/vite'
+import type { Manifest } from 'vite'
 import react from '@vitejs/plugin-react'
 import * as pagefind from 'pagefind'
-import type { Manifest } from 'vite'
 import { createBuilder } from 'vite'
-
 import type { INormalizedDoctrineConfig } from './config.js'
 import type { IPageAssets } from './runtime/types.js'
 import { withBase } from './runtime/url.js'
@@ -59,8 +56,7 @@ export async function build(config: INormalizedDoctrineConfig): Promise<IBuildRe
           },
         },
       },
-      plugins: [react(), tailwindcss(), ...doctrinePlugins({ config, dev: false, packageRoot })],
-      resolve: { dedupe: ['react', 'react-dom'] },
+      plugins: [react(), ...doctrinePlugins({ config, dev: false, packageRoot })],
       root: config.root,
     })
     await builder.buildApp()

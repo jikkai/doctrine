@@ -13,6 +13,7 @@ test('loads ordered navigation from the nearest locale config', async () => {
   try {
     await mkdir(path.join(docs, 'guide'), { recursive: true })
     await Promise.all([
+      writeFile(path.join(root, 'package.json'), JSON.stringify({ type: 'module' })),
       writeFile(path.join(docs, 'index.mdx'), '# Home\n'),
       writeFile(path.join(docs, 'index.zh-CN.mdx'), '# 首页\n'),
       writeFile(path.join(docs, 'guide/start.mdx'), '# Start\n'),

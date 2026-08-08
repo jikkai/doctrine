@@ -58,7 +58,7 @@ Doctrine 根据最终静态 HTML 生成 Pagefind 索引，因此自定义 MDX �
 
 ## 自定义 React 组件
 
-Doctrine 内置 Callout、Badge、Card、Steps 和 Tabs。在 `doctrine.config.ts` 中用 `components` 指向一个 TSX 模块，即可添加组件或替换内置实现。合并后的组件映射同时用于静态渲染和 hydration。Tailwind 会扫描自定义模块，因此其中的 utility class 会进入最终样式。
+Doctrine 内置 Callout、Badge、Card、Steps 和 Tabs。在 `doctrine.config.ts` 中用 `components` 指向一个 TSX 模块，即可添加组件或替换内置实现。合并后的组件映射同时用于静态渲染和 hydration。自定义组件默认使用普通 CSS；项目自行安装 Tailwind 后，也可以在配置的样式表中启用 utility class。
 
 示例和公开组件导出见[自定义](/zh-CN/customization/)。
 

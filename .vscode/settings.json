@@ -1,12 +1,19 @@
 {
-  "editor.formatOnSave": false,
   "editor.formatOnSaveMode": "file",
-  "editor.codeActionsOnSave": {
-    "source.format.oxc": "always",
-    "source.fixAll.oxc": "always"
+  "[javascript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+    "editor.formatOnSave": true
   },
-  "[javascript][javascriptreact][typescript][typescriptreact][json][jsonc][markdown][mdx][yaml]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode"
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+    "editor.formatOnSave": true
   },
-  "oxc.requireConfig": true
+  "[typescript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+    "editor.formatOnSave": true
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+    "editor.formatOnSave": true
+  }
 }

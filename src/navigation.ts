@@ -96,7 +96,7 @@ export async function loadDoctrineNavigation(
           options,
         )
       ).items
-      if (documentKeys.size !== localeDocuments.length) {
+      if (options.command === 'build' && documentKeys.size !== localeDocuments.length) {
         throw new Error(`Navigation for ${locale} does not include every MDX document`)
       }
     }),
@@ -140,10 +140,11 @@ async function loadDirectory(
   const referencedPages = new Set<string>()
   const referencedDirectories = new Set<string>()
   const items = await Promise.all(
-    config.items.map(async (item): Promise<DoctrineNavigationNode> => {
+    config.items.map(async (item): Promise<DoctrineNavigationNode | undefined> => {
       if ('page' in item) {
         const document = pages.get(item.page)
         if (!document) {
+          if (options.command === 'serve') return undefined
           throw new Error(
             `Navigation page ${JSON.stringify(item.page)} does not match an ${locale} MDX file in ${displayPath(options, directory)}`,
           )
@@ -170,6 +171,7 @@ async function loadDirectory(
 
       const childRelativeDirectory = joinRelative(relativeDirectory, item.directory)
       if (!childDirectories.has(childRelativeDirectory)) {
+        if (options.command === 'serve') return undefined
         throw new Error(
           `Navigation directory ${JSON.stringify(item.directory)} does not match an ${locale} content directory in ${displayPath(options, directory)}`,
         )
@@ -200,16 +202,22 @@ async function loadDirectory(
     }),
   )
 
-  assertCompleteReferences(pages.keys(), referencedPages, 'page', locale, configFile, options)
-  assertCompleteReferences(
-    directDirectories.map((candidate) => path.basename(candidate)),
-    referencedDirectories,
-    'directory',
-    locale,
-    configFile,
-    options,
-  )
-  return { icon: config.icon, items, title: config.title }
+  if (options.command === 'build') {
+    assertCompleteReferences(pages.keys(), referencedPages, 'page', locale, configFile, options)
+    assertCompleteReferences(
+      directDirectories.map((candidate) => path.basename(candidate)),
+      referencedDirectories,
+      'directory',
+      locale,
+      configFile,
+      options,
+    )
+  }
+  return {
+    icon: config.icon,
+    items: items.filter((item): item is DoctrineNavigationNode => item !== undefined),
+    title: config.title,
+  }
 }
 
 async function findDocuments(

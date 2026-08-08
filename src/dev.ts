@@ -1,12 +1,9 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import path from 'node:path'
-
-import tailwindcss from '@tailwindcss/vite'
+import type { Plugin, ViteDevServer } from 'vite'
 import react from '@vitejs/plugin-react'
 import * as pagefind from 'pagefind'
-import type { Plugin, ViteDevServer } from 'vite'
 import { createServer } from 'vite'
-
 import type { INormalizedDoctrineConfig } from './config.js'
 import type { IPageAssets } from './runtime/types.js'
 import { normalizeRoutePath, withBase, withoutBase } from './runtime/url.js'
@@ -124,11 +121,9 @@ export async function dev(
     configFile: false,
     plugins: [
       react(),
-      tailwindcss(),
       ...doctrinePlugins({ config, dev: true, onContentChange: markSearchDirty }),
       htmlPlugin,
     ],
-    resolve: { dedupe: ['react', 'react-dom'] },
     root: config.root,
     server: { host: options.host, port: options.port },
   })

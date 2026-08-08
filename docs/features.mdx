@@ -77,8 +77,8 @@ operating-system preference, preventing an initial wrong-color flash.
 
 Doctrine includes callouts, badges, cards, steps, and tabs. Set `components` to a TSX module in
 `doctrine.config.ts` to add more components or replace a built-in. The merged component map is used
-by both static rendering and hydration. Tailwind scans the custom module, so its utility classes are
-included in the generated stylesheet.
+by both static rendering and hydration. Custom components use ordinary CSS by default; projects
+that install Tailwind can opt into utility classes from their configured stylesheet.
 
 See [Customization](/customization/) for examples and public component exports.
 

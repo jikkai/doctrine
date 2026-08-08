@@ -12,7 +12,10 @@ export function createDocumentRoutes(
   for (const locale of config.locales.names) {
     for (const page of flattenNavigation(config.navigation[locale] ?? [])) {
       const document = documentsByKey.get(page.documentKey)
-      if (!document) throw new Error(`Navigation references missing document ${page.documentKey}`)
+      if (!document) {
+        if (config.dev) continue
+        throw new Error(`Navigation references missing document ${page.documentKey}`)
+      }
       documentsByKey.delete(page.documentKey)
       const documentLocale = document.locale ?? config.locales.default
       if (documentLocale !== locale) {
@@ -31,7 +34,7 @@ export function createDocumentRoutes(
     }
   }
 
-  if (documentsByKey.size > 0) {
+  if (!config.dev && documentsByKey.size > 0) {
     throw new Error(`Navigation is missing document ${documentsByKey.keys().next().value}`)
   }
 

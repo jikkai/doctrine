@@ -76,6 +76,23 @@ export default defineConfig({
 
 网站外壳提供 `header`、`header-inner`、`brand`、`navigation`、`sidebar`、`main` 和 `content`。内置 MDX 组件则使用对应组件名的 kebab-case。
 
+## 使用 Tailwind CSS
+
+Doctrine 自带的界面样式已经预编译，消费者不需要安装 Tailwind。如果要在 MDX 或自定义组件中使用 Tailwind utility，请在文档项目中安装：
+
+```sh
+pnpm add -D tailwindcss
+```
+
+在 `styles` 指定的样式表中导入 Tailwind，并声明需要扫描的文件：
+
+```css
+@import 'tailwindcss' source(none);
+@source './';
+```
+
+Doctrine 检测到项目声明了该依赖后才会启用 Tailwind。未安装时，`styles` 就是普通 CSS，开发与构建过程都不会运行 Tailwind。
+
 ## 内置 MDX 组件
 
 内置组件无需导入或注册。
@@ -176,7 +193,7 @@ import type { ComponentProps } from 'react'
 import { Callout } from '@amamo/doctrine/components'
 
 function BrandedCallout(props: ComponentProps<typeof Callout>) {
-  return <Callout className="border-brand" {...props} />
+  return <Callout className="branded-callout" {...props} />
 }
 
 export default { Callout: BrandedCallout } satisfies IDoctrineComponents
@@ -189,5 +206,7 @@ export default defineConfig({
   components: './docs/components.tsx',
 })
 ```
+
+请在配置的样式表中定义 `.branded-callout`；也可以按上文启用 Tailwind 后改用 utility class。
 
 自定义组件会同时被打包到 Node.js 渲染和浏览器中。不要在模块初始化或渲染阶段访问浏览器全局变量；应在 effect 或事件处理器中使用。

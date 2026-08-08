@@ -1,13 +1,16 @@
+import { existsSync, readFileSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
+import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
-
 import type { IAmamoMdxConfig } from '@amamo/mdx'
-import { amamoMdx } from '@amamo/mdx/vite'
 import type { Plugin, ViteDevServer } from 'vite'
-
+import { amamoMdx } from '@amamo/mdx/vite'
+import tailwindcss from '@tailwindcss/vite'
 import type { INormalizedDoctrineConfig } from './config.js'
+import type { ILoadedDoctrineNavigation } from './navigation.js'
 import type { IRuntimeConfig } from './runtime/types.js'
+import { loadDoctrineNavigation } from './navigation.js'
 
 const CONTENT_ID = 'virtual:doctrine/content'
 const COMPONENTS_ID = 'virtual:doctrine/components'
@@ -20,6 +23,7 @@ const RESOLVED_COMPONENTS_ID = `\0${COMPONENTS_ID}`
 const RESOLVED_CONFIG_ID = `\0${CONFIG_ID}`
 const RESOLVED_ICONS_ID = `\0${ICONS_ID}`
 const RESOLVED_CUSTOM_STYLES_ID = `\0${CUSTOM_STYLES_ID}`
+const packageRequire = createRequire(import.meta.url)
 
 export interface IDoctrinePluginOptions {
   config: INormalizedDoctrineConfig
@@ -36,24 +40,27 @@ export function runtimeEntry(
   name: 'client' | 'server',
   packageRoot = doctrinePackageRoot(),
 ): string {
-  return path.join(packageRoot, `runtime/entry-${name}.js`)
+  const entry = path.join(packageRoot, `runtime/entry-${name}.js`)
+  return existsSync(entry) ? entry : path.join(packageRoot, `runtime/entry-${name}.tsx`)
 }
 
 export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
   const generatedModule = path.join(options.config.root, '.amamo-mdx/collections.mjs')
   const resolvedStylesId = path.join(options.config.root, '.doctrine-styles.css')
   const styles = path.join(options.packageRoot ?? doctrinePackageRoot(), 'runtime/styles.css')
-  const runtimeSource = path.join(doctrinePackageRoot(), 'runtime')
-  const runtimeConfig: IRuntimeConfig = {
-    base: options.config.base,
-    copyright: options.config.copyright,
-    description: options.config.description,
-    dev: options.dev,
-    githubUrl: options.config.githubUrl,
-    locales: options.config.locales,
+  let navigation: Promise<ILoadedDoctrineNavigation> | undefined = Promise.resolve({
+    icons: options.config.navigationIcons,
     navigation: options.config.navigation,
-    siteUrl: options.config.siteUrl,
-    title: options.config.title,
+  })
+
+  function currentNavigation(): Promise<ILoadedDoctrineNavigation> {
+    navigation ??= loadDoctrineNavigation({
+      command: 'serve',
+      contentDirectory: options.config.contentDirectory,
+      locales: options.config.locales,
+      root: options.config.root,
+    })
+    return navigation
   }
 
   const amamoConfig: IAmamoMdxConfig = {
@@ -75,6 +82,16 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
   const mdxPlugin = amamoMdx(amamoConfig) as unknown as Plugin
 
   return [
+    ...(usesTailwind(options.config.root) ? tailwindcss() : []),
+    {
+      name: 'doctrine-build-dependencies',
+      apply: 'build',
+      enforce: 'pre',
+      resolveId(source) {
+        if (!isRuntimeDependency(source)) return null
+        return packageRequire.resolve(source)
+      },
+    },
     mdxPlugin,
     {
       name: 'doctrine',
@@ -102,49 +119,107 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
             ? `export { default } from ${JSON.stringify(options.config.components)};`
             : 'export default {};'
         }
-        if (id === RESOLVED_CONFIG_ID) return `export default ${JSON.stringify(runtimeConfig)};`
+        if (id === RESOLVED_CONFIG_ID) {
+          const current = await currentNavigation()
+          const runtimeConfig: IRuntimeConfig = {
+            base: options.config.base,
+            copyright: options.config.copyright,
+            description: options.config.description,
+            dev: options.dev,
+            githubUrl: options.config.githubUrl,
+            locales: options.config.locales,
+            navigation: current.navigation,
+            siteUrl: options.config.siteUrl,
+            title: options.config.title,
+          }
+          return `export default ${JSON.stringify(runtimeConfig)};`
+        }
         if (id === RESOLVED_ICONS_ID) {
-          if (options.config.navigationIcons.length === 0) return 'export default {};'
-          const names = options.config.navigationIcons.join(', ')
+          const { icons } = await currentNavigation()
+          if (icons.length === 0) return 'export default {};'
+          if (!options.config.iconLibrary) {
+            throw new Error('iconLibrary is required when navigation icons are configured')
+          }
+          const names = icons.join(', ')
           return `import { ${names} } from ${JSON.stringify(options.config.iconLibrary)}; export default { ${names} };`
         }
         if (id === RESOLVED_CUSTOM_STYLES_ID) return ''
-        if (id === resolvedStylesId) {
-          const source = await readFile(styles, 'utf8')
-          const componentSource = options.config.components
-            ? `\n@source ${JSON.stringify(cssSourcePath(options.config.root, options.config.components))};`
-            : ''
-          return `${source}\n@source ${JSON.stringify(cssSourcePath(options.config.root, runtimeSource))};\n@source ${JSON.stringify(cssSourcePath(options.config.root, options.config.contentDirectory))};${componentSource}\n`
-        }
+        if (id === resolvedStylesId) return readFile(styles, 'utf8')
         return null
       },
       configureServer(server: ViteDevServer) {
-        if (!options.onContentChange) return
-        const markChanged = (file: string) => {
-          if (isContentFile(file, options.config.contentDirectory)) options.onContentChange?.()
-        }
-        server.watcher.on('add', markChanged)
-        server.watcher.on('unlink', markChanged)
-        server.httpServer?.once('close', () => {
-          server.watcher.off('add', markChanged)
-          server.watcher.off('unlink', markChanged)
-        })
-      },
-      handleHotUpdate(context) {
-        if (isContentFile(context.file, options.config.contentDirectory)) {
+        const invalidateNavigation = (reload: boolean) => {
+          navigation = undefined
           options.onContentChange?.()
+          for (const id of [RESOLVED_CONFIG_ID, RESOLVED_ICONS_ID]) {
+            const module = server.moduleGraph.getModuleById(id)
+            if (module) server.moduleGraph.invalidateModule(module)
+          }
+          if (reload) server.hot.send({ type: 'full-reload' })
         }
+        const handleAdd = (file: string) => {
+          if (isNavigationFile(file, options.config)) invalidateNavigation(true)
+          else if (isContentFile(file, options.config.contentDirectory)) {
+            invalidateNavigation(false)
+          }
+        }
+        const handleChange = (file: string) => {
+          if (isNavigationFile(file, options.config)) invalidateNavigation(true)
+          else if (isContentFile(file, options.config.contentDirectory)) {
+            options.onContentChange?.()
+          }
+        }
+        const handleUnlink = (file: string) => {
+          if (isNavigationFile(file, options.config)) invalidateNavigation(true)
+          else if (isContentFile(file, options.config.contentDirectory)) {
+            invalidateNavigation(false)
+          }
+        }
+        server.watcher.on('add', handleAdd)
+        server.watcher.on('change', handleChange)
+        server.watcher.on('unlink', handleUnlink)
+        server.httpServer?.once('close', () => {
+          server.watcher.off('add', handleAdd)
+          server.watcher.off('change', handleChange)
+          server.watcher.off('unlink', handleUnlink)
+        })
       },
     },
   ]
 }
 
-function cssSourcePath(root: string, source: string): string {
-  const relative = path.relative(root, source).split(path.sep).join('/')
-  return relative.startsWith('.') ? relative : `./${relative}`
+function isRuntimeDependency(source: string): boolean {
+  return ['@base-ui/react', 'lucide-react', 'react', 'react-dom'].some(
+    (dependency) => source === dependency || source.startsWith(`${dependency}/`),
+  )
+}
+
+function usesTailwind(root: string): boolean {
+  try {
+    const manifest = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8')) as {
+      dependencies?: Readonly<Record<string, unknown>>
+      devDependencies?: Readonly<Record<string, unknown>>
+      optionalDependencies?: Readonly<Record<string, unknown>>
+    }
+    return [manifest.dependencies, manifest.devDependencies, manifest.optionalDependencies].some(
+      (dependencies) => typeof dependencies?.tailwindcss === 'string',
+    )
+  } catch {
+    return false
+  }
 }
 
 function isContentFile(file: string, directory: string): boolean {
   const relative = path.relative(directory, file)
   return !relative.startsWith('..') && !path.isAbsolute(relative) && file.endsWith('.mdx')
+}
+
+function isNavigationFile(file: string, config: INormalizedDoctrineConfig): boolean {
+  const relative = path.relative(config.contentDirectory, file)
+  if (relative.startsWith('..') || path.isAbsolute(relative)) return false
+  const name = path.basename(relative)
+  if (name === 'meta.ts') return true
+  return config.locales.names.some(
+    (locale) => locale !== config.locales.default && name === `meta.${locale}.ts`,
+  )
 }

@@ -152,11 +152,7 @@ import type { IDoctrineComponents } from '@amamo/doctrine'
 import type { ReactNode } from 'react'
 
 function Callout({ children }: { children: ReactNode }) {
-  return (
-    <aside className="rounded-lg border border-sky-500 bg-sky-50 p-4 dark:bg-sky-950">
-      {children}
-    </aside>
-  )
+  return <aside className="project-callout">{children}</aside>
 }
 
 export default { Callout } satisfies IDoctrineComponents
@@ -170,7 +166,8 @@ Use the registered name directly in MDX:
 
 The module is bundled into SSR and the browser, so components must render in Node.js during the
 build. Access browser-only globals from effects or event handlers, not while the module loads or the
-component renders. Tailwind scans the component file automatically.
+component renders. Style `project-callout` in the configured stylesheet. If the project installs
+Tailwind, its utility classes work too; see [Customization](/customization/#use-tailwind-css).
 
 Custom entries override built-in MDX element mappings with the same name. For example, registering
 `a` replaces Doctrine's default link renderer.

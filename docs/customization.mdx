@@ -78,6 +78,25 @@ Stable `data-slot` attributes let a theme target the shell without depending on 
 The shell exposes `header`, `header-inner`, `brand`, `navigation`, `sidebar`, `main`, and `content`.
 Built-in MDX components expose their component name in kebab case.
 
+## Use Tailwind CSS
+
+Doctrine ships its own interface as precompiled CSS, so consumers do not need Tailwind. To use
+Tailwind utilities in MDX or custom components, install it in the documentation project:
+
+```sh
+pnpm add -D tailwindcss
+```
+
+Import Tailwind from the stylesheet configured with `styles` and choose the files it should scan:
+
+```css
+@import 'tailwindcss' source(none);
+@source './';
+```
+
+Doctrine detects the declared dependency and enables Tailwind for that project. Without it,
+`styles` remains ordinary CSS and Doctrine does not run Tailwind during development or builds.
+
 ## Built-in MDX components
 
 Built-ins require no imports or registration.
@@ -183,7 +202,7 @@ import type { ComponentProps } from 'react'
 import { Callout } from '@amamo/doctrine/components'
 
 function BrandedCallout(props: ComponentProps<typeof Callout>) {
-  return <Callout className="border-brand" {...props} />
+  return <Callout className="branded-callout" {...props} />
 }
 
 export default { Callout: BrandedCallout } satisfies IDoctrineComponents
@@ -196,6 +215,9 @@ export default defineConfig({
   components: './docs/components.tsx',
 })
 ```
+
+Define `.branded-callout` in the configured stylesheet, or use a Tailwind utility after enabling
+Tailwind as described above.
 
 Custom components are bundled for Node.js rendering and the browser. Avoid browser globals during
 module initialization or rendering; access them from effects or event handlers.

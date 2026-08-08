@@ -1,11 +1,10 @@
 import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
 import { existsSync } from 'node:fs'
-import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { promisify } from 'node:util'
 import path from 'node:path'
-
 import { test } from 'vitest'
 
 const execFileAsync = promisify(execFile)
@@ -71,16 +70,33 @@ test('builds localized static pages and search below a GitHub Pages subpath', as
   }
 }, 60_000)
 
-test('includes runtime utilities when built outside the package root', async () => {
+test('builds in an isolated pnpm consumer', async () => {
   const packageRoot = process.cwd()
   const root = await mkdtemp(path.join(tmpdir(), 'doctrine-consumer-'))
   const outDir = path.join(root, 'dist')
+  const installArgs = [
+    'install',
+    '--ignore-scripts',
+    '--no-frozen-lockfile',
+    '--prefer-offline',
+    '--config.node-linker=isolated',
+  ]
   try {
-    await symlink(
-      path.join(packageRoot, 'node_modules'),
-      path.join(root, 'node_modules'),
-      'junction',
+    const archive = path.join(root, 'doctrine.tgz')
+    await execFileAsync('pnpm', ['--config.ignore-scripts=true', 'pack', '--out', archive], {
+      cwd: packageRoot,
+    })
+    await writeFile(
+      path.join(root, 'package.json'),
+      JSON.stringify({
+        dependencies: { '@amamo/doctrine': `file:${archive}` },
+        private: true,
+        type: 'module',
+      }),
     )
+    await execFileAsync('pnpm', installArgs, { cwd: root })
+    assert.equal(existsSync(path.join(root, 'node_modules/react')), false)
+    assert.equal(existsSync(path.join(root, 'node_modules/tailwindcss')), false)
     await mkdir(path.join(root, 'docs'))
     await writeFile(path.join(root, 'docs/index.mdx'), '# External consumer\n')
     await writeFile(
@@ -89,7 +105,7 @@ test('includes runtime utilities when built outside the package root', async () 
     )
     await execFileAsync(
       process.execPath,
-      [path.join(packageRoot, 'dist/cli.js'), 'build', 'docs'],
+      [path.join(root, 'node_modules/@amamo/doctrine/dist/cli.js'), 'build', 'docs'],
       {
         cwd: root,
       },
@@ -102,7 +118,42 @@ test('includes runtime utilities when built outside the package root', async () 
     const css = await readFile(path.join(outDir, stylesheet), 'utf8')
     assert.match(css, /\.sticky\{position:sticky\}/)
     assert.match(css, /\.hidden\{display:none\}/)
+
+    await writeFile(
+      path.join(root, 'package.json'),
+      JSON.stringify({
+        dependencies: {
+          '@amamo/doctrine': `file:${archive}`,
+          tailwindcss: '4.3.3',
+        },
+        private: true,
+        type: 'module',
+      }),
+    )
+    await execFileAsync('pnpm', installArgs, { cwd: root })
+    await writeFile(
+      path.join(root, 'doctrine.config.ts'),
+      "export default { styles: './docs/theme.css' }\n",
+    )
+    await writeFile(
+      path.join(root, 'docs/theme.css'),
+      "@import 'tailwindcss' source(none);\n@source './index.mdx';\n",
+    )
+    await writeFile(
+      path.join(root, 'docs/index.mdx'),
+      '# External consumer\n\n<div className="text-fuchsia-700">Tailwind consumer</div>\n',
+    )
+    await execFileAsync(
+      process.execPath,
+      [path.join(root, 'node_modules/@amamo/doctrine/dist/cli.js'), 'build', 'docs'],
+      { cwd: root },
+    )
+    const tailwindHome = await readFile(path.join(outDir, 'index.html'), 'utf8')
+    const tailwindStylesheet = tailwindHome.match(/href="\/(assets\/[^"]+\.css)"/)?.[1]
+    assert.ok(tailwindStylesheet)
+    const tailwindCss = await readFile(path.join(outDir, tailwindStylesheet), 'utf8')
+    assert.match(tailwindCss, /\.text-fuchsia-700/)
   } finally {
     await rm(root, { force: true, recursive: true })
   }
-}, 60_000)
+}, 120_000)

@@ -138,11 +138,7 @@ import type { IDoctrineComponents } from '@amamo/doctrine'
 import type { ReactNode } from 'react'
 
 function Callout({ children }: { children: ReactNode }) {
-  return (
-    <aside className="rounded-lg border border-sky-500 bg-sky-50 p-4 dark:bg-sky-950">
-      {children}
-    </aside>
-  )
+  return <aside className="project-callout">{children}</aside>
 }
 
 export default { Callout } satisfies IDoctrineComponents
@@ -154,7 +150,7 @@ export default { Callout } satisfies IDoctrineComponents
 <Callout>部署前先执行迁移。</Callout>
 ```
 
-该模块会同时进入 SSR 和浏览器 bundle，因此组件必须能在构建阶段的 Node.js 环境中渲染。浏览器专属全局变量应放在 effect 或事件处理函数中使用，不能在模块加载或组件渲染时访问。Tailwind 会自动扫描组件文件。
+该模块会同时进入 SSR 和浏览器 bundle，因此组件必须能在构建阶段的 Node.js 环境中渲染。浏览器专属全局变量应放在 effect 或事件处理函数中使用，不能在模块加载或组件渲染时访问。请在配置的样式表中设置 `project-callout`；如果项目安装了 Tailwind，也可以使用 utility class，详见[自定义](/zh-CN/customization/#使用-tailwind-css)。
 
 自定义条目可以覆盖同名的内置 MDX 元素映射。例如，注册 `a` 会替换 Doctrine 默认的链接渲染器。
 
