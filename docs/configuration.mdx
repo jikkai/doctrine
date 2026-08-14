@@ -21,20 +21,11 @@ sandbox or serialize the module.
 import { defineConfig } from '@amamo/doctrine'
 
 export default defineConfig({
-  title: {
-    en: 'Acme documentation',
-    'zh-CN': 'Acme 文档',
-  },
-  description: {
-    en: 'Product guides and API notes.',
-    'zh-CN': '产品指南和 API 说明。',
-  },
+  title: 'Acme documentation',
+  description: 'Product guides and API notes.',
   siteUrl: 'https://docs.example.com/',
   githubUrl: 'https://github.com/acme/docs',
-  copyright: {
-    en: 'Copyright © 2026 Acme.',
-    'zh-CN': '版权所有 © 2026 Acme。',
-  },
+  copyright: 'Copyright © 2026 Acme.',
   iconLibrary: 'lucide-react',
   outDir: 'dist',
   locales: {
@@ -49,21 +40,21 @@ export default defineConfig({
 
 ## Site options
 
-| Option        | Type                               | Default                            | Purpose                                                  |
-| ------------- | ---------------------------------- | ---------------------------------- | -------------------------------------------------------- |
-| `title`       | `string \| Record<string, string>` | `"Documentation"`                  | Brand text and page-title suffix.                        |
-| `description` | `string \| Record<string, string>` | `"Documentation built from MDX."`  | Fallback meta description.                               |
-| `siteUrl`     | `string`                           | `"http://localhost/"`              | Absolute public URL and Vite deployment base.            |
-| `githubUrl`   | `string`                           | none                               | External link shown as the GitHub header icon.           |
-| `copyright`   | `string \| Record<string, string>` | none                               | Localizable footer text.                                 |
-| `iconLibrary` | `string`                           | none                               | Module with named React icon exports used by navigation. |
-| `outDir`      | `string`                           | `"dist"`                           | Static output directory.                                 |
-| `locales`     | `IDoctrineLocaleConfig`            | `{ default: "en", names: ["en"] }` | Locale routes, navigation sets, and switch labels.       |
-| `components`  | `string`                           | none                               | Custom MDX component module.                             |
-| `styles`      | `string`                           | none                               | Custom stylesheet loaded after Doctrine CSS.             |
+| Option        | Type                    | Default                            | Purpose                                                  |
+| ------------- | ----------------------- | ---------------------------------- | -------------------------------------------------------- |
+| `title`       | `string`                | `"Documentation"`                  | Brand text and page-title suffix.                        |
+| `description` | `string`                | `"Documentation built from MDX."`  | Fallback meta description.                               |
+| `siteUrl`     | `string`                | `"http://localhost/"`              | Absolute public URL and Vite deployment base.            |
+| `githubUrl`   | `string`                | none                               | External link shown as the GitHub header icon.           |
+| `copyright`   | `string`                | none                               | Footer text.                                             |
+| `iconLibrary` | `string`                | none                               | Module with named React icon exports used by navigation. |
+| `outDir`      | `string`                | `"dist"`                           | Static output directory.                                 |
+| `locales`     | `IDoctrineLocaleConfig` | `{ default: "en", names: ["en"] }` | Locale routes, navigation sets, and switch labels.       |
+| `components`  | `string`                | none                               | Custom MDX component module.                             |
+| `styles`      | `string`                | none                               | Custom stylesheet loaded after Doctrine CSS.             |
 
-`title`, `description`, and `copyright` accept either one value for every locale or a locale map.
-Maps fall back from the current locale to `locales.default`, then to their first value.
+`title`, `description`, and `copyright` are site-wide values. Put localized page descriptions in
+the corresponding MDX frontmatter or locale-specific navigation entry.
 
 `siteUrl` must use HTTP or HTTPS and cannot contain a query or fragment. Doctrine normalizes its
 pathname with one leading and one trailing slash; that pathname becomes `base`. `githubUrl` also
@@ -99,7 +90,12 @@ import { defineDirectory } from '@amamo/doctrine'
 
 export default defineDirectory({
   items: [
-    { page: 'index', title: 'Overview', icon: 'House' },
+    {
+      page: 'index',
+      title: 'Overview',
+      description: 'Acme documentation overview.',
+      icon: 'House',
+    },
     { directory: 'guide' },
     { page: 'configuration', title: 'Configuration', icon: 'Settings' },
   ],
@@ -119,9 +115,10 @@ export default defineDirectory({
 })
 ```
 
-The root `title` is optional; nested navigation files require a non-empty title. `page` must be a
-direct MDX basename without a slash, extension, or locale suffix. `directory` must be a direct child
-name and cannot be `.` or `..`.
+The root `title` is optional; nested navigation files require a non-empty title. Page entries may
+define a locale-specific `description`, which is used when the page has no frontmatter description.
+`page` must be a direct MDX basename without a slash, extension, or locale suffix. `directory` must
+be a direct child name and cannot be `.` or `..`.
 
 Production requires every matching page and child directory exactly once. Duplicate entries,
 duplicate routes, invalid shapes, missing entries, and references that do not exist fail the build.

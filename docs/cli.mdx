@@ -8,8 +8,8 @@ The `doctrine` binary exposes two commands. It treats the current working direct
 root, loads `doctrine.config.*` from there, and resolves a relative content directory from that root.
 
 ```sh
-pnpm exec doctrine dev [directory] [--host localhost] [--port 5173]
-pnpm exec doctrine build [directory] [--site-url https://example.com/docs/] [--out-dir dist]
+doctrine dev [directory] [--host localhost] [--port 5173]
+doctrine build [directory] [--site-url https://example.com/docs/] [--out-dir dist]
 ```
 
 `[directory]` defaults to `docs` and must exist.
@@ -26,8 +26,8 @@ search index.
 | `--port`           | `5173`      | Integer port from `0` through `65535`; `0` is dynamic. |
 
 ```sh
-pnpm exec doctrine dev
-pnpm exec doctrine dev website --host 0.0.0.0 --port 4173
+doctrine dev
+doctrine dev website --host 0.0.0.0 --port 4173
 ```
 
 The command keeps running until the server is stopped. MDX and navigation changes update the site;
@@ -45,8 +45,8 @@ the Pagefind index.
 | `--out-dir`        | config or `dist`              | Output path resolved from the root unless already absolute. |
 
 ```sh
-pnpm exec doctrine build
-pnpm exec doctrine build website \
+doctrine build
+doctrine build website \
   --site-url https://user.github.io/project/ \
   --out-dir build
 ```
@@ -61,7 +61,7 @@ count does not include the shared 404 page.
 ## Help and failures
 
 ```sh
-pnpm exec doctrine --help
+doctrine --help
 ```
 
 The CLI exits non-zero for unknown commands or options, repeated positional directories, missing

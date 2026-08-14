@@ -13,10 +13,13 @@ Doctrine requires Node.js 20.19 or newer and a
 compiler has no JavaScript fallback. MDX can execute JavaScript during bundling, prerendering, and
 hydration, so use content and configuration from trusted authors only.
 
-Install the package and create the content directory:
+Install the package:
+
+<InstallTabs packageName="@amamo/doctrine" />
+
+Then create the content directory:
 
 ```sh
-pnpm add @amamo/doctrine
 mkdir -p docs/guide
 ```
 
@@ -32,13 +35,11 @@ Choose a guide from the navigation.
 
 Create `docs/guide/install.mdx`:
 
-````mdx
+```mdx
 # Install Acme
 
-```sh
-pnpm add acme
+<InstallTabs packageName="acme" />
 ```
-````
 
 Neither page needs frontmatter. An optional string `description` becomes that page's meta
 description.
@@ -73,7 +74,7 @@ direct child. The production build requires every page and child directory exact
 ## 4. Start development
 
 ```sh
-pnpm exec doctrine dev docs
+doctrine dev docs
 ```
 
 Open `http://localhost:5173`. Vite server-renders each request and hydrates it in the browser. MDX
@@ -87,7 +88,7 @@ search request.
 Choose another interface or port when needed:
 
 ```sh
-pnpm exec doctrine dev docs --host 0.0.0.0 --port 4173
+doctrine dev docs --host 0.0.0.0 --port 4173
 ```
 
 ## 5. Add optional site metadata
@@ -112,7 +113,7 @@ Without a config file, the title is `Documentation`, the description is
 Pass the real public URL, including any repository pathname:
 
 ```sh
-pnpm exec doctrine build docs --site-url https://docs.example.com/
+doctrine build docs --site-url https://docs.example.com/
 ```
 
 The default output is:

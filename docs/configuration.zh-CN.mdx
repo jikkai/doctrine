@@ -20,20 +20,11 @@ doctrine.config.mjs
 import { defineConfig } from '@amamo/doctrine'
 
 export default defineConfig({
-  title: {
-    en: 'Acme documentation',
-    'zh-CN': 'Acme 文档',
-  },
-  description: {
-    en: 'Product guides and API notes.',
-    'zh-CN': '产品指南和 API 说明。',
-  },
+  title: 'Acme 文档',
+  description: 'Acme 的产品指南和 API 说明。',
   siteUrl: 'https://docs.example.com/',
   githubUrl: 'https://github.com/acme/docs',
-  copyright: {
-    en: 'Copyright © 2026 Acme.',
-    'zh-CN': '版权所有 © 2026 Acme。',
-  },
+  copyright: 'copyright © 2026 Acme。',
   iconLibrary: 'lucide-react',
   outDir: 'dist',
   locales: {
@@ -48,21 +39,21 @@ export default defineConfig({
 
 ## 网站选项
 
-| 选项          | 类型                               | 默认值                             | 用途                                   |
-| ------------- | ---------------------------------- | ---------------------------------- | -------------------------------------- |
-| `title`       | `string \| Record<string, string>` | `"Documentation"`                  | 品牌文案和页面 title 后缀。            |
-| `description` | `string \| Record<string, string>` | `"Documentation built from MDX."`  | 默认 meta description。                |
-| `siteUrl`     | `string`                           | `"http://localhost/"`              | 绝对公开 URL 和 Vite 部署 base。       |
-| `githubUrl`   | `string`                           | 无                                 | Header 中 GitHub 图标的外部链接。      |
-| `copyright`   | `string \| Record<string, string>` | 无                                 | 可本地化的 footer 文案。               |
-| `iconLibrary` | `string`                           | 无                                 | 提供导航图标命名 React 导出的模块。    |
-| `outDir`      | `string`                           | `"dist"`                           | 静态输出目录。                         |
-| `locales`     | `IDoctrineLocaleConfig`            | `{ default: "en", names: ["en"] }` | 语言路由、导航集合和切换标签。         |
-| `components`  | `string`                           | 无                                 | 自定义 MDX 组件模块。                  |
-| `styles`      | `string`                           | 无                                 | 在 Doctrine CSS 后加载的自定义样式表。 |
+| 选项          | 类型                    | 默认值                             | 用途                                   |
+| ------------- | ----------------------- | ---------------------------------- | -------------------------------------- |
+| `title`       | `string`                | `"Documentation"`                  | 品牌文案和页面 title 后缀。            |
+| `description` | `string`                | `"Documentation built from MDX."`  | 默认 meta description。                |
+| `siteUrl`     | `string`                | `"http://localhost/"`              | 绝对公开 URL 和 Vite 部署 base。       |
+| `githubUrl`   | `string`                | 无                                 | Header 中 GitHub 图标的外部链接。      |
+| `copyright`   | `string`                | 无                                 | Footer 文案。                          |
+| `iconLibrary` | `string`                | 无                                 | 提供导航图标命名 React 导出的模块。    |
+| `outDir`      | `string`                | `"dist"`                           | 静态输出目录。                         |
+| `locales`     | `IDoctrineLocaleConfig` | `{ default: "en", names: ["en"] }` | 语言路由、导航集合和切换标签。         |
+| `components`  | `string`                | 无                                 | 自定义 MDX 组件模块。                  |
+| `styles`      | `string`                | 无                                 | 在 Doctrine CSS 后加载的自定义样式表。 |
 
-`title`、`description` 和 `copyright` 可以是所有 locale 共用的字符串，也可以是 locale 映射。映射
-按“当前 locale → `locales.default` → 第一个值”回退。
+`title`、`description` 和 `copyright` 是站点级单一值。本地化页面描述应写在对应 MDX 的
+frontmatter，或 locale 对应的导航条目中。
 
 `siteUrl` 必须使用 HTTP 或 HTTPS，且不能包含 query 或 fragment。Doctrine 会把 pathname 归一化
 为一个开头斜杠和一个结尾斜杠；这个 pathname 就是 `base`。`githubUrl` 也必须使用 HTTP 或
@@ -96,7 +87,12 @@ import { defineDirectory } from '@amamo/doctrine'
 
 export default defineDirectory({
   items: [
-    { page: 'index', title: '概览', icon: 'House' },
+    {
+      page: 'index',
+      title: '概览',
+      description: 'Acme 文档概览。',
+      icon: 'House',
+    },
     { directory: 'guide' },
     { page: 'configuration', title: '配置', icon: 'Settings' },
   ],
@@ -116,8 +112,9 @@ export default defineDirectory({
 })
 ```
 
-根目录的 `title` 可省略；嵌套导航文件必须提供非空 title。`page` 必须是不含斜杠、扩展名和
-locale 后缀的直属 MDX basename。`directory` 必须是直属子目录名，不能是 `.` 或 `..`。
+根目录的 `title` 可省略；嵌套导航文件必须提供非空 title。页面条目可以定义 locale 对应的
+`description`，在页面没有 frontmatter description 时使用。`page` 必须是不含斜杠、扩展名和 locale
+后缀的直属 MDX basename。`directory` 必须是直属子目录名，不能是 `.` 或 `..`。
 
 生产构建要求每个匹配页面和子目录恰好出现一次。重复条目、重复路由、非法结构、遗漏条目或
 不存在的引用都会失败。Serve 模式仍会校验结构与重复项，但会省略暂时不存在的引用，并忽略

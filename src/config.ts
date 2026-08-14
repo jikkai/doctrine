@@ -8,8 +8,6 @@ import { loadConfigFromFile } from 'vite'
 import type { DoctrineNavigation, IDoctrineTsxPage } from './navigation.js'
 import { loadDoctrineNavigation } from './navigation.js'
 
-export type DoctrineLocalizedText = string | Readonly<Record<string, string>>
-
 export interface IDoctrineLocaleConfig {
   default: string
   labels?: Readonly<Record<string, string>>
@@ -22,23 +20,23 @@ export interface IDoctrineComponents {
 
 export interface IDoctrineConfig {
   components?: string
-  copyright?: DoctrineLocalizedText
-  description?: DoctrineLocalizedText
+  copyright?: string
+  description?: string
   githubUrl?: string
   iconLibrary?: string
   locales?: IDoctrineLocaleConfig
   outDir?: string
   siteUrl?: string
   styles?: string
-  title?: DoctrineLocalizedText
+  title?: string
 }
 
 export interface INormalizedDoctrineConfig {
   base: string
   components?: string
   contentDirectory: string
-  copyright?: DoctrineLocalizedText
-  description: DoctrineLocalizedText
+  copyright?: string
+  description: string
   githubUrl?: string
   iconLibrary?: string
   locales: IDoctrineLocaleConfig
@@ -48,7 +46,7 @@ export interface INormalizedDoctrineConfig {
   root: string
   siteUrl: string
   styles?: string
-  title: DoctrineLocalizedText
+  title: string
   tsxPages: IDoctrineTsxPage[]
 }
 
@@ -95,6 +93,9 @@ export async function normalizeDoctrineConfig(
   if (!contentStat?.isDirectory()) {
     throw new Error(`MDX directory does not exist: ${contentDirectory}`)
   }
+  assertOptionalString(config.copyright, 'copyright')
+  assertOptionalString(config.description, 'description')
+  assertOptionalString(config.title, 'title')
 
   const locales = normalizeLocales(config.locales)
   const siteUrl = normalizeSiteUrl(options.siteUrl ?? config.siteUrl ?? 'http://localhost/')
@@ -134,6 +135,12 @@ export async function normalizeDoctrineConfig(
     styles,
     title: config.title ?? 'Documentation',
     tsxPages,
+  }
+}
+
+function assertOptionalString(value: unknown, label: string): asserts value is string | undefined {
+  if (value !== undefined && typeof value !== 'string') {
+    throw new Error(`${label} must be a string`)
   }
 }
 

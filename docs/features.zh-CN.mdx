@@ -86,8 +86,7 @@ Pagefind，短暂等待后最多显示八条结果。<kbd>⌘K</kbd> 和 <kbd>Ct
 默认 locale 没有路由前缀，其他 locale 使用编码后的前缀。只有另一个文档具有相同 slug 时，
 语言按钮才会显示。
 
-导航文件不会跨 locale fallback。可本地化的网站文字按“当前 locale → 默认 locale → 第一个
-配置值”回退；语言切换标签缺失时直接显示 locale code。
+导航和页面元数据都不会跨 locale fallback；语言切换标签缺失时直接显示 locale code。
 
 Doctrine 内置界面文案只区分两组：名称以 `zh` 开头的 locale 使用中文，其余使用英文。内容、
 导航、网站元数据、路由前缀和 `<html lang>` 仍使用完整的配置 locale。

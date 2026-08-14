@@ -28,7 +28,7 @@ test('loads ordered navigation from the nearest locale config', async () => {
       writeFile(path.join(docs, 'guide/start.zh-CN.mdx'), '# 开始\n'),
       writeFile(
         path.join(docs, 'meta.ts'),
-        "export default { items: [{ directory: 'guide' }, { page: 'index', title: 'Home', icon: 'House' }, { page: 'landing', title: 'Landing' }] }\n",
+        "export default { items: [{ directory: 'guide' }, { page: 'index', title: 'Home', icon: 'House' }, { page: 'landing', title: 'Landing', description: 'Standalone page' }] }\n",
       ),
       writeFile(
         path.join(docs, 'meta.zh-CN.ts'),
@@ -61,7 +61,12 @@ test('loads ordered navigation from the nearest locale config', async () => {
           type: 'directory',
         },
         { documentKey: 'en:/', icon: 'House', title: 'Home', type: 'page' },
-        { documentKey: 'en:landing', title: 'Landing', type: 'page' },
+        {
+          description: 'Standalone page',
+          documentKey: 'en:landing',
+          title: 'Landing',
+          type: 'page',
+        },
       ],
       'zh-CN': [
         { documentKey: 'zh-CN:/', title: '首页', type: 'page' },

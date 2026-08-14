@@ -1,5 +1,4 @@
 import type { IDocumentRoute, IPageAssets, IRuntimeConfig } from './types.js'
-import { localizedText } from './i18n.js'
 
 const THEME_SCRIPT = `(function(){var d=document.documentElement,t='';try{t=localStorage.getItem('doctrine-theme')||''}catch(e){}d.dataset.theme=t==='light'||t==='dark'?t:(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')})()`
 
@@ -11,10 +10,9 @@ export function htmlDocument(
   assets: IPageAssets,
 ): string {
   const locale = route?.locale ?? config.locales.default
-  const siteTitle = localizedText(config.title, locale, config.locales.default)
+  const siteTitle = config.title
   const title = route && route.title !== siteTitle ? `${route.title} · ${siteTitle}` : siteTitle
-  const description =
-    route?.description ?? localizedText(config.description, locale, config.locales.default)
+  const description = route?.description ?? config.description
   const canonical = route ? absoluteRouteUrl(config.siteUrl, route.path) : undefined
   const alternates = route
     ? routes

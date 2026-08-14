@@ -1,4 +1,4 @@
-import { ChevronDown } from 'lucide-react'
+import { ChevronDownIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 interface ITableOfContentsItem {
@@ -124,7 +124,7 @@ export function TableOfContents({ label, mobile, routePath }: ITableOfContentsPr
       >
         <summary className="flex min-h-11 cursor-pointer list-none items-center gap-3 text-sm font-medium [&::-webkit-details-marker]:hidden">
           <span className="min-w-0 flex-1">{label}</span>
-          <ChevronDown
+          <ChevronDownIcon
             aria-hidden="true"
             className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
           />

@@ -6,7 +6,6 @@ import config from 'virtual:doctrine/config'
 import icons from 'virtual:doctrine/icons'
 import 'virtual:doctrine/styles.css'
 import 'virtual:doctrine/custom-styles.css'
-
 import { App } from './app.js'
 import { createDocumentRoutes, findDocumentRoute } from './content.js'
 import { htmlDocument } from './document.js'

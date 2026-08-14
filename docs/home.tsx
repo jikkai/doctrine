@@ -1,3 +1,5 @@
+import type { IDoctrineComponents } from '@amamo/doctrine'
+
 const content = {
   en: {
     description:
@@ -29,7 +31,7 @@ const content = {
       'Custom React and MDX components',
       'Subpath-safe static deployment',
     ],
-    installLabel: 'Install Doctrine and start the development server',
+    installLabel: 'Install Doctrine with your package manager',
     setupDescription:
       'Keep content close to its navigation metadata. Doctrine turns the directory into routes and validates the whole tree before publishing.',
     setupEyebrow: 'Small source, complete site',
@@ -65,7 +67,7 @@ const content = {
       '自定义 React 与 MDX 组件',
       '支持子路径的静态部署',
     ],
-    installLabel: '安装 Doctrine 并启动开发服务器',
+    installLabel: '使用你的包管理器安装 Doctrine',
     setupDescription:
       '让内容与导航元数据就近放置。Doctrine 会将目录转换成路由，并在发布前校验整棵内容树。',
     setupEyebrow: '精简源码，完整站点',
@@ -74,12 +76,14 @@ const content = {
   },
 } as const
 
-interface IHomeProps {
+export interface IHomeProps {
+  components?: IDoctrineComponents
   locale: keyof typeof content
 }
 
-export function Home({ locale }: IHomeProps) {
+export function Home({ components, locale }: IHomeProps) {
   const copy = content[locale]
+  const InstallTabs = components?.InstallTabs
 
   return (
     <div className="text-base leading-7 sm:text-[15px]" data-slot="home">
@@ -96,7 +100,7 @@ export function Home({ locale }: IHomeProps) {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <a
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                href="./guide/getting-started/"
+                href="./getting-started/"
               >
                 {copy.getStarted}
                 <span aria-hidden="true">→</span>
@@ -110,17 +114,12 @@ export function Home({ locale }: IHomeProps) {
             </div>
           </div>
 
-          <pre
-            aria-label={copy.installLabel}
-            className="mt-14 max-w-3xl overflow-x-auto rounded-lg border border-border bg-muted/40 px-4 py-4 font-mono text-[13px] leading-6 sm:px-5 sm:text-sm"
-          >
-            <code>
-              <span className="select-none text-muted-foreground">$ </span>pnpm add @amamo/doctrine
-              {'\n'}
-              <span className="select-none text-muted-foreground">$ </span>pnpm exec doctrine dev
-              docs
-            </code>
-          </pre>
+          {InstallTabs && (
+            <div className="doctrine-prose mt-14 max-w-3xl">
+              <h2 className="sr-only">{copy.installLabel}</h2>
+              <InstallTabs packageName="@amamo/doctrine" />
+            </div>
+          )}
         </div>
       </section>
 

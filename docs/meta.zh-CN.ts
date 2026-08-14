@@ -2,8 +2,13 @@ import { defineDirectory } from '@amamo/doctrine'
 
 export default defineDirectory({
   items: [
-    { icon: 'House', page: 'index', title: 'Doctrine' },
-    { directory: 'guide' },
+    {
+      description: '一个由 Vite 驱动的 MDX 静态文档生成器。',
+      icon: 'House',
+      page: 'index',
+      title: 'Doctrine',
+    },
+    { icon: 'Rocket', page: 'getting-started', title: '入门教程' },
     { icon: 'Sparkles', page: 'features', title: '功能说明' },
     { icon: 'Palette', page: 'customization', title: '自定义' },
     { icon: 'Settings', page: 'configuration', title: '配置参考' },

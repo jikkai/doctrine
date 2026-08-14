@@ -47,26 +47,26 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@amamo/mdx": "0.1.5",
+    "@amamo/mdx": "0.2.0",
     "@base-ui/react": "1.7.0",
     "@tailwindcss/vite": "4.3.3",
     "@vitejs/plugin-react": "6.0.5",
-    "lucide-react": "1.29.0",
+    "lucide-react": "1.31.0",
     "pagefind": "1.5.2",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "vite": "8.2.1"
   },
   "devDependencies": {
-    "@amamo/oxlint-config": "1.0.0",
-    "@amamo/verso": "1.0.1",
+    "@amamo/oxlint-config": "1.1.0",
+    "@amamo/verso": "1.1.0",
     "@tailwindcss/cli": "4.3.3",
-    "@types/node": "26.1.2",
+    "@types/node": "26.2.0",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
     "lint-staged": "17.3.0",
-    "oxfmt": "0.62.0",
-    "oxlint": "1.77.0",
+    "oxfmt": "0.63.0",
+    "oxlint": "1.78.0",
     "simple-git-hooks": "2.13.1",
     "tailwindcss": "4.3.3",
     "typescript": "7.0.2",
@@ -85,5 +85,5 @@
   "engines": {
     "node": ">=20.19"
   },
-  "packageManager": "pnpm@11.20.0"
+  "packageManager": "pnpm@11.21.0"
 }

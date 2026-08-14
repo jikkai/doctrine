@@ -8,8 +8,8 @@ description: 使用 Doctrine 的 Vite 开发服务器和静态生产构建。
 `doctrine.config.*`，并解析相对内容目录。
 
 ```sh
-pnpm exec doctrine dev [directory] [--host localhost] [--port 5173]
-pnpm exec doctrine build [directory] [--site-url https://example.com/docs/] [--out-dir dist]
+doctrine dev [directory] [--host localhost] [--port 5173]
+doctrine build [directory] [--site-url https://example.com/docs/] [--out-dir dist]
 ```
 
 `[directory]` 默认是 `docs`，并且必须存在。
@@ -25,8 +25,8 @@ pnpm exec doctrine build [directory] [--site-url https://example.com/docs/] [--o
 | `--port`      | `5173`      | `0` 到 `65535` 的整数端口；`0` 表示动态分配。 |
 
 ```sh
-pnpm exec doctrine dev
-pnpm exec doctrine dev website --host 0.0.0.0 --port 4173
+doctrine dev
+doctrine dev website --host 0.0.0.0 --port 4173
 ```
 
 命令会持续运行，直到服务器停止。MDX 和导航变化会更新网站；下一次搜索请求才会惰性重建
@@ -43,8 +43,8 @@ Pagefind 开发数据。
 | `--out-dir`   | 配置或 `dist`              | 从 root 解析的输出路径；已是绝对路径时保持不变。 |
 
 ```sh
-pnpm exec doctrine build
-pnpm exec doctrine build website \
+doctrine build
+doctrine build website \
   --site-url https://user.github.io/project/ \
   --out-dir build
 ```
@@ -57,7 +57,7 @@ CLI 值会为本次调用覆盖根配置中的 `siteUrl` 和 `outDir`。输出�
 ## 帮助与失败
 
 ```sh
-pnpm exec doctrine --help
+doctrine --help
 ```
 
 未知命令或选项、重复位置目录、缺少选项值、非法端口、内容目录不存在、配置或导航非法、输出

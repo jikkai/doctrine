@@ -13,10 +13,13 @@ Doctrine 需要 Node.js 20.19 或更新版本，并且机器必须属于 `@amamo
 fallback。MDX 可以在打包、预渲染和 hydration 时执行 JavaScript，因此只能使用可信作者提供的
 内容与配置。
 
-安装包并创建内容目录：
+安装包：
+
+<InstallTabs packageName="@amamo/doctrine" />
+
+然后创建内容目录：
 
 ```sh
-pnpm add @amamo/doctrine
 mkdir -p docs/guide
 ```
 
@@ -32,13 +35,11 @@ mkdir -p docs/guide
 
 创建 `docs/guide/install.mdx`：
 
-````mdx
+```mdx
 # 安装 Acme
 
-```sh
-pnpm add acme
+<InstallTabs packageName="acme" />
 ```
-````
 
 页面不要求 frontmatter。可选的字符串 `description` 会成为该页面的 meta description。
 
@@ -72,7 +73,7 @@ export default defineDirectory({
 ## 4. 启动开发服务器
 
 ```sh
-pnpm exec doctrine dev docs
+doctrine dev docs
 ```
 
 打开 `http://localhost:5173`。Vite 会服务端渲染每次请求，再在浏览器 hydration。MDX 修改由
@@ -84,7 +85,7 @@ Pagefind 索引失效，下一次搜索请求才会惰性重建它。
 需要其他监听地址或端口时：
 
 ```sh
-pnpm exec doctrine dev docs --host 0.0.0.0 --port 4173
+doctrine dev docs --host 0.0.0.0 --port 4173
 ```
 
 ## 5. 添加可选的网站元数据
@@ -109,7 +110,7 @@ export default defineConfig({
 传入真实公开网址，包括可能存在的仓库路径：
 
 ```sh
-pnpm exec doctrine build docs --site-url https://docs.example.com/
+doctrine build docs --site-url https://docs.example.com/
 ```
 
 默认产物为：

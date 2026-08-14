@@ -94,9 +94,8 @@ request rebuilds it.
 The default locale has no route prefix. Other configured locales use an encoded prefix, and the
 language control appears only when another document has the same slug.
 
-Navigation never falls back between locale files. Localized site text falls back from the current
-locale to the default locale, then to the first configured value. Locale switch labels fall back to
-the locale code.
+Navigation and page metadata never fall back between locale files. Locale switch labels fall back
+to the locale code.
 
 Doctrine's built-in interface labels are Chinese for locale names beginning with `zh` and English
 for every other locale. Content, navigation, site metadata, route prefixes, and `<html lang>` still

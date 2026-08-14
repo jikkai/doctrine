@@ -1,22 +1,18 @@
 import type { ComponentProps, ComponentType } from 'react'
 
-import type {
-  DoctrineLocalizedText,
-  IDoctrineComponents,
-  IDoctrineLocaleConfig,
-} from '../config.js'
+import type { IDoctrineComponents, IDoctrineLocaleConfig } from '../config.js'
 import type { DoctrineNavigation } from '../navigation.js'
 
 export interface IRuntimeConfig {
   base: string
-  copyright?: DoctrineLocalizedText
-  description: DoctrineLocalizedText
+  copyright?: string
+  description: string
   dev: boolean
   githubUrl?: string
   locales: IDoctrineLocaleConfig
   navigation: DoctrineNavigation
   siteUrl: string
-  title: DoctrineLocalizedText
+  title: string
 }
 
 export interface IMdxContentProps {

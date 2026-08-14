@@ -36,18 +36,23 @@ test('builds localized static pages and search below a GitHub Pages subpath', as
     const stylesheet = home.match(/href="\/doctrine\/(assets\/[^"]+\.css)"/)?.[1]
     assert.ok(stylesheet)
     assert.ok(existsSync(path.join(outDir, stylesheet)))
-    assert.match(home, /href="\/doctrine\/assets\//)
-    assert.match(home, /href="\.\/guide\/getting-started\/"/)
-    assert.match(features, /lucide-book-open/)
-    assert.match(features, /<span>Guide<\/span>/)
+    assert.match(home, /href="\.\/getting-started\/"/)
+    assert.match(features, /lucide-rocket/)
+    assert.match(features, /<span>Getting started<\/span>/)
     assert.match(features, /<span>Features<\/span>/)
-    assert.ok(features.indexOf('<span>Guide</span>') < features.indexOf('<span>Features</span>'))
+    assert.doesNotMatch(features, /<span>Doctrine<\/span>/)
+    assert.ok(
+      features.indexOf('<span>Getting started</span>') < features.indexOf('<span>Features</span>'),
+    )
     assert.match(home, /href="https:\/\/github\.com\/jikkai\/doctrine"/)
-    assert.match(home, /Copyright © 2026 白熱\./)
+    assert.match(home, /aria-label="Language"/)
+    assert.match(
+      home,
+      /<meta name="description" content="A Vite-powered static documentation generator for MDX\."/,
+    )
+    assert.match(home, /copyright © 2026 白熱。/)
     assert.match(home, /https:\/\/example\.com\/doctrine\//)
     assert.match(home, /hreflang="zh-CN"/)
-    assert.match(home, /doctrine-theme/)
-    assert.match(home, /data-slot="home-hero"/)
     assert.doesNotMatch(home, /data-slot="sidebar"/)
     assert.doesNotMatch(home, /data-slot="toc"/)
     assert.match(features, /data-slot="badge"/)
@@ -60,14 +65,20 @@ test('builds localized static pages and search below a GitHub Pages subpath', as
     assert.match(customization, /data-slot="tabs"/)
     assert.match(customization, /data-slot="toc"/)
     assert.match(customization, /<h2 id="add-a-stylesheet">/)
-    assert.match(chinese, /data-slot="home-hero"/)
     assert.doesNotMatch(chinese, /data-slot="sidebar"/)
     assert.doesNotMatch(chinese, /data-slot="toc"/)
     assert.match(chinese, /lang="zh-CN"/)
-    assert.match(chineseFeatures, /<span>指南<\/span>/)
-    assert.match(chinese, /版权所有 © 2026 白熱。/)
+    assert.match(
+      chinese,
+      /<meta name="description" content="一个由 Vite 驱动的 MDX 静态文档生成器。"/,
+    )
+    assert.match(chineseFeatures, /<span>入门教程<\/span>/)
+    assert.match(chinese, /copyright © 2026 白熱。/)
     assert.match(notFound, /src="\/doctrine\/assets\//)
     assert.ok(existsSync(path.join(outDir, 'pagefind/pagefind.js')))
+    assert.ok(existsSync(path.join(outDir, 'getting-started/index.html')))
+    assert.ok(existsSync(path.join(outDir, 'zh-CN/getting-started/index.html')))
+    assert.equal(existsSync(path.join(outDir, 'guide/getting-started/index.html')), false)
     assert.equal(existsSync(path.join(outDir, 'doctrine/index.html')), false)
   } finally {
     await rm(outDir, { force: true, recursive: true })

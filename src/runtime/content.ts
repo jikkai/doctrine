@@ -24,7 +24,7 @@ export function createDocumentRoutes(
       const slug = document.slug ?? '/'
       const description = document.frontmatter.description
       routes.push({
-        description: typeof description === 'string' ? description : undefined,
+        description: typeof description === 'string' ? description : page.description,
         document,
         locale,
         path: documentRoutePath(locale, config.locales.default, slug),

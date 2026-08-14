@@ -1,8 +1,16 @@
 import type { ChangeEvent, ComponentProps, ComponentType, ReactNode } from 'react'
 import { Dialog } from '@base-ui/react/dialog'
-import { Languages, Menu, Moon, Search, Sun, X } from 'lucide-react'
+import { Select } from '@base-ui/react/select'
+import {
+  CheckIcon,
+  LanguagesIcon,
+  MenuIcon,
+  MoonIcon,
+  SearchIcon,
+  SunIcon,
+  XIcon,
+} from 'lucide-react'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
-
 import type { IDoctrineComponents } from '../config.js'
 import type { DoctrineNavigationNode } from '../navigation.js'
 import type { DoctrineIcons, IDocumentRoute, IMdxContentProps, IRuntimeConfig } from './types.js'
@@ -11,7 +19,6 @@ import { builtinMdxComponents } from './components/mdx/registry.js'
 import { TableOfContents } from './components/table-of-contents.js'
 import { Button } from './components/ui/button.js'
 import { DialogSurface } from './components/ui/dialog-surface.js'
-import { localizedText } from './i18n.js'
 import { withBase } from './url.js'
 
 export interface IAppProps {
@@ -142,7 +149,7 @@ function Navigation({
           }
 
           const route = routes.find((candidate) => candidate.document.key === item.documentKey)
-          if (!route) return null
+          if (!route || route.slug === '/') return null
           return (
             <li key={item.documentKey}>
               <a
@@ -190,7 +197,7 @@ function MobileNavigation({
         aria-label={labels.menu}
         className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-input bg-background shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:h-9 sm:w-9 lg:hidden"
       >
-        <Menu aria-hidden="true" className="size-4" />
+        <MenuIcon aria-hidden="true" className="size-4" />
       </Dialog.Trigger>
       <DialogSurface className="max-w-sm">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
@@ -199,7 +206,7 @@ function MobileNavigation({
             aria-label={labels.close}
             className="inline-flex size-11 items-center justify-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:size-9"
           >
-            <X aria-hidden="true" className="size-4" />
+            <XIcon aria-hidden="true" className="size-4" />
           </Dialog.Close>
         </div>
         <Navigation current={current} icons={icons} items={items} mobile routes={routes} />
@@ -224,28 +231,47 @@ function LocaleSwitcher({
     : routes.filter((candidate) => candidate.slug === '/')
   if (translations.length < 2) return null
 
-  function handleChange(event: ChangeEvent<HTMLSelectElement>) {
-    window.location.assign(event.target.value)
+  function handleValueChange(nextValue: string | null) {
+    if (nextValue) window.location.assign(nextValue)
   }
 
   const value = withBase(config.base, route?.path ?? translations[0]?.path ?? '/')
+  const items = translations.map((translation) => ({
+    label: config.locales.labels?.[translation.locale] ?? translation.locale,
+    value: withBase(config.base, translation.path),
+  }))
 
   return (
-    <div className="relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-input bg-background shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 sm:h-9 sm:w-9">
-      <Languages aria-hidden="true" className="pointer-events-none size-4" />
-      <select
+    <Select.Root items={items} onValueChange={handleValueChange} value={value}>
+      <Select.Trigger
         aria-label={label}
-        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-        onChange={handleChange}
-        value={value}
+        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-input bg-background shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:h-9 sm:w-9"
+        data-slot="locale-switcher"
       >
-        {translations.map((translation) => (
-          <option key={translation.locale} value={withBase(config.base, translation.path)}>
-            {config.locales.labels?.[translation.locale] ?? translation.locale}
-          </option>
-        ))}
-      </select>
-    </div>
+        <LanguagesIcon aria-hidden="true" className="size-4" />
+        <Select.Value className="sr-only" />
+      </Select.Trigger>
+      <Select.Portal>
+        <Select.Positioner align="end" className="z-50 outline-none" sideOffset={4}>
+          <Select.Popup className="min-w-36 rounded-md border border-border bg-background p-1 text-foreground shadow-md outline-none">
+            <Select.List>
+              {items.map((item) => (
+                <Select.Item
+                  className="grid cursor-default grid-cols-[1rem_1fr] items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                  key={item.value}
+                  value={item.value}
+                >
+                  <Select.ItemIndicator className="col-start-1">
+                    <CheckIcon aria-hidden="true" className="size-4" />
+                  </Select.ItemIndicator>
+                  <Select.ItemText className="col-start-2">{item.label}</Select.ItemText>
+                </Select.Item>
+              ))}
+            </Select.List>
+          </Select.Popup>
+        </Select.Positioner>
+      </Select.Portal>
+    </Select.Root>
   )
 }
 
@@ -260,12 +286,12 @@ function ThemeToggle({ label }: { label: string }) {
   return (
     <Button
       aria-label={label}
-      className="h-11 w-11 shrink-0 px-0 sm:h-9 sm:w-9"
+      className="h-11 w-11 shrink-0 px-0! sm:h-9 sm:w-9"
       onClick={handleClick}
       variant="outline"
     >
-      <Sun aria-hidden="true" className="theme-icon-light size-4" />
-      <Moon aria-hidden="true" className="theme-icon-dark size-4" />
+      <SunIcon aria-hidden="true" className="theme-icon-light size-4" />
+      <MoonIcon aria-hidden="true" className="theme-icon-dark size-4" />
     </Button>
   )
 }
@@ -336,7 +362,7 @@ function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILab
         aria-label={labels.search}
         className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-input bg-background text-sm text-muted-foreground shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:h-9 sm:w-52 sm:justify-start sm:px-3"
       >
-        <Search aria-hidden="true" className="size-4" />
+        <SearchIcon aria-hidden="true" className="size-4" />
         <span className="hidden sm:inline">{labels.search}</span>
         <kbd className="ml-auto hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] sm:inline">
           ⌘K
@@ -346,7 +372,7 @@ function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILab
         <Dialog.Title className="sr-only">{labels.search}</Dialog.Title>
         <Dialog.Description className="sr-only">{labels.searchPlaceholder}</Dialog.Description>
         <div className="flex items-center border-b border-border px-4">
-          <Search aria-hidden="true" className="size-4 text-muted-foreground" />
+          <SearchIcon aria-hidden="true" className="size-4 text-muted-foreground" />
           <input
             aria-label={labels.search}
             autoComplete="off"
@@ -360,7 +386,7 @@ function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILab
             aria-label={labels.close}
             className="inline-flex size-11 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:size-9"
           >
-            <X aria-hidden="true" className="size-4" />
+            <XIcon aria-hidden="true" className="size-4" />
           </Dialog.Close>
         </div>
         <div aria-live="polite" className="max-h-[min(55dvh,28rem)] min-h-24 overflow-y-auto p-2">
@@ -393,10 +419,7 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
   const localeRoutes = routes.filter((candidate) => candidate.locale === locale)
   const navigation = config.navigation[locale] ?? []
   const home = localeRoutes.find((candidate) => candidate.slug === '/') ?? localeRoutes[0]
-  const siteTitle = localizedText(config.title, locale, config.locales.default)
-  const copyright = config.copyright
-    ? localizedText(config.copyright, locale, config.locales.default)
-    : undefined
+  const siteTitle = config.title
   const mdxComponents: IDoctrineComponents = {
     a: MdxLink,
     ...builtinMdxComponents,
@@ -404,14 +427,14 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
   }
 
   function renderFooter() {
-    if (!copyright) return null
+    if (!config.copyright) return null
     return (
       <footer
         className="mx-auto max-w-[var(--doctrine-content-width)] border-t border-border py-8 text-center text-sm text-muted-foreground"
         data-pagefind-ignore
         data-slot="footer"
       >
-        {copyright}
+        {config.copyright}
       </footer>
     )
   }
@@ -463,7 +486,7 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
         <>
           <main data-pagefind-body data-slot="standalone-page">
             <DoctrineLocaleContext value={locale}>
-              <Content />
+              <Content components={mdxComponents} />
             </DoctrineLocaleContext>
           </main>
           {renderFooter()}

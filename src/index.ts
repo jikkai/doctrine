@@ -1,9 +1,4 @@
-export type {
-  DoctrineLocalizedText,
-  IDoctrineComponents,
-  IDoctrineConfig,
-  IDoctrineLocaleConfig,
-} from './config.js'
+export type { IDoctrineComponents, IDoctrineConfig, IDoctrineLocaleConfig } from './config.js'
 export { defineConfig } from './config.js'
 export type {
   DoctrineDirectoryNavigationItem,

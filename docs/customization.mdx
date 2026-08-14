@@ -86,9 +86,7 @@ The shell exposes `header`, `header-inner`, `brand`, `navigation`, `sidebar`, `m
 Doctrine's own interface is already compiled, so consumers do not need Tailwind. To use utilities
 inside MDX or custom components, declare Tailwind in the documentation project's root manifest:
 
-```sh
-pnpm add -D tailwindcss
-```
+<InstallTabs dev packageName="tailwindcss" />
 
 Then opt the configured stylesheet into Tailwind and state what it should scan:
 
@@ -104,7 +102,7 @@ declaration, `styles` remains ordinary CSS.
 ## Built-in MDX components
 
 Importing is unnecessary inside MDX. Values and prop types are also public from
-`@amamo/doctrine/components` for custom wrappers.
+`@amamo/doctrine/components` for custom components.
 
 | Component          | Main props                                                                    |
 | ------------------ | ----------------------------------------------------------------------------- |
@@ -112,6 +110,7 @@ Importing is unnecessary inside MDX. Values and prop types are also public from
 | `Callout`          | `variant="note" \| "tip" \| "warning" \| "danger"`, `title`, aside attributes |
 | `Card`, `CardGrid` | optional card `title` and normal div attributes                               |
 | `CodeBlock`        | optional `filename`/`language`; wrap a fenced code block                      |
+| `InstallTabs`      | `packageName` and optional `dev`; renders pnpm, npm, yarn, and bun commands   |
 | `Step`, `Steps`    | optional step `title` and list attributes                                     |
 | `Tab`, `Tabs`      | tab `label`/`value`; tabs `defaultValue`/`className`                          |
 
@@ -166,7 +165,7 @@ export default {
 
 ```mdx
 <CardGrid>
-  <Card title="Installation">Start with [Getting started](/guide/getting-started/).</Card>
+  <Card title="Installation">Start with [Getting started](/getting-started/).</Card>
   <Card title="Deployment">Copy the [GitHub Pages workflow](/deployment/).</Card>
 </CardGrid>
 
@@ -178,7 +177,7 @@ export default {
 ```
 
 <CardGrid>
-  <Card title="Installation">Start with [Getting started](/guide/getting-started/).</Card>
+  <Card title="Installation">Start with [Getting started](/getting-started/).</Card>
   <Card title="Deployment">Copy the [GitHub Pages workflow](/deployment/).</Card>
 </CardGrid>
 
@@ -188,43 +187,16 @@ export default {
   <Step title="Build">Generate static files.</Step>
 </Steps>
 
-### Tabs
+### Installation and tabs
 
-````mdx
-<Tabs defaultValue="pnpm">
-  <Tab label="pnpm" value="pnpm">
+`InstallTabs` composes the built-in tabs and code block into package-manager-specific install
+commands. Use `Tabs` and `Tab` directly for other tabbed content.
 
-    ```sh
-    pnpm add @amamo/doctrine
-    ```
+```mdx
+<InstallTabs packageName="@amamo/doctrine" />
+```
 
-  </Tab>
-  <Tab label="npm" value="npm">
-
-    ```sh
-    npm install @amamo/doctrine
-    ```
-
-  </Tab>
-</Tabs>
-````
-
-<Tabs defaultValue="pnpm">
-  <Tab label="pnpm" value="pnpm">
-
-    ```sh
-    pnpm add @amamo/doctrine
-    ```
-
-  </Tab>
-  <Tab label="npm" value="npm">
-
-    ```sh
-    npm install @amamo/doctrine
-    ```
-
-  </Tab>
-</Tabs>
+<InstallTabs packageName="@amamo/doctrine" />
 
 ## Register or override components
 

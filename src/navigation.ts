@@ -6,6 +6,7 @@ import { loadConfigFromFile } from 'vite'
 import type { IDoctrineLocaleConfig } from './config.js'
 
 export interface IDoctrinePageNavigationItem {
+  description?: string
   icon?: string
   page: string
   title: string
@@ -26,6 +27,7 @@ export interface IDoctrineDirectoryConfig {
 }
 
 export interface INormalizedDoctrineNavigationPage {
+  description?: string
   documentKey: string
   icon?: string
   title: string
@@ -201,6 +203,7 @@ async function loadDirectory(
         }
         addIcon(item.icon, icons, configFile, options)
         return {
+          ...(item.description ? { description: item.description } : {}),
           documentKey,
           ...(item.icon ? { icon: item.icon } : {}),
           title: item.title,
@@ -354,6 +357,14 @@ function validateDirectoryConfig(
       }
       if (typeof item.title !== 'string' || !item.title.trim()) {
         throw new Error(`Navigation page must define title: ${displayPath(options, file)}`)
+      }
+      if (
+        item.description !== undefined &&
+        (typeof item.description !== 'string' || !item.description.trim())
+      ) {
+        throw new Error(
+          `Navigation description must be a non-empty string: ${displayPath(options, file)}`,
+        )
       }
       if (item.icon !== undefined && typeof item.icon !== 'string') {
         throw new Error(`Navigation icon must be a string: ${displayPath(options, file)}`)

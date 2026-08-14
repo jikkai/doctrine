@@ -1,5 +1,5 @@
 import type { HTMLAttributes, ReactNode } from 'react'
-import { Check, Copy } from 'lucide-react'
+import { CheckIcon, CopyIcon } from 'lucide-react'
 import {
   Children,
   createContext,
@@ -142,9 +142,9 @@ export function CodeBlockPre({
           type="button"
         >
           {copied ? (
-            <Check aria-hidden="true" className="size-3.5" />
+            <CheckIcon aria-hidden="true" className="size-3.5" />
           ) : (
-            <Copy aria-hidden="true" className="size-3.5" />
+            <CopyIcon aria-hidden="true" className="size-3.5" />
           )}
           <span className="hidden sm:inline">{copied ? copiedLabel : copyLabel}</span>
         </button>

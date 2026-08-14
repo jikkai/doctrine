@@ -56,6 +56,7 @@ export function Tabs({ children, className, defaultValue, variant = 'default' }:
         <TabsPrimitive.Tabs.Panel
           className="flex-1 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           data-slot="tab-panel"
+          keepMounted
           key={values[index]}
           value={values[index]}
         >

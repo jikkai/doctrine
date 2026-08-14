@@ -1,5 +1,5 @@
 import type { HTMLAttributes } from 'react'
-import { CircleCheck, Info, TriangleAlert, XCircle } from 'lucide-react'
+import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, XCircleIcon } from 'lucide-react'
 
 export interface ICalloutProps extends HTMLAttributes<HTMLElement> {
   title?: string
@@ -9,19 +9,19 @@ export interface ICalloutProps extends HTMLAttributes<HTMLElement> {
 const CALLOUT_VARIANTS = {
   danger: {
     className: 'border-red-500/40 bg-red-500/10 text-red-950 dark:text-red-100',
-    icon: XCircle,
+    icon: XCircleIcon,
   },
   note: {
     className: 'border-border bg-card text-card-foreground',
-    icon: Info,
+    icon: InfoIcon,
   },
   tip: {
     className: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-950 dark:text-emerald-100',
-    icon: CircleCheck,
+    icon: CircleCheckIcon,
   },
   warning: {
     className: 'border-amber-500/40 bg-amber-500/10 text-amber-950 dark:text-amber-100',
-    icon: TriangleAlert,
+    icon: TriangleAlertIcon,
   },
 } as const
 

@@ -130,6 +130,7 @@ export async function dev(
       include: [
         '@amamo/doctrine > @base-ui/react/button',
         '@amamo/doctrine > @base-ui/react/dialog',
+        '@amamo/doctrine > @base-ui/react/select',
         '@amamo/doctrine > @base-ui/react/tabs',
         '@amamo/doctrine > lucide-react',
         '@amamo/doctrine > react-dom/client',

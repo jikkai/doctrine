@@ -1,5 +1,6 @@
+import type { IHomeProps } from './home'
 import { Home } from './home'
 
-export default function HomePage() {
-  return <Home locale="zh-CN" />
+export default function HomePage(props: Pick<IHomeProps, 'components'>) {
+  return <Home {...props} locale="zh-CN" />
 }

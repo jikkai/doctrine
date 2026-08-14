@@ -81,8 +81,8 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
     highlight: {
       provider: 'shiki',
       themes: {
-        dark: 'andromeeda',
-        light: 'one-light',
+        dark: 'vitesse-dark',
+        light: 'vitesse-light',
       },
     },
     root: options.config.root,

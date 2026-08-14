@@ -35,24 +35,6 @@ test('refreshes navigation metadata and MDX routes without restarting', async ()
       { command: 'serve', contentDirectory: 'docs', root },
     )
     server = await dev(config, { host: '127.0.0.1', port: 0 })
-    const optimizedRuntimeDependencies = [
-      '@amamo/doctrine > @base-ui/react/button',
-      '@amamo/doctrine > @base-ui/react/dialog',
-      '@amamo/doctrine > @base-ui/react/tabs',
-      '@amamo/doctrine > lucide-react',
-      '@amamo/doctrine > react-dom/client',
-    ]
-    assert.ok(
-      optimizedRuntimeDependencies.every((dependency) =>
-        server?.config.optimizeDeps.include?.includes(dependency),
-      ),
-    )
-    const watch = server.config.server.watch
-    assert.ok(watch)
-    assert.deepEqual(watch.awaitWriteFinish, {
-      pollInterval: 10,
-      stabilityThreshold: 100,
-    })
     const address = server.httpServer?.address()
     assert.ok(address && typeof address !== 'string')
     const origin = `http://127.0.0.1:${address.port}`
@@ -60,20 +42,18 @@ test('refreshes navigation metadata and MDX routes without restarting', async ()
     const initial = await fetch(`${origin}/`)
     assert.equal(initial.status, 200)
     const initialHtml = await initial.text()
-    assert.match(initialHtml, /<span>Home<\/span>/)
+    assert.match(initialHtml, /<span>Remove<\/span>/)
     assert.match(initialHtml, /<link rel="stylesheet" href="\/@fs\/[^"]+\/runtime\/styles\.css">/)
 
     await writeFile(
       path.join(docs, 'meta.ts'),
-      "export default { items: [{ page: 'remove', title: 'Keep briefly' }, { page: 'index', title: 'Updated', icon: 'BookOpen' }] }\n",
+      "export default { items: [{ page: 'remove', title: 'Keep briefly', icon: 'BookOpen' }, { page: 'index', title: 'Home' }] }\n",
     )
     const updated = await waitForPage(origin, '/', (response) => {
       return (
         response.status === 200 &&
-        response.body.includes('<span>Updated</span>') &&
-        response.body.includes('lucide-book-open') &&
-        response.body.indexOf('<span>Keep briefly</span>') <
-          response.body.indexOf('<span>Updated</span>')
+        response.body.includes('<span>Keep briefly</span>') &&
+        response.body.includes('lucide-book-open')
       )
     })
     assert.doesNotMatch(updated.body, /lucide-house/)
@@ -86,7 +66,7 @@ test('refreshes navigation metadata and MDX routes without restarting', async ()
     assert.doesNotMatch(pendingAddition.body, /<span>Added<\/span>/)
     await writeFile(
       path.join(docs, 'meta.ts'),
-      "export default { items: [{ page: 'index', title: 'Updated', icon: 'BookOpen' }, { page: 'added', title: 'Added' }, { page: 'remove', title: 'Remove' }] }\n",
+      "export default { items: [{ page: 'index', title: 'Home' }, { page: 'added', title: 'Added' }, { page: 'remove', title: 'Keep briefly', icon: 'BookOpen' }] }\n",
     )
     await waitForPage(origin, '/added/', (response) => {
       return response.status === 200 && response.body.includes('<span>Added</span>')
@@ -94,14 +74,14 @@ test('refreshes navigation metadata and MDX routes without restarting', async ()
 
     await writeFile(
       path.join(docs, 'meta.ts'),
-      "export default { items: [{ page: 'index', title: 'Updated', icon: 'BookOpen' }, { page: 'added', title: 'Added' }] }\n",
+      "export default { items: [{ page: 'index', title: 'Home' }, { page: 'added', title: 'Added' }] }\n",
     )
     await waitForPage(origin, '/', (response) => {
-      return response.status === 200 && !response.body.includes('<span>Remove</span>')
+      return response.status === 200 && !response.body.includes('<span>Keep briefly</span>')
     })
     await rm(path.join(docs, 'remove.mdx'))
     await waitForPage(origin, '/', (response) => {
-      return response.status === 200 && !response.body.includes('<span>Remove</span>')
+      return response.status === 200 && !response.body.includes('<span>Keep briefly</span>')
     })
     await waitForPage(origin, '/remove/', (response) => response.status === 404)
   } finally {

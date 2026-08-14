@@ -12,7 +12,7 @@ Doctrine 就能处理这段子路径。
 添加 CI 前，先使用相同的公开地址结构：
 
 ```sh
-pnpm exec doctrine build docs --site-url https://owner.github.io/repository/
+doctrine build docs --site-url https://owner.github.io/repository/
 ```
 
 如果要检查导航与搜索，请通过静态服务器打开生成的 `dist/index.html`。不要使用 `file:` URL；
@@ -61,7 +61,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - id: pages
         uses: actions/configure-pages@v6
-      - run: pnpm exec doctrine build docs --site-url "${{ steps.pages.outputs.base_url }}"
+      - run: doctrine build docs --site-url "${{ steps.pages.outputs.base_url }}"
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist

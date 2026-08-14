@@ -14,8 +14,18 @@ subpath-safe assets without requiring a production Node.js server.
 
 ## Quick start
 
+Install Doctrine with your package manager:
+
+| Package manager | Command                       |
+| --------------- | ----------------------------- |
+| pnpm            | `pnpm add @amamo/doctrine`    |
+| npm             | `npm install @amamo/doctrine` |
+| yarn            | `yarn add @amamo/doctrine`    |
+| bun             | `bun add @amamo/doctrine`     |
+
+Then create the content directory:
+
 ```sh
-pnpm add @amamo/doctrine
 mkdir docs
 ```
 
@@ -40,8 +50,8 @@ export default defineDirectory({
 Preview and build:
 
 ```sh
-pnpm exec doctrine dev docs
-pnpm exec doctrine build docs --site-url https://example.com/project/
+doctrine dev docs
+doctrine build docs --site-url https://example.com/project/
 ```
 
 Development defaults to `http://localhost:5173`. Production output defaults to `dist`; pass the
@@ -109,12 +119,12 @@ build work in `.doctrine/`. Treat both as generated directories and keep them ou
 | Import                       | Public API                                                              |
 | ---------------------------- | ----------------------------------------------------------------------- |
 | `@amamo/doctrine`            | `defineConfig`, `defineDirectory`, and their public configuration types |
-| `@amamo/doctrine/components` | `Badge`, `Callout`, `Card`, `CardGrid`, `Step`, `Steps`, `Tab`, `Tabs`  |
+| `@amamo/doctrine/components` | Built-in MDX components, including `InstallTabs`, `Tabs`, and `Tab`     |
 | `doctrine`                   | `dev` and `build` CLI commands                                          |
 
 ## Documentation
 
-- [Getting started](https://jikkai.github.io/doctrine/guide/getting-started/)
+- [Getting started](https://jikkai.github.io/doctrine/getting-started/)
 - [Features and runtime behavior](https://jikkai.github.io/doctrine/features/)
 - [Customization](https://jikkai.github.io/doctrine/customization/)
 - [Configuration](https://jikkai.github.io/doctrine/configuration/)
