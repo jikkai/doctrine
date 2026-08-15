@@ -1,2 +1,14 @@
 @import 'tailwindcss' source(none);
 @source './home.tsx';
+
+[data-slot='header-navigation']::before {
+  content: 'v0.2.3';
+  align-content: center;
+  margin-right: 1rem;
+  color: color-mix(in oklab, var(--muted-foreground) 80%, transparent);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  white-space: nowrap;
+}

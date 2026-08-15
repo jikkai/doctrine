@@ -23,11 +23,12 @@ Doctrine 会在预编译运行时 CSS 之后 import 这个文件。只覆盖网�
 
 ```css
 :root {
-  --doctrine-accent: oklch(0.55 0.2 250);
-  --doctrine-accent-foreground: white;
-  --doctrine-ring: oklch(0.55 0.2 250);
+  --doctrine-accent: oklch(0.9 0.05 155);
+  --doctrine-accent-foreground: oklch(0.25 0.04 155);
+  --doctrine-ring: oklch(0.48 0.12 155);
   --doctrine-radius: 0.9rem;
   --doctrine-font-sans: Inter, sans-serif;
+  --doctrine-font-display: Charter, serif;
   --doctrine-content-width: 52rem;
 }
 
@@ -51,6 +52,7 @@ Doctrine 会在预编译运行时 CSS 之后 import 这个文件。只覆盖网�
 | `--doctrine-accent-foreground` | 强调色上的文字        |
 | `--doctrine-radius`            | 共用表面圆角          |
 | `--doctrine-font-sans`         | 网站字体栈            |
+| `--doctrine-font-display`      | 大标题字体栈          |
 | `--doctrine-content-width`     | 正文最大宽度          |
 | `--doctrine-sidebar-width`     | 桌面导航宽度          |
 | `--doctrine-header-height`     | 吸顶 header 高度      |
@@ -75,8 +77,8 @@ Doctrine 会在预编译运行时 CSS 之后 import 这个文件。只覆盖网�
 }
 ```
 
-网站外壳提供 `header`、`header-inner`、`brand`、`navigation`、`sidebar`、`main`、`content` 和
-`footer`。内置组件提供 `badge`、`callout`、`card`、`card-grid`、`step`、`steps`、`tabs`、
+网站外壳提供 `header`、`header-inner`、`brand`、`navigation`、`sidebar`、`main`、`content`、
+`page-navigation` 和 `footer`。内置组件提供 `badge`、`callout`、`card`、`card-grid`、`step`、`steps`、`tabs`、
 `code-block`、`code-block-header`、`code-block-filename`、`code-block-language`、
 `code-block-copy`、`table-scroll`、`tab-list`、`tab` 和 `tab-panel`。
 
@@ -113,6 +115,33 @@ Doctrine 会检查根 `package.json` 的 dependencies、dev dependencies 与 opt
 | `Tab`、`Tabs`      | tab `label`/`value`；tabs `defaultValue`/`className`                    |
 
 `Card` 只是展示容器，不是链接。需要跳转时，请在 Card 内放 Markdown 链接。
+
+### 原生写作元素
+
+Doctrine 会直接排版语义化 HTML，因此常见写作模式不需要额外的 React 组件。Markdown 引用与表格
+照常使用；MDX 还可以用 `<details>` 和 `<summary>` 展开补充内容，用 `<kbd>` 表示键盘输入，用
+`<mark>` 标出重点，用 `<dl>` 编写定义列表，并用 `<figure>` 和 `<figcaption>` 为媒体添加说明。
+这些元素会沿用主题、窄屏布局、焦点样式和打印样式。
+
+```mdx
+<details>
+  <summary>为什么产物是静态的？</summary>
+
+构建时会预渲染每条路由。
+
+</details>
+
+按 <kbd>Ctrl</kbd> + <kbd>K</kbd> 搜索。
+```
+
+<details>
+  <summary>为什么产物是静态的？</summary>
+
+构建时会预渲染每条路由。
+
+</details>
+
+按 <kbd>Ctrl</kbd> + <kbd>K</kbd> 搜索。
 
 ### 代码块
 

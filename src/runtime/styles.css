@@ -4,26 +4,29 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 :root {
-  --doctrine-background: oklch(0.985 0.009 80);
-  --doctrine-foreground: oklch(0.245 0.022 55);
-  --doctrine-card: oklch(0.995 0.005 80);
-  --doctrine-card-foreground: oklch(0.225 0.022 55);
-  --doctrine-primary: oklch(0.42 0.12 35);
+  --doctrine-background: oklch(0.985 0.007 80);
+  --doctrine-foreground: oklch(0.225 0.018 55);
+  --doctrine-card: oklch(0.995 0.004 80);
+  --doctrine-card-foreground: oklch(0.21 0.018 55);
+  --doctrine-primary: oklch(0.45 0.115 35);
   --doctrine-primary-foreground: oklch(0.985 0 0);
-  --doctrine-muted: oklch(0.955 0.014 75);
-  --doctrine-muted-foreground: oklch(0.45 0.025 55);
-  --doctrine-accent: oklch(0.94 0.035 65);
-  --doctrine-accent-foreground: oklch(0.32 0.08 38);
-  --doctrine-border: oklch(0.88 0.025 70);
-  --doctrine-input: oklch(0.86 0.03 70);
-  --doctrine-ring: oklch(0.55 0.15 38);
-  --doctrine-radius: 0.625rem;
+  --doctrine-muted: oklch(0.955 0.011 75);
+  --doctrine-muted-foreground: oklch(0.455 0.021 55);
+  --doctrine-accent: oklch(0.94 0.026 65);
+  --doctrine-accent-foreground: oklch(0.31 0.07 38);
+  --doctrine-border: oklch(0.875 0.018 70);
+  --doctrine-input: oklch(0.84 0.022 70);
+  --doctrine-ring: oklch(0.52 0.14 38);
+  --doctrine-radius: 0.5rem;
   --doctrine-font-sans:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
-    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-  --doctrine-content-width: 48rem;
-  --doctrine-sidebar-width: 16rem;
-  --doctrine-header-height: 3.5rem;
+    'Avenir Next', 'Segoe UI Variable', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --doctrine-font-display:
+    'Iowan Old Style', Charter, 'Source Han Serif SC', 'Noto Serif CJK SC', 'Songti SC', ui-serif,
+    Georgia, serif;
+  --doctrine-content-width: 46.5rem;
+  --doctrine-sidebar-width: 17rem;
+  --doctrine-header-height: 4rem;
   --background: var(--doctrine-background);
   --foreground: var(--doctrine-foreground);
   --card: var(--doctrine-card);
@@ -40,19 +43,19 @@
 }
 
 [data-theme='dark'] {
-  --doctrine-background: oklch(0.17 0.014 50);
-  --doctrine-foreground: oklch(0.9 0.018 75);
-  --doctrine-card: oklch(0.205 0.018 50);
-  --doctrine-card-foreground: oklch(0.92 0.016 75);
-  --doctrine-primary: oklch(0.75 0.12 65);
-  --doctrine-primary-foreground: oklch(0.17 0.02 45);
-  --doctrine-muted: oklch(0.245 0.02 50);
-  --doctrine-muted-foreground: oklch(0.71 0.028 70);
-  --doctrine-accent: oklch(0.28 0.045 45);
-  --doctrine-accent-foreground: oklch(0.92 0.02 75);
-  --doctrine-border: oklch(0.8 0.025 70 / 20%);
-  --doctrine-input: oklch(0.8 0.025 70 / 25%);
-  --doctrine-ring: oklch(0.7 0.13 60);
+  --doctrine-background: oklch(0.165 0.011 50);
+  --doctrine-foreground: oklch(0.91 0.014 75);
+  --doctrine-card: oklch(0.195 0.014 50);
+  --doctrine-card-foreground: oklch(0.925 0.013 75);
+  --doctrine-primary: oklch(0.73 0.105 58);
+  --doctrine-primary-foreground: oklch(0.165 0.015 45);
+  --doctrine-muted: oklch(0.235 0.015 50);
+  --doctrine-muted-foreground: oklch(0.715 0.022 70);
+  --doctrine-accent: oklch(0.275 0.035 45);
+  --doctrine-accent-foreground: oklch(0.925 0.017 75);
+  --doctrine-border: oklch(0.8 0.02 70 / 18%);
+  --doctrine-input: oklch(0.8 0.02 70 / 24%);
+  --doctrine-ring: oklch(0.72 0.11 60);
 }
 
 @theme inline {
@@ -84,6 +87,7 @@
     color: var(--foreground);
     color-scheme: light;
     scroll-padding-top: calc(var(--doctrine-header-height) + 1.5rem);
+    scrollbar-color: color-mix(in oklab, var(--foreground) 24%, transparent) transparent;
   }
 
   html[data-theme='dark'] {
@@ -96,6 +100,7 @@
     background: var(--background);
     color: var(--foreground);
     font-family: var(--doctrine-font-sans);
+    font-synthesis: none;
     text-rendering: optimizeLegibility;
   }
 
@@ -103,6 +108,19 @@
   input,
   select {
     font: inherit;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 22%, transparent);
+  }
+
+  :where(a, button, input, select, summary, textarea):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+  }
+
+  main[tabindex='-1']:focus {
+    outline: none;
   }
 }
 
@@ -124,11 +142,12 @@
 
 .doctrine-prose {
   --typeset-font-body: var(--doctrine-font-sans);
+  --typeset-font-display: var(--doctrine-font-display);
   --typeset-font-heading: var(--doctrine-font-sans);
   --typeset-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --typeset-size: 1rem;
-  --typeset-leading: 1.75;
-  --typeset-flow: 1.25em;
+  --typeset-leading: 1.8;
+  --typeset-flow: 1.35em;
   font-family: var(--typeset-font-body);
   font-size: var(--typeset-size);
   line-height: var(--typeset-leading);
@@ -149,21 +168,23 @@
 .doctrine-prose :where(h1, h2, h3, h4) {
   scroll-margin-top: calc(var(--doctrine-header-height) + 1.5rem);
   font-family: var(--typeset-font-heading);
-  font-weight: 700;
-  line-height: 1.15;
+  font-weight: 650;
+  line-height: 1.2;
   color: var(--foreground);
   letter-spacing: -0.03em;
   text-wrap: balance;
 }
 
 .doctrine-prose h1 {
-  font-size: 2.25em;
+  font-family: var(--typeset-font-display);
+  font-size: clamp(2.5rem, 7vw, 3.5rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.045em;
 }
 
 .doctrine-prose h2 {
-  padding-bottom: 0.3em;
-  border-bottom: 1px solid color-mix(in oklab, var(--primary) 24%, var(--border));
-  font-size: 1.5em;
+  font-size: 1.55em;
 }
 
 .doctrine-prose h3 {
@@ -175,11 +196,18 @@
 }
 
 .doctrine-prose > :where(h2, h3, h4) {
-  margin-block-start: calc(var(--typeset-flow) * 2);
+  margin-block-start: calc(var(--typeset-flow) * 2.35);
 }
 
 .doctrine-prose > :where(h1, h2, h3, h4) + :where(*) {
-  margin-block-start: calc(var(--typeset-flow) * 0.55);
+  margin-block-start: calc(var(--typeset-flow) * 0.65);
+}
+
+.doctrine-prose > h1 + p {
+  max-width: 42rem;
+  color: color-mix(in oklab, var(--foreground) 72%, var(--background));
+  font-size: 1.0625em;
+  line-height: 1.85;
 }
 
 .doctrine-prose :where(ul, ol) {
@@ -213,7 +241,7 @@
   text-decoration-color: color-mix(in oklab, currentColor 35%, transparent);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
-  transition: text-decoration-color 150ms ease;
+  transition: text-decoration-color 150ms ease-out;
 }
 
 .doctrine-prose a:hover {
@@ -222,14 +250,15 @@
 
 .doctrine-prose blockquote {
   border-left: 2px solid var(--primary);
-  background: color-mix(in oklab, var(--accent) 52%, transparent);
-  padding: 0.75rem 1rem;
-  color: color-mix(in oklab, var(--foreground) 74%, var(--background));
+  padding: 0.25rem 0 0.25rem 1.25rem;
+  color: color-mix(in oklab, var(--foreground) 76%, var(--background));
+  font-family: var(--typeset-font-display);
+  font-size: 1.08em;
   font-style: italic;
 }
 
 .doctrine-prose :not(pre) > code {
-  border-radius: var(--radius-md);
+  border-radius: 0.25rem;
   background: var(--muted);
   color: var(--accent-foreground);
   padding: 0.15em 0.35em;
@@ -270,6 +299,94 @@
   border-radius: var(--radius-lg);
 }
 
+.doctrine-prose > figure:not([data-slot='code-block']) {
+  margin-inline: 0;
+}
+
+.doctrine-prose > figure:not([data-slot='code-block']) > figcaption {
+  margin-top: 0.625rem;
+  color: var(--muted-foreground);
+  font-size: 0.8125em;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.doctrine-prose hr {
+  width: 4rem;
+  margin-block: calc(var(--typeset-flow) * 2.4);
+  margin-inline: 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+.doctrine-prose kbd {
+  display: inline-block;
+  min-width: 1.5em;
+  border: 1px solid var(--input);
+  border-bottom-width: 2px;
+  border-radius: 0.3rem;
+  background: var(--card);
+  padding: 0.05em 0.38em;
+  color: var(--foreground);
+  font-family: var(--typeset-font-mono);
+  font-size: 0.78em;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.doctrine-prose mark {
+  background: color-mix(in oklab, var(--primary) 18%, transparent);
+  color: inherit;
+  padding-inline: 0.08em;
+}
+
+.doctrine-prose details {
+  border-block: 1px solid var(--border);
+  padding-block: 0.25rem;
+}
+
+.doctrine-prose details + details {
+  margin-top: -1px;
+}
+
+.doctrine-prose summary {
+  min-height: 2.75rem;
+  cursor: pointer;
+  align-content: center;
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.doctrine-prose details[open] > summary {
+  margin-bottom: 0.5rem;
+}
+
+.doctrine-prose details > :not(summary) {
+  margin-block: 0 0.75rem;
+}
+
+.doctrine-prose dl {
+  display: grid;
+  grid-template-columns: minmax(7rem, 0.35fr) minmax(0, 1fr);
+  column-gap: 1.5rem;
+}
+
+.doctrine-prose dt,
+.doctrine-prose dd {
+  border-top: 1px solid var(--border);
+  padding-block: 0.75rem;
+}
+
+.doctrine-prose dt {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.doctrine-prose dd {
+  margin: 0;
+}
+
 .doctrine-prose table {
   width: 100%;
   border-collapse: collapse;
@@ -277,13 +394,14 @@
 }
 
 .doctrine-prose :where(th, td) {
-  border-bottom: 1px solid var(--border);
-  padding: 0.625em 0.75em;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 78%, transparent);
+  padding: 0.7em 0.8em;
   text-align: left;
   vertical-align: top;
 }
 
 .doctrine-prose th {
+  background: color-mix(in oklab, var(--muted) 48%, transparent);
   color: var(--foreground);
   font-weight: 600;
 }
@@ -301,12 +419,13 @@ html:lang(zh) .doctrine-prose :where(h1, h2, h3, h4) {
 }
 
 .doctrine-prose [data-slot='table-scroll'] {
-  border: 1px solid var(--border);
+  border: 1px solid color-mix(in oklab, var(--border) 78%, transparent);
   border-radius: var(--radius-lg);
 }
 
 .doctrine-prose [data-slot='steps'] {
   list-style: none;
+  padding-left: 0;
 }
 
 @media (min-width: 40rem) {
@@ -317,11 +436,63 @@ html:lang(zh) .doctrine-prose :where(h1, h2, h3, h4) {
     padding-left: max(1rem, env(safe-area-inset-left));
   }
 
-  .doctrine-prose {
-    --typeset-size: 0.9375rem;
-  }
-
   .doctrine-prose pre {
     padding: 1rem;
+  }
+}
+
+@media (max-width: 39.999rem) {
+  .doctrine-prose dl {
+    grid-template-columns: 1fr;
+  }
+
+  .doctrine-prose dt {
+    padding-bottom: 0.15rem;
+  }
+
+  .doctrine-prose dd {
+    border-top: 0;
+    padding-top: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  [data-slot='header'],
+  [data-slot='sidebar'],
+  [data-slot='toc'],
+  [data-slot='toc-mobile'],
+  [data-slot='page-navigation'],
+  [data-slot='footer'] {
+    display: none !important;
+  }
+
+  body,
+  .doctrine-prose {
+    background: white;
+    color: black;
+  }
+
+  [data-slot='main'] {
+    padding: 0;
+  }
+
+  .doctrine-prose {
+    max-width: none;
+  }
+
+  .doctrine-prose a {
+    color: inherit;
+    text-decoration-color: currentColor;
   }
 }

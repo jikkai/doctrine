@@ -106,9 +106,11 @@ use the exact configured locale.
 The theme control stores `light` or `dark` in `localStorage`. An inline head script applies the saved
 choice—or the operating-system preference on first visit—before the document body renders.
 
-Doctrine ships precompiled interface CSS and built-in `Badge`, `Callout`, `Card`, `CardGrid`, `Step`,
-`Steps`, `Tab`, and `Tabs` components. A configured CSS file loads after the defaults. A custom
-component map is merged after built-ins and is shared by SSR and browser hydration.
+Doctrine ships precompiled interface CSS and built-in `Badge`, `Callout`, `Card`, `CardGrid`,
+`CodeBlock`, `InstallTabs`, `Step`, `Steps`, `Tab`, and `Tabs` components. Semantic details,
+definitions, figures, keyboard input, highlights, quotes, and tables are styled without wrappers. A
+configured CSS file loads after the defaults. A custom component map is merged after built-ins and
+is shared by SSR and browser hydration.
 
 Tailwind is optional. Doctrine enables its Vite plugin only when the documentation project's root
 `package.json` declares `tailwindcss` in dependencies, dev dependencies, or optional dependencies.

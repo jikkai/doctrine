@@ -37,6 +37,8 @@ const content = {
     setupEyebrow: 'Small source, complete site',
     setupTitle: 'Write docs. Let the site assemble itself.',
     title: 'An MDX directory is all you need.',
+    workflow: ['Write MDX', 'Preview every route', 'Publish static files'],
+    workflowLabel: 'One source, one continuous path',
   },
   'zh-CN': {
     description:
@@ -73,6 +75,8 @@ const content = {
     setupEyebrow: '精简源码，完整站点',
     setupTitle: '只管写文档，网站会自行组装。',
     title: '只需一个 MDX 目录。',
+    workflow: ['编写 MDX', '预览全部路由', '发布静态文件'],
+    workflowLabel: '一份源码，一条完整路径',
   },
 } as const
 
@@ -86,74 +90,107 @@ export function Home({ components, locale }: IHomeProps) {
   const InstallTabs = components?.InstallTabs
 
   return (
-    <div className="text-base leading-7 sm:text-[15px]" data-slot="home">
-      <section className="border-b border-border" data-slot="home-hero">
-        <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8 lg:py-32">
+    <div className="text-base leading-7" data-slot="home">
+      <section className="border-b border-border/60" data-slot="home-hero">
+        <div className="mx-auto grid max-w-6xl gap-16 px-4 py-20 sm:px-6 sm:py-28 lg:grid-cols-[minmax(0,1.25fr)_minmax(18rem,0.75fr)] lg:gap-24 lg:px-8 lg:py-32">
           <div className="max-w-3xl">
-            <p className="text-sm font-medium text-muted-foreground">{copy.eyebrow}</p>
-            <h1 className="mt-5 text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
+            <p className="flex items-center gap-3 text-sm font-medium text-muted-foreground before:h-px before:w-8 before:bg-[color-mix(in_oklab,var(--primary)_60%,transparent)]">
+              {copy.eyebrow}
+            </p>
+            <h1 className="mt-6 max-w-[12ch] text-balance font-[var(--doctrine-font-display)] text-5xl leading-[0.98] font-semibold tracking-[-0.045em] sm:text-6xl lg:text-[4.5rem]">
               {copy.title}
             </h1>
-            <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-muted-foreground">
+            <p className="mt-7 max-w-2xl text-pretty text-lg leading-8 text-muted-foreground">
               {copy.description}
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
               <a
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="inline-flex min-h-11 items-center justify-center gap-3 rounded-md bg-[var(--primary)] px-5 text-sm font-semibold text-[var(--primary-foreground)] transition-colors hover:bg-[color-mix(in_oklab,var(--primary)_90%,var(--background))] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 href="./getting-started/"
               >
                 {copy.getStarted}
                 <span aria-hidden="true">→</span>
               </a>
               <a
-                className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="group inline-flex min-h-11 items-center gap-2 px-1 text-sm font-semibold underline decoration-[var(--border)] underline-offset-4 transition-colors hover:text-primary hover:decoration-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 href="./features/"
               >
                 {copy.featuresLink}
+                <span
+                  aria-hidden="true"
+                  className="transition-transform group-hover:translate-x-0.5 motion-reduce:transform-none"
+                >
+                  →
+                </span>
               </a>
             </div>
           </div>
 
-          {InstallTabs && (
-            <div className="doctrine-prose mt-14 max-w-3xl">
-              <h2 className="sr-only">{copy.installLabel}</h2>
-              <InstallTabs packageName="@amamo/doctrine" />
-            </div>
-          )}
+          <div className="self-end lg:pb-1">
+            <p className="text-xs font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+              {copy.workflowLabel}
+            </p>
+            <ol className="mt-5 border-t border-border/60">
+              {copy.workflow.map((item, index) => (
+                <li
+                  className="grid grid-cols-[2rem_1fr] gap-3 border-b border-border/60 py-3.5 text-sm"
+                  key={item}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="font-mono text-xs text-primary"
+                    data-pagefind-ignore
+                  >
+                    0{index + 1}
+                  </span>
+                  <span className="font-medium">{item}</span>
+                </li>
+              ))}
+            </ol>
+            {InstallTabs && (
+              <div className="doctrine-prose mt-8">
+                <h2 className="sr-only">{copy.installLabel}</h2>
+                <InstallTabs packageName="@amamo/doctrine" />
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
-      <section className="border-b border-border" aria-label={copy.eyebrow}>
-        <div className="mx-auto grid max-w-6xl px-4 sm:px-6 md:grid-cols-3 lg:px-8">
-          {copy.features.map((feature) => (
-            <div
-              className="border-b border-border py-10 last:border-b-0 md:border-r md:border-b-0 md:px-8 md:py-12 md:first:pl-0 md:last:border-r-0 md:last:pr-0"
-              key={feature.title}
-            >
+      <section className="border-b border-border/60" aria-label={copy.eyebrow}>
+        <ol className="mx-auto grid max-w-6xl gap-8 px-4 py-16 sm:px-6 md:grid-cols-3 md:gap-10 lg:px-8 lg:py-20">
+          {copy.features.map((feature, index) => (
+            <li className="border-t border-border/60 pt-5" key={feature.title}>
+              <span
+                aria-hidden="true"
+                className="font-mono text-xs text-primary"
+                data-pagefind-ignore
+              >
+                0{index + 1}
+              </span>
               <h2 className="text-base font-semibold tracking-tight">{feature.title}</h2>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">{feature.description}</p>
-            </div>
+            </li>
           ))}
-        </div>
+        </ol>
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-12 px-4 py-20 sm:px-6 sm:py-24 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)] lg:items-start lg:gap-20 lg:px-8 lg:py-28">
+      <section className="mx-auto grid max-w-6xl gap-12 px-4 py-20 sm:px-6 sm:py-24 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)] lg:items-start lg:gap-24 lg:px-8 lg:py-28">
         <div className="max-w-xl">
           <p className="text-sm font-medium text-muted-foreground">{copy.setupEyebrow}</p>
-          <h2 className="mt-4 text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
+          <h2 className="mt-4 max-w-[16ch] text-balance font-[var(--doctrine-font-display)] text-4xl leading-tight font-semibold tracking-[-0.03em] sm:text-5xl">
             {copy.setupTitle}
           </h2>
           <p className="mt-5 text-pretty leading-7 text-muted-foreground">
             {copy.setupDescription}
           </p>
         </div>
-        <ul className="grid gap-4">
+        <ul className="border-t border-border/60">
           {copy.included.map((item) => (
-            <li className="flex gap-3 border-b border-border pb-4 last:border-0" key={item}>
-              <span
-                aria-hidden="true"
-                className="mt-[0.7rem] size-1.5 shrink-0 rounded-full bg-foreground"
-              />
+            <li className="flex gap-4 border-b border-border/60 py-4" key={item}>
+              <span aria-hidden="true" className="text-primary">
+                —
+              </span>
               <span className="font-medium">{item}</span>
             </li>
           ))}

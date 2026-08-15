@@ -13,6 +13,9 @@ test('builds localized static pages and search below a GitHub Pages subpath', as
   const root = process.cwd()
   const outDir = path.join(root, '.doctrine-test-dist')
   try {
+    const manifest = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8')) as {
+      version: string
+    }
     await execFileAsync(
       process.execPath,
       [
@@ -36,6 +39,8 @@ test('builds localized static pages and search below a GitHub Pages subpath', as
     const stylesheet = home.match(/href="\/doctrine\/(assets\/[^"]+\.css)"/)?.[1]
     assert.ok(stylesheet)
     assert.ok(existsSync(path.join(outDir, stylesheet)))
+    const styles = await readFile(path.join(outDir, stylesheet), 'utf8')
+    assert.ok(styles.includes(`content:"v${manifest.version}"`))
     assert.match(home, /href="\.\/getting-started\/"/)
     assert.match(features, /lucide-rocket/)
     assert.match(features, /<span>Getting started<\/span>/)
@@ -45,7 +50,12 @@ test('builds localized static pages and search below a GitHub Pages subpath', as
       features.indexOf('<span>Getting started</span>') < features.indexOf('<span>Features</span>'),
     )
     assert.match(home, /href="https:\/\/github\.com\/jikkai\/doctrine"/)
+    assert.doesNotMatch(home, /data-slot="version"/)
+    assert.match(home, /data-slot="header-navigation"/)
+    assert.match(home, /href="\/doctrine\/getting-started\/">Documentation<\/a>/)
     assert.match(home, /aria-label="Language"/)
+    assert.match(home, /href="#main-content"[^>]*>Skip to content<\/a>/)
+    assert.match(home, /<main[^>]*id="main-content"[^>]*>/)
     assert.match(
       home,
       /<meta name="description" content="A Vite-powered static documentation generator for MDX\."/,
@@ -56,6 +66,11 @@ test('builds localized static pages and search below a GitHub Pages subpath', as
     assert.doesNotMatch(home, /data-slot="sidebar"/)
     assert.doesNotMatch(home, /data-slot="toc"/)
     assert.match(features, /data-slot="badge"/)
+    assert.match(
+      features,
+      /data-slot="header-navigation"[\s\S]*?aria-current="location"[\s\S]*?>Documentation<\/a>/,
+    )
+    assert.match(features, /aria-label="Page navigation"/)
     assert.match(customization, /data-slot="card-grid"/)
     assert.match(customization, /data-slot="code-block"/)
     assert.match(customization, /data-slot="code-block-filename"[^>]*>doctrine\.config\.ts/)
@@ -68,11 +83,14 @@ test('builds localized static pages and search below a GitHub Pages subpath', as
     assert.doesNotMatch(chinese, /data-slot="sidebar"/)
     assert.doesNotMatch(chinese, /data-slot="toc"/)
     assert.match(chinese, /lang="zh-CN"/)
+    assert.match(chinese, /href="#main-content"[^>]*>跳到正文<\/a>/)
+    assert.match(chinese, /data-slot="header-navigation"[\s\S]*?>文档<\/a>/)
     assert.match(
       chinese,
       /<meta name="description" content="一个由 Vite 驱动的 MDX 静态文档生成器。"/,
     )
     assert.match(chineseFeatures, /<span>入门教程<\/span>/)
+    assert.match(chineseFeatures, /aria-label="页面导航"/)
     assert.match(chinese, /copyright © 2026 白熱。/)
     assert.match(notFound, /src="\/doctrine\/assets\//)
     assert.ok(existsSync(path.join(outDir, 'pagefind/pagefind.js')))
@@ -140,6 +158,7 @@ test('builds in an isolated pnpm consumer', async () => {
 
     const home = await readFile(path.join(outDir, 'index.html'), 'utf8')
     const landing = await readFile(path.join(outDir, 'landing/index.html'), 'utf8')
+    assert.doesNotMatch(home, /data-slot="version"/)
     assert.match(home, /data-pagefind-meta="title" content="External consumer"/)
     assert.match(home, /<span>Standalone<\/span>/)
     assert.match(landing, /data-standalone-page/)

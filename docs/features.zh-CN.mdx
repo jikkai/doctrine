@@ -96,9 +96,10 @@ Doctrine 内置界面文案只区分两组：名称以 `zh` 开头的 locale 使
 主题控件把 `light` 或 `dark` 写入 `localStorage`。Head 中的内联脚本会在页面 body 渲染前应用
 已保存选择；首次访问则使用操作系统偏好。
 
-Doctrine 提供预编译界面 CSS，以及 `Badge`、`Callout`、`Card`、`CardGrid`、`Step`、`Steps`、
-`Tab` 和 `Tabs`。配置的 CSS 在默认样式之后加载；自定义组件映射在内置映射之后合并，并由 SSR
-和浏览器 hydration 共用。
+Doctrine 提供预编译界面 CSS，以及 `Badge`、`Callout`、`Card`、`CardGrid`、`CodeBlock`、
+`InstallTabs`、`Step`、`Steps`、`Tab` 和 `Tabs`。语义化的折叠内容、定义列表、图片说明、键盘
+输入、重点、引用和表格无需包装组件也会获得完整样式。配置的 CSS 在默认样式之后加载；自定义
+组件映射在内置映射之后合并，并由 SSR 和浏览器 hydration 共用。
 
 Tailwind 是可选项。只有文档项目根 `package.json` 在 dependencies、dev dependencies 或
 optional dependencies 中声明 `tailwindcss` 时，Doctrine 才启用对应 Vite 插件。

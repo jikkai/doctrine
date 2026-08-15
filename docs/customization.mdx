@@ -24,11 +24,12 @@ Doctrine imports this file after its precompiled runtime CSS. Override only what
 
 ```css
 :root {
-  --doctrine-accent: oklch(0.55 0.2 250);
-  --doctrine-accent-foreground: white;
-  --doctrine-ring: oklch(0.55 0.2 250);
+  --doctrine-accent: oklch(0.9 0.05 155);
+  --doctrine-accent-foreground: oklch(0.25 0.04 155);
+  --doctrine-ring: oklch(0.48 0.12 155);
   --doctrine-radius: 0.9rem;
   --doctrine-font-sans: Inter, sans-serif;
+  --doctrine-font-display: Charter, serif;
   --doctrine-content-width: 52rem;
 }
 
@@ -52,6 +53,7 @@ Doctrine imports this file after its precompiled runtime CSS. Override only what
 | `--doctrine-accent-foreground` | Text on the accent color             |
 | `--doctrine-radius`            | Shared surface radius                |
 | `--doctrine-font-sans`         | Site font stack                      |
+| `--doctrine-font-display`      | Display heading font stack           |
 | `--doctrine-content-width`     | Maximum article width                |
 | `--doctrine-sidebar-width`     | Desktop navigation width             |
 | `--doctrine-header-height`     | Sticky header height                 |
@@ -76,8 +78,8 @@ Use `data-slot` instead of depending on generated utility classes:
 }
 ```
 
-The shell exposes `header`, `header-inner`, `brand`, `navigation`, `sidebar`, `main`, `content`, and
-`footer`. Built-ins expose `badge`, `callout`, `card`, `card-grid`, `code-block`,
+The shell exposes `header`, `header-inner`, `brand`, `navigation`, `sidebar`, `main`, `content`,
+`page-navigation`, and `footer`. Built-ins expose `badge`, `callout`, `card`, `card-grid`, `code-block`,
 `code-block-header`, `code-block-filename`, `code-block-language`, `code-block-copy`, `step`,
 `steps`, `table-scroll`, `tabs`, `tab-list`, `tab`, and `tab-panel`.
 
@@ -116,6 +118,34 @@ Importing is unnecessary inside MDX. Values and prop types are also public from
 
 `Card` is a presentation container, not a link. Put a Markdown link inside when the card should lead
 somewhere.
+
+### Native writing elements
+
+Doctrine also typesets semantic HTML directly, so common writing patterns do not need a React
+component. Markdown blockquotes and tables work as usual; MDX can use `<details>` and `<summary>` for
+disclosure, `<kbd>` for keyboard input, `<mark>` for highlights, `<dl>` for definitions, and
+`<figure>` with `<figcaption>` for captioned media. They share the theme, narrow-screen behavior,
+focus treatment, and print styles.
+
+```mdx
+<details>
+  <summary>Why is the output static?</summary>
+
+Every route is prerendered during the build.
+
+</details>
+
+Press <kbd>Ctrl</kbd> + <kbd>K</kbd> to search.
+```
+
+<details>
+  <summary>Why is the output static?</summary>
+
+Every route is prerendered during the build.
+
+</details>
+
+Press <kbd>Ctrl</kbd> + <kbd>K</kbd> to search.
 
 ### Code blocks
 

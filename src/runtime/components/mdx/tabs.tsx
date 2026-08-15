@@ -26,16 +26,16 @@ export function Tabs({ children, className, defaultValue, variant = 'default' }:
 
   const listClass =
     variant === 'line'
-      ? 'inline-flex max-w-full items-center gap-1 overflow-x-auto border-b border-border bg-transparent text-muted-foreground'
-      : 'inline-flex min-h-13 w-fit max-w-full items-center justify-center overflow-x-auto rounded-lg bg-muted p-[3px] text-muted-foreground sm:h-9 sm:min-h-0'
+      ? 'inline-flex max-w-full items-center gap-1 overflow-x-auto border-b border-border/70 bg-transparent text-muted-foreground'
+      : 'flex min-h-12 w-full max-w-full items-center overflow-x-auto border-b border-border/70 bg-transparent text-muted-foreground sm:min-h-10'
   const tabClass =
     variant === 'line'
-      ? 'relative inline-flex min-h-11 items-center justify-center whitespace-nowrap border-b-2 border-transparent px-3 py-1 text-sm font-medium transition-[color,box-shadow] focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 data-[active]:border-foreground data-[active]:text-foreground sm:min-h-9'
-      : 'inline-flex min-h-11 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-transparent px-3 py-1 text-sm font-medium transition-[color,box-shadow] focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-background data-[active]:text-foreground data-[active]:shadow-sm sm:h-[calc(100%-1px)] sm:min-h-0 sm:px-2'
+      ? 'relative inline-flex min-h-11 items-center justify-center whitespace-nowrap border-b-2 border-transparent px-3 py-1 text-sm font-medium transition-[color,box-shadow] focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 data-[active]:border-primary data-[active]:text-foreground sm:min-h-9'
+      : 'relative inline-flex min-h-11 items-center justify-center whitespace-nowrap border-b-2 border-transparent px-3 py-1 text-sm font-medium transition-[color,box-shadow] focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 data-[active]:border-primary data-[active]:text-foreground sm:min-h-10 sm:px-4'
 
   return (
     <TabsPrimitive.Tabs.Root
-      className={`flex flex-col gap-2 ${className ?? ''}`}
+      className={`flex flex-col gap-3 ${className ?? ''}`}
       data-slot="tabs"
       data-variant={variant}
       defaultValue={defaultValue ?? values[0]}

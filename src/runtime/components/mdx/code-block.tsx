@@ -111,11 +111,11 @@ export function CodeBlockPre({
 
   return (
     <figure
-      className="overflow-hidden rounded-lg border border-border bg-card"
+      className="overflow-hidden rounded-lg border border-border/70 bg-card"
       data-slot="code-block"
     >
       <figcaption
-        className="flex min-h-10 items-center gap-2 border-b border-border bg-muted/50 px-3 text-xs text-muted-foreground"
+        className="flex min-h-10 items-center gap-2 border-b border-border/60 bg-muted/30 px-3 text-xs text-muted-foreground"
         data-slot="code-block-header"
       >
         {filename && (
@@ -135,7 +135,7 @@ export function CodeBlockPre({
         </span>
         <button
           aria-label={copied ? copiedLabel : copyLabel}
-          className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-md px-2 transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-9 sm:min-w-0"
+          className="inline-flex size-10 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           data-slot="code-block-copy"
           onClick={handleCopy}
           title={copied ? copiedLabel : copyLabel}
@@ -146,7 +146,6 @@ export function CodeBlockPre({
           ) : (
             <CopyIcon aria-hidden="true" className="size-3.5" />
           )}
-          <span className="hidden sm:inline">{copied ? copiedLabel : copyLabel}</span>
         </button>
       </figcaption>
       <pre className={className} {...props}>

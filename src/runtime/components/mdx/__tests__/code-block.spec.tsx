@@ -21,5 +21,6 @@ test('renders a localized code block toolbar with filename and language', () => 
   assert.match(html, /data-slot="code-block-filename"[^>]*>doctrine\.config\.ts/)
   assert.match(html, /data-slot="code-block-language">TypeScript/)
   assert.match(html, /aria-label="复制代码"/)
+  assert.doesNotMatch(html, />复制代码</)
   assert.match(html, /export default \{\}/)
 })

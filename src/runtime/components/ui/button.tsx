@@ -8,8 +8,8 @@ export interface IButtonProps extends BaseButton.Button.Props {
 }
 
 const VARIANTS = {
-  ghost: 'border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground',
-  outline: 'border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground',
+  ghost: 'border-transparent bg-transparent hover:bg-muted hover:text-foreground',
+  outline: 'border-border/70 bg-transparent hover:bg-muted hover:text-foreground',
 } as const
 
 export function Button({ className, variant = 'ghost', ...props }: IButtonProps) {

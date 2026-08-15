@@ -11,9 +11,11 @@ import {
   XIcon,
 } from 'lucide-react'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
+
 import type { IDoctrineComponents } from '../config.js'
 import type { DoctrineNavigationNode } from '../navigation.js'
 import type { DoctrineIcons, IDocumentRoute, IMdxContentProps, IRuntimeConfig } from './types.js'
+
 import { DoctrineLocaleContext } from './components/mdx/context.js'
 import { builtinMdxComponents } from './components/mdx/registry.js'
 import { TableOfContents } from './components/table-of-contents.js'
@@ -47,40 +49,64 @@ interface IPagefindModule {
 
 interface ILabels {
   close: string
+  documentation: string
   language: string
   menu: string
   noResults: string
   notFound: string
   notFoundDescription: string
+  next: string
   onThisPage: string
+  pageNavigation: string
+  previous: string
   search: string
+  searchError: string
+  searchHint: string
+  searchLoading: string
   searchPlaceholder: string
+  skipToContent: string
   theme: string
 }
 
 const LABELS: Readonly<Record<'en' | 'zh', ILabels>> = {
   en: {
     close: 'Close',
+    documentation: 'Documentation',
     language: 'Language',
     menu: 'Menu',
     noResults: 'No results found.',
     notFound: 'Page not found',
     notFoundDescription: 'The page may have moved or does not exist.',
+    next: 'Next',
     onThisPage: 'On This Page',
+    pageNavigation: 'Page navigation',
+    previous: 'Previous',
     search: 'Search',
+    searchError: 'Search is unavailable. Try again in a moment.',
+    searchHint: 'Type a word or phrase to search every page.',
+    searchLoading: 'Searching…',
     searchPlaceholder: 'Search documentation…',
+    skipToContent: 'Skip to content',
     theme: 'Toggle color theme',
   },
   zh: {
     close: '关闭',
+    documentation: '文档',
     language: '语言',
     menu: '菜单',
     noResults: '没有找到结果。',
     notFound: '页面不存在',
     notFoundDescription: '该页面可能已移动，或从未存在。',
+    next: '下一篇',
     onThisPage: '本页目录',
+    pageNavigation: '页面导航',
+    previous: '上一篇',
     search: '搜索',
+    searchError: '暂时无法搜索，请稍后重试。',
+    searchHint: '输入词语，搜索全部文档。',
+    searchLoading: '正在搜索…',
     searchPlaceholder: '搜索文档…',
+    skipToContent: '跳到正文',
     theme: '切换颜色主题',
   },
 }
@@ -120,12 +146,14 @@ function Navigation({
   current,
   icons,
   items,
+  label,
   mobile,
   routes,
 }: {
   current?: IDocumentRoute
   icons: DoctrineIcons
   items: readonly DoctrineNavigationNode[]
+  label: string
   mobile?: boolean
   routes: readonly IDocumentRoute[]
 }) {
@@ -133,14 +161,16 @@ function Navigation({
 
   function renderItems(nodes: readonly DoctrineNavigationNode[], nested = false): ReactNode {
     return (
-      <ul className={nested ? 'mt-1 space-y-1 border-l border-border pl-3' : 'space-y-1'}>
+      <ul
+        className={nested ? 'mt-1 ml-2 space-y-0.5 border-l border-border/60 pl-3' : 'space-y-0.5'}
+      >
         {nodes.map((item) => {
           const Icon = item.icon ? icons[item.icon] : undefined
           if (item.type === 'directory') {
             return (
-              <li className="pt-3 first:pt-0" key={item.directory}>
-                <div className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-muted-foreground">
-                  {Icon && <Icon aria-hidden="true" className="size-4 shrink-0" />}
+              <li className="pt-5 first:pt-0" key={item.directory}>
+                <div className="flex items-center gap-2 px-3 py-2 text-[0.6875rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+                  {Icon && <Icon aria-hidden="true" className="size-3.5 shrink-0" />}
                   <span>{item.title}</span>
                 </div>
                 {renderItems(item.items, true)}
@@ -154,10 +184,10 @@ function Navigation({
             <li key={item.documentKey}>
               <a
                 aria-current={current?.path === route.path ? 'page' : undefined}
-                className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground aria-[current=page]:bg-accent aria-[current=page]:font-medium aria-[current=page]:text-accent-foreground ${mobile ? 'min-h-11' : ''}`}
+                className={`relative flex items-center gap-2 rounded-sm px-3 py-2 text-[0.8125rem] leading-5 text-muted-foreground transition-colors before:absolute before:inset-y-2 before:-left-px before:w-px before:bg-transparent hover:bg-muted/60 hover:text-foreground aria-[current=page]:bg-accent/55 aria-[current=page]:font-medium aria-[current=page]:text-accent-foreground aria-[current=page]:before:bg-primary ${mobile ? 'min-h-11 text-sm' : 'min-h-9'}`}
                 href={withBase(base, route.path)}
               >
-                {Icon && <Icon aria-hidden="true" className="size-4 shrink-0" />}
+                {Icon && <Icon aria-hidden="true" className="size-3.5 shrink-0" />}
                 <span>{item.title}</span>
               </a>
             </li>
@@ -169,8 +199,8 @@ function Navigation({
 
   return (
     <nav
-      aria-label="Documentation"
-      className={mobile ? 'max-h-[calc(100dvh-4.5rem)] overflow-y-auto p-4' : 'py-6 pr-5'}
+      aria-label={label}
+      className={mobile ? 'max-h-[calc(100dvh-4.5rem)] overflow-y-auto p-4' : 'py-8 pr-6'}
       data-slot="navigation"
     >
       {renderItems(items)}
@@ -195,7 +225,7 @@ function MobileNavigation({
     <Dialog.Root>
       <Dialog.Trigger
         aria-label={labels.menu}
-        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-input bg-background shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:h-9 sm:w-9 lg:hidden!"
+        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-transparent bg-transparent transition-colors hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:h-9 sm:w-9 lg:hidden!"
       >
         <MenuIcon aria-hidden="true" className="size-4" />
       </Dialog.Trigger>
@@ -209,7 +239,14 @@ function MobileNavigation({
             <XIcon aria-hidden="true" className="size-4" />
           </Dialog.Close>
         </div>
-        <Navigation current={current} icons={icons} items={items} mobile routes={routes} />
+        <Navigation
+          current={current}
+          icons={icons}
+          items={items}
+          label={labels.documentation}
+          mobile
+          routes={routes}
+        />
       </DialogSurface>
     </Dialog.Root>
   )
@@ -245,7 +282,7 @@ function LocaleSwitcher({
     <Select.Root items={items} onValueChange={handleValueChange} value={value}>
       <Select.Trigger
         aria-label={label}
-        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-input bg-background shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:h-9 sm:w-9"
+        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-transparent bg-transparent transition-colors hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:h-9 sm:w-9"
         data-slot="locale-switcher"
       >
         <LanguagesIcon aria-hidden="true" className="size-4" />
@@ -253,11 +290,11 @@ function LocaleSwitcher({
       </Select.Trigger>
       <Select.Portal>
         <Select.Positioner align="end" className="z-50 outline-none" sideOffset={4}>
-          <Select.Popup className="min-w-36 rounded-md border border-border bg-background p-1 text-foreground shadow-md outline-none">
+          <Select.Popup className="min-w-36 rounded-lg border border-border/70 bg-card p-1 text-card-foreground shadow-lg outline-none">
             <Select.List>
               {items.map((item) => (
                 <Select.Item
-                  className="grid cursor-default grid-cols-[1rem_1fr] items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                  className="grid min-h-9 cursor-default grid-cols-[1rem_1fr] items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none data-[highlighted]:bg-accent/70 data-[highlighted]:text-accent-foreground"
                   key={item.value}
                   value={item.value}
                 >
@@ -286,7 +323,7 @@ function ThemeToggle({ label }: { label: string }) {
   return (
     <Button
       aria-label={label}
-      className="h-11 w-11 shrink-0 px-0! sm:h-9 sm:w-9"
+      className="h-11 w-11 shrink-0 border-transparent! px-0! shadow-none! sm:h-9 sm:w-9"
       onClick={handleClick}
       variant="outline"
     >
@@ -301,7 +338,7 @@ function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILab
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<IPagefindResultData[]>([])
-  const [status, setStatus] = useState<'idle' | 'loading' | 'ready'>('idle')
+  const [status, setStatus] = useState<'error' | 'idle' | 'loading' | 'ready'>('idle')
 
   function handleOpenChange(nextOpen: boolean) {
     setOpen(nextOpen)
@@ -346,7 +383,7 @@ function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILab
           console.error(error)
           if (!cancelled) {
             setResults([])
-            setStatus('ready')
+            setStatus('error')
           }
         })
     }, 120)
@@ -360,18 +397,18 @@ function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILab
     <Dialog.Root onOpenChange={handleOpenChange} open={open}>
       <Dialog.Trigger
         aria-label={labels.search}
-        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-input bg-background text-sm text-muted-foreground shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:h-9 sm:w-52 sm:justify-start sm:px-3"
+        className="inline-flex h-11 w-11 shrink-0 items-center justify-center gap-2 rounded-md border border-transparent bg-transparent text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:h-9 sm:w-52 sm:justify-start sm:bg-muted/55 sm:px-3"
       >
         <SearchIcon aria-hidden="true" className="size-4" />
         <span className="hidden sm:inline">{labels.search}</span>
-        <kbd className="ml-auto hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] sm:inline">
-          ⌘K
+        <kbd className="ml-auto hidden border-0 bg-transparent p-0 text-[0.6875rem] font-normal text-muted-foreground sm:inline">
+          ⌘ K
         </kbd>
       </Dialog.Trigger>
       <DialogSurface className="max-w-2xl overflow-hidden" initialFocus={inputRef}>
         <Dialog.Title className="sr-only">{labels.search}</Dialog.Title>
         <Dialog.Description className="sr-only">{labels.searchPlaceholder}</Dialog.Description>
-        <div className="flex items-center border-b border-border px-4">
+        <div className="flex items-center border-b border-border/70 px-4">
           <SearchIcon aria-hidden="true" className="size-4 text-muted-foreground" />
           <input
             aria-label={labels.search}
@@ -389,20 +426,32 @@ function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILab
             <XIcon aria-hidden="true" className="size-4" />
           </Dialog.Close>
         </div>
-        <div aria-live="polite" className="max-h-[min(55dvh,28rem)] min-h-24 overflow-y-auto p-2">
-          {status === 'loading' && <p className="p-4 text-sm text-muted-foreground">…</p>}
+        <div
+          aria-busy={status === 'loading'}
+          aria-live="polite"
+          className="max-h-[min(55dvh,28rem)] min-h-28 overflow-y-auto p-2"
+        >
+          {status === 'idle' && (
+            <p className="p-4 text-sm leading-6 text-muted-foreground">{labels.searchHint}</p>
+          )}
+          {status === 'loading' && (
+            <p className="p-4 text-sm text-muted-foreground">{labels.searchLoading}</p>
+          )}
+          {status === 'error' && (
+            <p className="p-4 text-sm text-muted-foreground">{labels.searchError}</p>
+          )}
           {status === 'ready' && results.length === 0 && (
             <p className="p-4 text-sm text-muted-foreground">{labels.noResults}</p>
           )}
           {results.map((result) => (
             <a
-              className="block rounded-lg p-3 transition-colors hover:bg-accent hover:text-accent-foreground"
+              className="block rounded-md p-3 transition-colors hover:bg-accent/70 hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               href={result.url}
               key={result.url}
             >
               <strong className="block text-sm">{result.meta.title ?? result.url}</strong>
               <span
-                className="mt-1 block text-sm text-muted-foreground [&_mark]:bg-transparent [&_mark]:font-semibold [&_mark]:text-foreground"
+                className="mt-1 line-clamp-3 text-sm leading-6 text-muted-foreground [&_mark]:bg-transparent [&_mark]:font-semibold [&_mark]:text-foreground"
                 dangerouslySetInnerHTML={{ __html: result.excerpt }}
               />
             </a>
@@ -419,6 +468,12 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
   const localeRoutes = routes.filter((candidate) => candidate.locale === locale)
   const navigation = config.navigation[locale] ?? []
   const home = localeRoutes.find((candidate) => candidate.slug === '/') ?? localeRoutes[0]
+  const routeIndex = route
+    ? localeRoutes.findIndex((candidate) => candidate.path === route.path)
+    : -1
+  const previousRoute = routeIndex > 0 ? localeRoutes[routeIndex - 1] : undefined
+  const nextRoute = routeIndex >= 0 ? localeRoutes[routeIndex + 1] : undefined
+  const documentationHome = localeRoutes.find((candidate) => !candidate.standalone)
   const siteTitle = config.title
   const mdxComponents: IDoctrineComponents = {
     a: MdxLink,
@@ -430,7 +485,7 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
     if (!config.copyright) return null
     return (
       <footer
-        className="mx-auto max-w-[var(--doctrine-content-width)] border-t border-border py-8 text-center text-sm text-muted-foreground"
+        className="mx-auto max-w-[var(--doctrine-content-width)] border-t border-border/60 py-10 text-center text-xs tracking-wide text-muted-foreground"
         data-pagefind-ignore
         data-slot="footer"
       >
@@ -439,15 +494,58 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
     )
   }
 
+  function renderPageNavigation() {
+    if (!previousRoute && !nextRoute) return null
+    return (
+      <nav
+        aria-label={labels.pageNavigation}
+        className="mx-auto mt-20 grid max-w-[var(--doctrine-content-width)] grid-cols-2 gap-6"
+        data-pagefind-ignore
+        data-slot="page-navigation"
+      >
+        {previousRoute ? (
+          <a
+            className="group min-w-0 border-t border-border/60 pt-4 text-left transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            href={withBase(config.base, previousRoute.path)}
+          >
+            <span className="block text-xs text-muted-foreground">← {labels.previous}</span>
+            <strong className="mt-1 block truncate text-sm font-semibold group-hover:text-primary">
+              {previousRoute.title}
+            </strong>
+          </a>
+        ) : (
+          <span />
+        )}
+        {nextRoute && (
+          <a
+            className="group min-w-0 border-t border-border/60 pt-4 text-right transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            href={withBase(config.base, nextRoute.path)}
+          >
+            <span className="block text-xs text-muted-foreground">{labels.next} →</span>
+            <strong className="mt-1 block truncate text-sm font-semibold group-hover:text-primary">
+              {nextRoute.title}
+            </strong>
+          </a>
+        )}
+      </nav>
+    )
+  }
+
   return (
     <BaseContext value={config.base}>
+      <a
+        className="fixed top-3 left-3 z-[60] -translate-y-20 rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background shadow-lg transition-transform focus:translate-y-0 focus:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/60 motion-reduce:transition-none"
+        href="#main-content"
+      >
+        {labels.skipToContent}
+      </a>
       <header
-        className="sticky top-0 z-40 h-[var(--doctrine-header-height)] bg-background/80 backdrop-blur-xl"
+        className="sticky top-0 z-40 h-[var(--doctrine-header-height)] bg-background"
         data-pagefind-ignore
         data-slot="header"
       >
         <div
-          className="relative mx-auto flex h-full max-w-screen-2xl items-center gap-2 px-3 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:bg-border/70 sm:gap-3 sm:px-4 sm:after:inset-x-4 lg:px-8 lg:after:inset-x-8"
+          className="relative mx-auto flex h-full max-w-screen-2xl items-center gap-0 px-2 after:absolute after:inset-x-2 after:bottom-0 after:h-px after:bg-border/55 min-[23rem]:gap-1 min-[23rem]:px-3 min-[23rem]:after:inset-x-3 sm:gap-2 sm:px-4 sm:after:inset-x-4 lg:px-8 lg:after:inset-x-8"
           data-slot="header-inner"
         >
           <MobileNavigation
@@ -457,18 +555,35 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
             labels={labels}
             routes={localeRoutes}
           />
-          <a
-            className="group relative mr-auto inline-flex min-h-11 min-w-0 shrink items-center truncate rounded-sm text-sm font-semibold tracking-tight after:absolute after:inset-x-0 after:bottom-2 after:h-px after:origin-right after:scale-x-0 after:bg-current after:opacity-40 after:transition-transform after:duration-200 hover:after:origin-left hover:after:scale-x-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 motion-reduce:after:transition-none sm:min-h-9 sm:text-base"
-            data-slot="brand"
-            href={withBase(config.base, home?.path ?? '/')}
-          >
-            {siteTitle}
-          </a>
+          <div className="mr-auto flex min-w-0 items-center gap-2">
+            <a
+              className="group relative inline-flex min-h-11 min-w-0 shrink items-center truncate rounded-sm text-sm font-semibold tracking-[-0.015em] after:absolute after:inset-x-0 after:bottom-2 after:h-px after:origin-right after:scale-x-0 after:bg-current after:opacity-40 after:transition-transform after:duration-200 hover:after:origin-left hover:after:scale-x-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 motion-reduce:after:transition-none sm:min-h-9 sm:text-[0.9375rem]"
+              data-slot="brand"
+              href={withBase(config.base, home?.path ?? '/')}
+            >
+              {siteTitle}
+            </a>
+            {documentationHome && (
+              <nav
+                aria-label={labels.documentation}
+                className="ml-4 hidden shrink-0 lg:flex"
+                data-slot="header-navigation"
+              >
+                <a
+                  aria-current={route && !route.standalone ? 'location' : undefined}
+                  className="inline-flex min-h-10 items-center rounded-sm border-b border-transparent px-1 text-sm font-medium text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 aria-[current=location]:border-primary/60 aria-[current=location]:text-foreground"
+                  href={withBase(config.base, documentationHome.path)}
+                >
+                  {labels.documentation}
+                </a>
+              </nav>
+            )}
+          </div>
           <SearchDialog config={config} labels={labels} />
           {config.githubUrl && (
             <a
               aria-label="GitHub"
-              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-input bg-background shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:h-9 sm:w-9"
+              className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-md border border-transparent bg-transparent transition-colors hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 min-[23rem]:inline-flex sm:h-9 sm:w-9"
               href={config.githubUrl}
               rel="noreferrer"
               target="_blank"
@@ -484,7 +599,7 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
       </header>
       {route?.standalone && Content ? (
         <>
-          <main data-pagefind-body data-slot="standalone-page">
+          <main data-pagefind-body data-slot="standalone-page" id="main-content" tabIndex={-1}>
             <DoctrineLocaleContext value={locale}>
               <Content components={mdxComponents} />
             </DoctrineLocaleContext>
@@ -494,27 +609,41 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
       ) : (
         <div className="mx-auto grid max-w-screen-2xl grid-cols-1 px-4 lg:grid-cols-[var(--doctrine-sidebar-width)_minmax(0,1fr)] lg:px-8 xl:grid-cols-[var(--doctrine-sidebar-width)_minmax(0,1fr)_14rem]">
           <aside
-            className="sticky top-[var(--doctrine-header-height)] hidden h-[calc(100vh-var(--doctrine-header-height))] overflow-y-auto border-r border-border lg:block"
+            className="sticky top-[var(--doctrine-header-height)] hidden h-[calc(100vh-var(--doctrine-header-height))] overflow-y-auto border-r border-border/50 lg:block"
             data-pagefind-ignore
             data-slot="sidebar"
           >
-            <Navigation current={route} icons={icons} items={navigation} routes={localeRoutes} />
+            <Navigation
+              current={route}
+              icons={icons}
+              items={navigation}
+              label={labels.documentation}
+              routes={localeRoutes}
+            />
           </aside>
           <div className="min-w-0">
-            <main className="px-0 py-10 sm:px-6 lg:px-12 lg:py-14" data-slot="main">
+            <main
+              className="px-0 py-10 sm:px-6 lg:px-12 lg:py-16"
+              data-slot="main"
+              id="main-content"
+              tabIndex={-1}
+            >
               {route && Content && (
                 <TableOfContents label={labels.onThisPage} mobile routePath={route.path} />
               )}
               {route && Content ? (
-                <article
-                  className="doctrine-prose mx-auto max-w-[var(--doctrine-content-width)]"
-                  data-pagefind-body
-                  data-slot="content"
-                >
-                  <DoctrineLocaleContext value={locale}>
-                    <Content components={mdxComponents} />
-                  </DoctrineLocaleContext>
-                </article>
+                <>
+                  <article
+                    className="doctrine-prose mx-auto max-w-[var(--doctrine-content-width)]"
+                    data-pagefind-body
+                    data-slot="content"
+                  >
+                    <DoctrineLocaleContext value={locale}>
+                      <Content components={mdxComponents} />
+                    </DoctrineLocaleContext>
+                  </article>
+                  {renderPageNavigation()}
+                </>
               ) : (
                 <div className="mx-auto max-w-3xl py-20 text-center">
                   <p className="text-sm font-medium text-muted-foreground">404</p>

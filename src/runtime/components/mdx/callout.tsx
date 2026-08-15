@@ -8,19 +8,20 @@ export interface ICalloutProps extends HTMLAttributes<HTMLElement> {
 
 const CALLOUT_VARIANTS = {
   danger: {
-    className: 'border-red-500/40 bg-red-500/10 text-red-950 dark:text-red-100',
+    className: 'border-red-600/70 text-red-950 dark:border-red-400/70 dark:text-red-100',
     icon: XCircleIcon,
   },
   note: {
-    className: 'border-border bg-card text-card-foreground',
+    className: 'border-primary/70 text-card-foreground',
     icon: InfoIcon,
   },
   tip: {
-    className: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-950 dark:text-emerald-100',
+    className:
+      'border-emerald-600/70 text-emerald-950 dark:border-emerald-400/70 dark:text-emerald-100',
     icon: CircleCheckIcon,
   },
   warning: {
-    className: 'border-amber-500/40 bg-amber-500/10 text-amber-950 dark:text-amber-100',
+    className: 'border-amber-600/70 text-amber-950 dark:border-amber-400/70 dark:text-amber-100',
     icon: TriangleAlertIcon,
   },
 } as const
@@ -30,7 +31,7 @@ export function Callout({ children, className, title, variant = 'note', ...props
   const Icon = definition.icon
   return (
     <aside
-      className={`flex gap-3 rounded-lg border px-4 py-3 text-sm ${definition.className} ${className ?? ''}`}
+      className={`flex gap-3 border-l-2 px-4 py-1 text-sm ${definition.className} ${className ?? ''}`}
       {...props}
       data-slot="callout"
       data-variant={variant}

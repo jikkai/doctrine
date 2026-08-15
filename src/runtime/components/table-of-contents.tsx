@@ -95,12 +95,12 @@ export function TableOfContents({ label, mobile, routePath }: ITableOfContentsPr
 
   function renderItems() {
     return (
-      <ul className="space-y-2.5">
+      <ul className="space-y-0.5 border-l border-border/60">
         {items.map((item) => (
           <li key={item.id}>
             <a
               aria-current={activeId === item.id ? 'location' : undefined}
-              className={`block text-[0.8125rem] leading-5 text-muted-foreground transition-colors hover:text-foreground aria-[current=location]:font-medium aria-[current=location]:text-foreground ${item.level === 3 ? 'pl-3' : ''}`}
+              className={`relative block min-h-7 py-1 pr-1 pl-3 text-[0.78125rem] leading-5 text-muted-foreground transition-colors before:absolute before:inset-y-1.5 before:-left-px before:w-px before:bg-transparent hover:text-foreground aria-[current=location]:font-medium aria-[current=location]:text-foreground aria-[current=location]:before:bg-primary ${item.level === 3 ? 'pl-6' : ''}`}
               href={`#${item.id}`}
               onClick={() => handleNavigate(item.id)}
             >
@@ -117,19 +117,19 @@ export function TableOfContents({ label, mobile, routePath }: ITableOfContentsPr
   if (mobile) {
     return (
       <details
-        className="group mx-auto mb-8 max-w-[var(--doctrine-content-width)] xl:hidden"
+        className="group mx-auto mb-10 max-w-[var(--doctrine-content-width)] border-y border-border/60 xl:hidden"
         data-pagefind-ignore
         data-slot="toc-mobile"
         ref={detailsRef}
       >
-        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-3 text-sm font-medium [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-12 cursor-pointer list-none items-center gap-3 text-sm font-medium [&::-webkit-details-marker]:hidden">
           <span className="min-w-0 flex-1">{label}</span>
           <ChevronDownIcon
             aria-hidden="true"
             className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
           />
         </summary>
-        <nav aria-label={label} className="pb-2 pt-2">
+        <nav aria-label={label} className="pb-4 pt-1">
           {renderItems()}
         </nav>
       </details>
@@ -138,11 +138,13 @@ export function TableOfContents({ label, mobile, routePath }: ITableOfContentsPr
 
   return (
     <aside
-      className="sticky top-[var(--doctrine-header-height)] hidden h-[calc(100vh-var(--doctrine-header-height))] overflow-y-auto py-8 pl-5 xl:block"
+      className="sticky top-[var(--doctrine-header-height)] hidden h-[calc(100vh-var(--doctrine-header-height))] overflow-y-auto py-9 pl-6 xl:block"
       data-pagefind-ignore
       data-slot="toc"
     >
-      <p className="mb-4 text-xs font-medium text-foreground">{label}</p>
+      <p className="mb-4 text-[0.6875rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+        {label}
+      </p>
       <nav aria-label={label}>{renderItems()}</nav>
     </aside>
   )

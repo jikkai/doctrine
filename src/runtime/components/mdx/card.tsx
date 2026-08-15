@@ -7,7 +7,7 @@ export interface ICardProps extends HTMLAttributes<HTMLDivElement> {
 export function Card({ children, className, title, ...props }: ICardProps) {
   return (
     <div
-      className={`rounded-xl border border-border bg-card p-6 text-card-foreground shadow-sm ${className ?? ''}`}
+      className={`rounded-lg border border-border/70 bg-card/45 p-5 text-card-foreground ${className ?? ''}`}
       {...props}
       data-slot="card"
     >
