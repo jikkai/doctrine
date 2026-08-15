@@ -1,0 +1,178 @@
+---
+description: Use Doctrine's built-in MDX components for common documentation patterns.
+---
+
+# MDX components
+
+Doctrine registers its built-ins in every MDX page. Importing is unnecessary inside MDX; component
+values and prop types are also public from `@amamo/doctrine/components` for custom modules.
+
+## Built-in components
+
+| Component          | Main props                                                                    |
+| ------------------ | ----------------------------------------------------------------------------- |
+| `Badge`            | `variant="default" \| "outline"` and span attributes                          |
+| `Callout`          | `variant="note" \| "tip" \| "warning" \| "danger"`, `title`, aside attributes |
+| `Card`, `CardGrid` | optional card `title` and normal div attributes                               |
+| `CodeBlock`        | optional `filename`/`language`; wrap a fenced code block                      |
+| `FileTree` family  | folder/file `name`; optional file `active` state                              |
+| `InstallTabs`      | `packageName` and optional `dev`; renders pnpm, npm, yarn, and bun commands   |
+| `LivePreview`      | rendered children; optional `title`, `source`, and `language`                 |
+| `Step`, `Steps`    | optional step `title` and list attributes                                     |
+| `Tab`, `Tabs`      | tab `label`/`value`; tabs `defaultValue`/`className`                          |
+
+`Card` is a presentation container, not a link. Put a Markdown link inside when the card should lead
+somewhere.
+
+## Native writing elements
+
+Doctrine also typesets semantic HTML directly, so common writing patterns do not need a React
+component. Markdown blockquotes and tables work as usual; MDX can use `<details>` and `<summary>` for
+disclosure, `<kbd>` for keyboard input, `<mark>` for highlights, `<dl>` for definitions, and
+`<figure>` with `<figcaption>` for captioned media. They share the theme, narrow-screen behavior,
+focus treatment, and print styles.
+
+```mdx
+<details>
+  <summary>Why is the output static?</summary>
+
+Every route is prerendered during the build.
+
+</details>
+
+Press <kbd>Ctrl</kbd> + <kbd>K</kbd> to search.
+```
+
+<details>
+  <summary>Why is the output static?</summary>
+
+Every route is prerendered during the build.
+
+</details>
+
+Press <kbd>Ctrl</kbd> + <kbd>K</kbd> to search.
+
+## Code blocks
+
+Fenced code blocks use One Light and Andromeeda for light and dark mode. They show the detected
+language and include a copy action automatically. Wrap a fence with `CodeBlock` when it also needs a
+filename:
+
+````mdx
+<CodeBlock filename="doctrine.config.ts">
+
+```ts
+export default {
+  title: 'Documentation',
+}
+```
+
+</CodeBlock>
+````
+
+<CodeBlock filename="doctrine.config.ts">
+
+```ts
+export default {
+  title: 'Documentation',
+}
+```
+
+</CodeBlock>
+
+## Callouts and badges
+
+```mdx
+<Callout variant="tip" title="Ready to deploy">
+  Run the production build before uploading `dist`.
+</Callout>
+
+<Badge>Stable</Badge> <Badge variant="outline">Preview</Badge>
+```
+
+<Callout variant="tip" title="Ready to deploy">
+  Run the production build before uploading `dist`.
+</Callout>
+
+<Badge>Stable</Badge> <Badge variant="outline">Preview</Badge>
+
+## Cards and steps
+
+```mdx
+<CardGrid>
+  <Card title="Installation">Start with [Getting started](/getting-started/).</Card>
+  <Card title="Deployment">Copy the [GitHub Pages workflow](/deployment/).</Card>
+</CardGrid>
+
+<Steps>
+  <Step title="Write">Create an MDX file.</Step>
+  <Step title="Preview">Run the development server.</Step>
+  <Step title="Build">Generate static files.</Step>
+</Steps>
+```
+
+<CardGrid>
+  <Card title="Installation">Start with [Getting started](/getting-started/).</Card>
+  <Card title="Deployment">Copy the [GitHub Pages workflow](/deployment/).</Card>
+</CardGrid>
+
+<Steps>
+  <Step title="Write">Create an MDX file.</Step>
+  <Step title="Preview">Run the development server.</Step>
+  <Step title="Build">Generate static files.</Step>
+</Steps>
+
+## Live previews
+
+`LivePreview` renders normal MDX children, so React event handlers hydrate with the page. Pass
+`source` to add an optional native source disclosure; Doctrine does not ship a browser compiler or
+editor.
+
+```mdx
+<LivePreview source={`<PreviewCounter />`} title="Interactive counter">
+  <PreviewCounter />
+</LivePreview>
+```
+
+<LivePreview source={`<PreviewCounter />`} title="Interactive counter">
+  <PreviewCounter />
+</LivePreview>
+
+## File trees
+
+Compose folders and files into a static semantic list. Use `active` only for the file represented by
+the current example.
+
+```mdx
+<FileTree>
+  <FileTreeFolder name="docs">
+    <FileTreeFile active name="index.mdx" />
+    <FileTreeFile name="getting-started.mdx" />
+  </FileTreeFolder>
+  <FileTreeFile name="doctrine.config.ts" />
+  <FileTreeFile name="package.json" />
+</FileTree>
+```
+
+<FileTree>
+  <FileTreeFolder name="docs">
+    <FileTreeFile active name="index.mdx" />
+    <FileTreeFile name="getting-started.mdx" />
+  </FileTreeFolder>
+  <FileTreeFile name="doctrine.config.ts" />
+  <FileTreeFile name="package.json" />
+</FileTree>
+
+## Installation and tabs
+
+`InstallTabs` composes the built-in tabs and code block into package-manager-specific install
+commands. Use `Tabs` and `Tab` directly for other tabbed content.
+
+```mdx
+<InstallTabs packageName="@amamo/doctrine" />
+```
+
+<InstallTabs packageName="@amamo/doctrine" />
+
+To add project-specific names or override a built-in, continue with
+[Customization](/customization/#register-or-override-components).

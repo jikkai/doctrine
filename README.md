@@ -119,7 +119,7 @@ build work in `.doctrine/`. Treat both as generated directories and keep them ou
 | Import                       | Public API                                                              |
 | ---------------------------- | ----------------------------------------------------------------------- |
 | `@amamo/doctrine`            | `defineConfig`, `defineDirectory`, and their public configuration types |
-| `@amamo/doctrine/components` | Built-in MDX components, including `InstallTabs`, `Tabs`, and `Tab`     |
+| `@amamo/doctrine/components` | Built-in MDX components, including `LivePreview`, `FileTree`, and tabs  |
 | `doctrine`                   | `dev` and `build` CLI commands                                          |
 
 ## Documentation
@@ -127,6 +127,7 @@ build work in `.doctrine/`. Treat both as generated directories and keep them ou
 - [Getting started](https://jikkai.github.io/doctrine/getting-started/)
 - [Features and runtime behavior](https://jikkai.github.io/doctrine/features/)
 - [Customization](https://jikkai.github.io/doctrine/customization/)
+- [MDX components](https://jikkai.github.io/doctrine/mdx-components/)
 - [Configuration](https://jikkai.github.io/doctrine/configuration/)
 - [CLI reference](https://jikkai.github.io/doctrine/cli/)
 - [GitHub Pages deployment](https://jikkai.github.io/doctrine/deployment/)

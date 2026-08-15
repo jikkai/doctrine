@@ -1,12 +1,12 @@
 ---
-description: Customize Doctrine with CSS variables, stable slots, optional Tailwind, and React MDX components.
+description: Customize Doctrine with CSS variables, stable slots, and optional Tailwind CSS.
 ---
 
 # Customization
 
 Doctrine has two extension points: a stylesheet for appearance and a React component map for MDX.
-Both are optional, load in development and production, and are shared by server rendering and browser
-hydration.
+Both are project-level customization. See [MDX components](/mdx-components/) for the built-in
+component reference.
 
 ## Add a stylesheet
 
@@ -80,7 +80,9 @@ Use `data-slot` instead of depending on generated utility classes:
 
 The shell exposes `header`, `header-inner`, `brand`, `navigation`, `sidebar`, `main`, `content`,
 `page-navigation`, and `footer`. Built-ins expose `badge`, `callout`, `card`, `card-grid`, `code-block`,
-`code-block-header`, `code-block-filename`, `code-block-language`, `code-block-copy`, `step`,
+`code-block-header`, `code-block-filename`, `code-block-language`, `code-block-copy`, `file-tree`,
+`file-tree-list`, `file-tree-folder`, `file-tree-file`, `live-preview`, `live-preview-title`,
+`live-preview-canvas`, `live-preview-code`, `live-preview-code-toggle`, `live-preview-source`, `step`,
 `steps`, `table-scroll`, `tabs`, `tab-list`, `tab`, and `tab-panel`.
 
 ## Use Tailwind CSS
@@ -100,133 +102,6 @@ Then opt the configured stylesheet into Tailwind and state what it should scan:
 Doctrine checks the root `package.json` dependencies, dev dependencies, and optional dependencies.
 When one declares `tailwindcss`, it enables `@tailwindcss/vite` in both commands. Without that
 declaration, `styles` remains ordinary CSS.
-
-## Built-in MDX components
-
-Importing is unnecessary inside MDX. Values and prop types are also public from
-`@amamo/doctrine/components` for custom components.
-
-| Component          | Main props                                                                    |
-| ------------------ | ----------------------------------------------------------------------------- |
-| `Badge`            | `variant="default" \| "outline"` and span attributes                          |
-| `Callout`          | `variant="note" \| "tip" \| "warning" \| "danger"`, `title`, aside attributes |
-| `Card`, `CardGrid` | optional card `title` and normal div attributes                               |
-| `CodeBlock`        | optional `filename`/`language`; wrap a fenced code block                      |
-| `InstallTabs`      | `packageName` and optional `dev`; renders pnpm, npm, yarn, and bun commands   |
-| `Step`, `Steps`    | optional step `title` and list attributes                                     |
-| `Tab`, `Tabs`      | tab `label`/`value`; tabs `defaultValue`/`className`                          |
-
-`Card` is a presentation container, not a link. Put a Markdown link inside when the card should lead
-somewhere.
-
-### Native writing elements
-
-Doctrine also typesets semantic HTML directly, so common writing patterns do not need a React
-component. Markdown blockquotes and tables work as usual; MDX can use `<details>` and `<summary>` for
-disclosure, `<kbd>` for keyboard input, `<mark>` for highlights, `<dl>` for definitions, and
-`<figure>` with `<figcaption>` for captioned media. They share the theme, narrow-screen behavior,
-focus treatment, and print styles.
-
-```mdx
-<details>
-  <summary>Why is the output static?</summary>
-
-Every route is prerendered during the build.
-
-</details>
-
-Press <kbd>Ctrl</kbd> + <kbd>K</kbd> to search.
-```
-
-<details>
-  <summary>Why is the output static?</summary>
-
-Every route is prerendered during the build.
-
-</details>
-
-Press <kbd>Ctrl</kbd> + <kbd>K</kbd> to search.
-
-### Code blocks
-
-Fenced code blocks use One Light and Andromeeda for light and dark mode. They show the detected
-language and include a copy action automatically. Wrap a fence with `CodeBlock` when it also needs a
-filename:
-
-````mdx
-<CodeBlock filename="doctrine.config.ts">
-
-```ts
-export default {
-  title: 'Documentation',
-}
-```
-
-</CodeBlock>
-````
-
-<CodeBlock filename="doctrine.config.ts">
-
-```ts
-export default {
-  title: 'Documentation',
-}
-```
-
-</CodeBlock>
-
-### Callouts and badges
-
-```mdx
-<Callout variant="tip" title="Ready to deploy">
-  Run the production build before uploading `dist`.
-</Callout>
-
-<Badge>Stable</Badge> <Badge variant="outline">Preview</Badge>
-```
-
-<Callout variant="tip" title="Ready to deploy">
-  Run the production build before uploading `dist`.
-</Callout>
-
-<Badge>Stable</Badge> <Badge variant="outline">Preview</Badge>
-
-### Cards and steps
-
-```mdx
-<CardGrid>
-  <Card title="Installation">Start with [Getting started](/getting-started/).</Card>
-  <Card title="Deployment">Copy the [GitHub Pages workflow](/deployment/).</Card>
-</CardGrid>
-
-<Steps>
-  <Step title="Write">Create an MDX file.</Step>
-  <Step title="Preview">Run the development server.</Step>
-  <Step title="Build">Generate static files.</Step>
-</Steps>
-```
-
-<CardGrid>
-  <Card title="Installation">Start with [Getting started](/getting-started/).</Card>
-  <Card title="Deployment">Copy the [GitHub Pages workflow](/deployment/).</Card>
-</CardGrid>
-
-<Steps>
-  <Step title="Write">Create an MDX file.</Step>
-  <Step title="Preview">Run the development server.</Step>
-  <Step title="Build">Generate static files.</Step>
-</Steps>
-
-### Installation and tabs
-
-`InstallTabs` composes the built-in tabs and code block into package-manager-specific install
-commands. Use `Tabs` and `Tab` directly for other tabbed content.
-
-```mdx
-<InstallTabs packageName="@amamo/doctrine" />
-```
-
-<InstallTabs packageName="@amamo/doctrine" />
 
 ## Register or override components
 

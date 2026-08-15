@@ -11,6 +11,7 @@ export default defineDirectory({
     { icon: 'Rocket', page: 'getting-started', title: '入门教程' },
     { icon: 'Sparkles', page: 'features', title: '功能说明' },
     { icon: 'Palette', page: 'customization', title: '自定义' },
+    { icon: 'Blocks', page: 'mdx-components', title: 'MDX 组件' },
     { icon: 'Settings', page: 'configuration', title: '配置参考' },
     { icon: 'Terminal', page: 'cli', title: 'CLI 参考' },
     { icon: 'Upload', page: 'deployment', title: 'GitHub Pages' },

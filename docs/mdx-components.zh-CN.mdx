@@ -1,0 +1,172 @@
+---
+description: 使用 Doctrine 内置 MDX 组件编写常见文档内容。
+---
+
+# MDX 组件
+
+Doctrine 会在每个 MDX 页面注册内置组件，因此在 MDX 中无需 import。自定义模块也可以从
+`@amamo/doctrine/components` 导入组件值与 prop 类型。
+
+## 内置组件
+
+| 组件               | 主要 props                                                              |
+| ------------------ | ----------------------------------------------------------------------- |
+| `Badge`            | `variant="default" \| "outline"` 和 span 属性                           |
+| `Callout`          | `variant="note" \| "tip" \| "warning" \| "danger"`、`title`、aside 属性 |
+| `Card`、`CardGrid` | 可选 card `title` 和普通 div 属性                                       |
+| `CodeBlock`        | 可选 `filename`/`language`；包裹 fenced code block                      |
+| `FileTree` 系列    | folder/file 的 `name`；file 可选 `active` 状态                          |
+| `InstallTabs`      | `packageName` 和可选 `dev`；展示 pnpm、npm、yarn、bun 命令              |
+| `LivePreview`      | 渲染的 children；可选 `title`、`source` 和 `language`                   |
+| `Step`、`Steps`    | 可选 step `title` 和列表属性                                            |
+| `Tab`、`Tabs`      | tab `label`/`value`；tabs `defaultValue`/`className`                    |
+
+`Card` 只是展示容器，不是链接。需要跳转时，请在 Card 内放 Markdown 链接。
+
+## 原生写作元素
+
+Doctrine 会直接排版语义化 HTML，因此常见写作模式不需要额外的 React 组件。Markdown 引用与表格
+照常使用；MDX 还可以用 `<details>` 和 `<summary>` 展开补充内容，用 `<kbd>` 表示键盘输入，用
+`<mark>` 标出重点，用 `<dl>` 编写定义列表，并用 `<figure>` 和 `<figcaption>` 为媒体添加说明。
+这些元素会沿用主题、窄屏布局、焦点样式和打印样式。
+
+```mdx
+<details>
+  <summary>为什么产物是静态的？</summary>
+
+构建时会预渲染每条路由。
+
+</details>
+
+按 <kbd>Ctrl</kbd> + <kbd>K</kbd> 搜索。
+```
+
+<details>
+  <summary>为什么产物是静态的？</summary>
+
+构建时会预渲染每条路由。
+
+</details>
+
+按 <kbd>Ctrl</kbd> + <kbd>K</kbd> 搜索。
+
+## 代码块
+
+Fenced code block 在浅色和深色模式下分别使用 One Light 与 Andromeeda，默认显示检测到的语言并
+提供复制操作。需要同时显示文件名时，用 `CodeBlock` 包裹代码围栏：
+
+````mdx
+<CodeBlock filename="doctrine.config.ts">
+
+```ts
+export default {
+  title: 'Documentation',
+}
+```
+
+</CodeBlock>
+````
+
+<CodeBlock filename="doctrine.config.ts">
+
+```ts
+export default {
+  title: 'Documentation',
+}
+```
+
+</CodeBlock>
+
+## Callout 与 Badge
+
+```mdx
+<Callout variant="tip" title="可以部署">
+  上传 `dist` 前先运行生产构建。
+</Callout>
+
+<Badge>稳定</Badge> <Badge variant="outline">预览</Badge>
+```
+
+<Callout variant="tip" title="可以部署">
+  上传 `dist` 前先运行生产构建。
+</Callout>
+
+<Badge>稳定</Badge> <Badge variant="outline">预览</Badge>
+
+## Card 与 Steps
+
+```mdx
+<CardGrid>
+  <Card title="安装">从[入门教程](/zh-CN/getting-started/)开始。</Card>
+  <Card title="部署">复制 [GitHub Pages 工作流](/zh-CN/deployment/)。</Card>
+</CardGrid>
+
+<Steps>
+  <Step title="编写">创建 MDX 文件。</Step>
+  <Step title="预览">启动开发服务器。</Step>
+  <Step title="构建">生成静态文件。</Step>
+</Steps>
+```
+
+<CardGrid>
+  <Card title="安装">从[入门教程](/zh-CN/getting-started/)开始。</Card>
+  <Card title="部署">复制 [GitHub Pages 工作流](/zh-CN/deployment/)。</Card>
+</CardGrid>
+
+<Steps>
+  <Step title="编写">创建 MDX 文件。</Step>
+  <Step title="预览">启动开发服务器。</Step>
+  <Step title="构建">生成静态文件。</Step>
+</Steps>
+
+## 实时预览
+
+`LivePreview` 渲染普通 MDX children，因此 React 事件会随页面一起 hydration。传入 `source` 可以
+增加原生的源码折叠区；Doctrine 不会额外引入浏览器编译器或编辑器。
+
+```mdx
+<LivePreview source={`<PreviewCounter />`} title="交互式计数器">
+  <PreviewCounter />
+</LivePreview>
+```
+
+<LivePreview source={`<PreviewCounter />`} title="交互式计数器">
+  <PreviewCounter />
+</LivePreview>
+
+## 文件树
+
+用 folder 和 file 组合静态语义列表。只给当前示例所表示的文件添加 `active`。
+
+```mdx
+<FileTree>
+  <FileTreeFolder name="docs">
+    <FileTreeFile active name="index.mdx" />
+    <FileTreeFile name="getting-started.mdx" />
+  </FileTreeFolder>
+  <FileTreeFile name="doctrine.config.ts" />
+  <FileTreeFile name="package.json" />
+</FileTree>
+```
+
+<FileTree>
+  <FileTreeFolder name="docs">
+    <FileTreeFile active name="index.mdx" />
+    <FileTreeFile name="getting-started.mdx" />
+  </FileTreeFolder>
+  <FileTreeFile name="doctrine.config.ts" />
+  <FileTreeFile name="package.json" />
+</FileTree>
+
+## 安装命令与 Tabs
+
+`InstallTabs` 使用内置 Tabs 和代码块组合出各包管理器对应的安装命令。其他选项卡内容仍可直接
+使用 `Tabs` 与 `Tab`。
+
+```mdx
+<InstallTabs packageName="@amamo/doctrine" />
+```
+
+<InstallTabs packageName="@amamo/doctrine" />
+
+需要添加项目专属名称或覆盖内置组件时，请继续阅读[自定义](/zh-CN/customization/)。

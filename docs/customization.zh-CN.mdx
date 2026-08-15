@@ -1,11 +1,11 @@
 ---
-description: 用 CSS 变量、稳定 slot、可选 Tailwind 和 React MDX 组件自定义 Doctrine。
+description: 用 CSS 变量、稳定 slot 和可选 Tailwind CSS 自定义 Doctrine。
 ---
 
 # 自定义
 
-Doctrine 有两个扩展点：用样式表调整外观，用 React 组件映射扩展 MDX。两者都可省略，同时在
-开发与生产中加载，并由服务端渲染和浏览器 hydration 共用。
+Doctrine 有两个项目级扩展点：用样式表调整外观，用 React 组件映射扩展 MDX。内置组件参考见
+[MDX 组件](/zh-CN/mdx-components/)。
 
 ## 添加样式表
 
@@ -80,7 +80,9 @@ Doctrine 会在预编译运行时 CSS 之后 import 这个文件。只覆盖网�
 网站外壳提供 `header`、`header-inner`、`brand`、`navigation`、`sidebar`、`main`、`content`、
 `page-navigation` 和 `footer`。内置组件提供 `badge`、`callout`、`card`、`card-grid`、`step`、`steps`、`tabs`、
 `code-block`、`code-block-header`、`code-block-filename`、`code-block-language`、
-`code-block-copy`、`table-scroll`、`tab-list`、`tab` 和 `tab-panel`。
+`code-block-copy`、`file-tree`、`file-tree-list`、`file-tree-folder`、`file-tree-file`、
+`live-preview`、`live-preview-title`、`live-preview-canvas`、`live-preview-code`、
+`live-preview-code-toggle`、`live-preview-source`、`table-scroll`、`tab-list`、`tab` 和 `tab-panel`。
 
 ## 使用 Tailwind CSS
 
@@ -98,130 +100,6 @@ Doctrine 自己的界面已经编译，消费者不需要 Tailwind。要在 MDX 
 
 Doctrine 会检查根 `package.json` 的 dependencies、dev dependencies 与 optional dependencies。
 其中声明 `tailwindcss` 时，两个命令都会启用 `@tailwindcss/vite`；否则 `styles` 只是普通 CSS。
-
-## 内置 MDX 组件
-
-在 MDX 中无需 import。自定义组件也可以从 `@amamo/doctrine/components` 导入组件值与 prop
-类型。
-
-| 组件               | 主要 props                                                              |
-| ------------------ | ----------------------------------------------------------------------- |
-| `Badge`            | `variant="default" \| "outline"` 和 span 属性                           |
-| `Callout`          | `variant="note" \| "tip" \| "warning" \| "danger"`、`title`、aside 属性 |
-| `Card`、`CardGrid` | 可选 card `title` 和普通 div 属性                                       |
-| `CodeBlock`        | 可选 `filename`/`language`；包裹 fenced code block                      |
-| `InstallTabs`      | `packageName` 和可选 `dev`；展示 pnpm、npm、yarn、bun 命令              |
-| `Step`、`Steps`    | 可选 step `title` 和列表属性                                            |
-| `Tab`、`Tabs`      | tab `label`/`value`；tabs `defaultValue`/`className`                    |
-
-`Card` 只是展示容器，不是链接。需要跳转时，请在 Card 内放 Markdown 链接。
-
-### 原生写作元素
-
-Doctrine 会直接排版语义化 HTML，因此常见写作模式不需要额外的 React 组件。Markdown 引用与表格
-照常使用；MDX 还可以用 `<details>` 和 `<summary>` 展开补充内容，用 `<kbd>` 表示键盘输入，用
-`<mark>` 标出重点，用 `<dl>` 编写定义列表，并用 `<figure>` 和 `<figcaption>` 为媒体添加说明。
-这些元素会沿用主题、窄屏布局、焦点样式和打印样式。
-
-```mdx
-<details>
-  <summary>为什么产物是静态的？</summary>
-
-构建时会预渲染每条路由。
-
-</details>
-
-按 <kbd>Ctrl</kbd> + <kbd>K</kbd> 搜索。
-```
-
-<details>
-  <summary>为什么产物是静态的？</summary>
-
-构建时会预渲染每条路由。
-
-</details>
-
-按 <kbd>Ctrl</kbd> + <kbd>K</kbd> 搜索。
-
-### 代码块
-
-Fenced code block 在浅色和深色模式下分别使用 One Light 与 Andromeeda，默认显示检测到的语言并
-提供复制操作。需要同时显示文件名时，用 `CodeBlock` 包裹代码围栏：
-
-````mdx
-<CodeBlock filename="doctrine.config.ts">
-
-```ts
-export default {
-  title: 'Documentation',
-}
-```
-
-</CodeBlock>
-````
-
-<CodeBlock filename="doctrine.config.ts">
-
-```ts
-export default {
-  title: 'Documentation',
-}
-```
-
-</CodeBlock>
-
-### Callout 与 Badge
-
-```mdx
-<Callout variant="tip" title="可以部署">
-  上传 `dist` 前先运行生产构建。
-</Callout>
-
-<Badge>稳定</Badge> <Badge variant="outline">预览</Badge>
-```
-
-<Callout variant="tip" title="可以部署">
-  上传 `dist` 前先运行生产构建。
-</Callout>
-
-<Badge>稳定</Badge> <Badge variant="outline">预览</Badge>
-
-### Card 与 Steps
-
-```mdx
-<CardGrid>
-  <Card title="安装">从[入门教程](/zh-CN/getting-started/)开始。</Card>
-  <Card title="部署">复制 [GitHub Pages 工作流](/zh-CN/deployment/)。</Card>
-</CardGrid>
-
-<Steps>
-  <Step title="编写">创建 MDX 文件。</Step>
-  <Step title="预览">启动开发服务器。</Step>
-  <Step title="构建">生成静态文件。</Step>
-</Steps>
-```
-
-<CardGrid>
-  <Card title="安装">从[入门教程](/zh-CN/getting-started/)开始。</Card>
-  <Card title="部署">复制 [GitHub Pages 工作流](/zh-CN/deployment/)。</Card>
-</CardGrid>
-
-<Steps>
-  <Step title="编写">创建 MDX 文件。</Step>
-  <Step title="预览">启动开发服务器。</Step>
-  <Step title="构建">生成静态文件。</Step>
-</Steps>
-
-### 安装命令与 Tabs
-
-`InstallTabs` 使用内置 Tabs 和代码块组合出各包管理器对应的安装命令。其他选项卡内容仍可直接
-使用 `Tabs` 与 `Tab`。
-
-```mdx
-<InstallTabs packageName="@amamo/doctrine" />
-```
-
-<InstallTabs packageName="@amamo/doctrine" />
 
 ## 注册或覆盖组件
 

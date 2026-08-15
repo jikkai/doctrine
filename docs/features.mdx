@@ -107,10 +107,13 @@ The theme control stores `light` or `dark` in `localStorage`. An inline head scr
 choice—or the operating-system preference on first visit—before the document body renders.
 
 Doctrine ships precompiled interface CSS and built-in `Badge`, `Callout`, `Card`, `CardGrid`,
-`CodeBlock`, `InstallTabs`, `Step`, `Steps`, `Tab`, and `Tabs` components. Semantic details,
-definitions, figures, keyboard input, highlights, quotes, and tables are styled without wrappers. A
-configured CSS file loads after the defaults. A custom component map is merged after built-ins and
-is shared by SSR and browser hydration.
+`CodeBlock`, `FileTree`, `FileTreeFolder`, `FileTreeFile`, `InstallTabs`, `LivePreview`, `Step`,
+`Steps`, `Tab`, and `Tabs` components. Semantic details, definitions, figures, keyboard input,
+highlights, quotes, and tables are styled without wrappers. A configured CSS file loads after the
+defaults. A custom component map is merged after built-ins and is shared by SSR and browser
+hydration.
+
+See [MDX components](/mdx-components/) for the built-in reference and examples.
 
 Tailwind is optional. Doctrine enables its Vite plugin only when the documentation project's root
 `package.json` declares `tailwindcss` in dependencies, dev dependencies, or optional dependencies.
