@@ -47,7 +47,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@amamo/mdx": "0.2.0",
+    "@amamo/mdx": "0.3.0",
     "@base-ui/react": "1.7.0",
     "@tailwindcss/vite": "4.3.3",
     "@vitejs/plugin-react": "6.0.5",

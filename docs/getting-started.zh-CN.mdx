@@ -9,7 +9,7 @@ description: 从零创建、预览并构建一个 Doctrine 网站。
 ## 1. 检查构建环境
 
 Doctrine 需要 Node.js 20.19 或更新版本，并且机器必须属于 `@amamo/mdx` 的
-[受支持原生目标](https://jikkai.github.io/mdx/native-targets/)。原生编译器没有 JavaScript
+[受支持原生目标](https://jikkai.github.io/mdx/zh-CN/native-targets/)。原生编译器没有 JavaScript
 fallback。MDX 可以在打包、预渲染和 hydration 时执行 JavaScript，因此只能使用可信作者提供的
 内容与配置。
 
@@ -28,7 +28,7 @@ mkdir -p docs/guide
 创建 `docs/index.mdx`：
 
 ```mdx
-# Acme 文档
+# 我的项目文档
 
 从导航中选择一篇指南。
 ```
@@ -36,9 +36,9 @@ mkdir -p docs/guide
 创建 `docs/guide/install.mdx`：
 
 ```mdx
-# 安装 Acme
+# 安装我的项目
 
-<InstallTabs packageName="acme" />
+<InstallTabs packageName="my-project" />
 ```
 
 页面不要求 frontmatter。可选的字符串 `description` 会成为该页面的 meta description。
@@ -52,7 +52,7 @@ mkdir -p docs/guide
 import { defineDirectory } from '@amamo/doctrine'
 
 export default defineDirectory({
-  items: [{ page: 'index', title: 'Acme 文档' }, { directory: 'guide' }],
+  items: [{ page: 'index', title: '我的项目文档' }, { directory: 'guide' }],
 })
 ```
 
@@ -63,7 +63,7 @@ import { defineDirectory } from '@amamo/doctrine'
 
 export default defineDirectory({
   title: '指南',
-  items: [{ page: 'install', title: '安装 Acme' }],
+  items: [{ page: 'install', title: '安装我的项目' }],
 })
 ```
 
@@ -96,9 +96,9 @@ doctrine dev docs --host 0.0.0.0 --port 4173
 import { defineConfig } from '@amamo/doctrine'
 
 export default defineConfig({
-  title: 'Acme 文档',
-  description: 'Acme 的产品指南和 API 说明。',
-  githubUrl: 'https://github.com/acme/acme',
+  title: '我的项目文档',
+  description: '我的项目产品指南和 API 说明。',
+  githubUrl: 'https://github.com/your-org/my-project',
 })
 ```
 
@@ -125,8 +125,8 @@ dist/
 ```
 
 Doctrine 会构建客户端与 SSR bundle、预渲染全部导航路由、移除 Vite 私有 manifest，再由
-Pagefind 索引最终 HTML。`https://user.github.io/acme/` 这样的仓库网址会把公开 URL 改为
-`/acme/...`，而不会创建 `dist/acme`。
+Pagefind 索引最终 HTML。`https://user.github.io/my-project/` 这样的仓库网址会把公开 URL 改为
+`/my-project/...`，而不会创建 `dist/my-project`。
 
 ## 7. 不要提交生成目录
 

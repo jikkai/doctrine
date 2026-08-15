@@ -195,7 +195,7 @@ function MobileNavigation({
     <Dialog.Root>
       <Dialog.Trigger
         aria-label={labels.menu}
-        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-input bg-background shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:h-9 sm:w-9 lg:hidden"
+        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-input bg-background shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:h-9 sm:w-9 lg:hidden!"
       >
         <MenuIcon aria-hidden="true" className="size-4" />
       </Dialog.Trigger>
@@ -442,12 +442,12 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
   return (
     <BaseContext value={config.base}>
       <header
-        className="sticky top-0 z-40 h-[var(--doctrine-header-height)] border-b border-border bg-background/90 backdrop-blur"
+        className="sticky top-0 z-40 h-[var(--doctrine-header-height)] bg-background/80 backdrop-blur-xl"
         data-pagefind-ignore
         data-slot="header"
       >
         <div
-          className="mx-auto flex h-full max-w-screen-2xl items-center gap-2 px-3 sm:gap-3 sm:px-4 lg:px-8"
+          className="relative mx-auto flex h-full max-w-screen-2xl items-center gap-2 px-3 after:absolute after:inset-x-3 after:bottom-0 after:h-px after:bg-border/70 sm:gap-3 sm:px-4 sm:after:inset-x-4 lg:px-8 lg:after:inset-x-8"
           data-slot="header-inner"
         >
           <MobileNavigation
@@ -458,7 +458,7 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
             routes={localeRoutes}
           />
           <a
-            className="min-w-0 flex-1 truncate text-sm font-semibold tracking-tight sm:text-base"
+            className="group relative mr-auto inline-flex min-h-11 min-w-0 shrink items-center truncate rounded-sm text-sm font-semibold tracking-tight after:absolute after:inset-x-0 after:bottom-2 after:h-px after:origin-right after:scale-x-0 after:bg-current after:opacity-40 after:transition-transform after:duration-200 hover:after:origin-left hover:after:scale-x-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 motion-reduce:after:transition-none sm:min-h-9 sm:text-base"
             data-slot="brand"
             href={withBase(config.base, home?.path ?? '/')}
           >

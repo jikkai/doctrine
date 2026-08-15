@@ -1,12 +1,14 @@
+import type { IAmamoMdxConfig } from '@amamo/mdx'
+import type { Plugin, ViteDevServer } from 'vite'
 import { existsSync, readFileSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
-import type { IAmamoMdxConfig } from '@amamo/mdx'
-import type { Plugin, ViteDevServer } from 'vite'
+import { z } from '@amamo/mdx'
 import { amamoMdx } from '@amamo/mdx/vite'
 import tailwindcss from '@tailwindcss/vite'
+
 import type { INormalizedDoctrineConfig } from './config.js'
 import type { ILoadedDoctrineNavigation } from './navigation.js'
 import type { IRuntimeConfig } from './runtime/types.js'
@@ -69,12 +71,9 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
       docs: {
         directory: options.config.contentDirectory,
         locales: options.config.locales,
-        schema: {
-          type: 'object',
-          properties: {
-            description: { type: 'string' },
-          },
-        },
+        schema: z.object({
+          description: z.string().optional(),
+        }),
       },
     },
     generatedDirectory: path.dirname(generatedModule),
@@ -87,7 +86,7 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
     },
     root: options.config.root,
   }
-  const mdxPlugin = amamoMdx(amamoConfig) as unknown as Plugin
+  const mdxPlugin = amamoMdx(amamoConfig)
 
   return [
     ...(usesTailwind(options.config.root) ? tailwindcss() : []),

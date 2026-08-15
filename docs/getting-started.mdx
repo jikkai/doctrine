@@ -28,7 +28,7 @@ mkdir -p docs/guide
 Create `docs/index.mdx`:
 
 ```mdx
-# Acme documentation
+# My project documentation
 
 Choose a guide from the navigation.
 ```
@@ -36,9 +36,9 @@ Choose a guide from the navigation.
 Create `docs/guide/install.mdx`:
 
 ```mdx
-# Install Acme
+# Install My project
 
-<InstallTabs packageName="acme" />
+<InstallTabs packageName="my-project" />
 ```
 
 Neither page needs frontmatter. An optional string `description` becomes that page's meta
@@ -53,7 +53,7 @@ orders the home page and child directory:
 import { defineDirectory } from '@amamo/doctrine'
 
 export default defineDirectory({
-  items: [{ page: 'index', title: 'Acme documentation' }, { directory: 'guide' }],
+  items: [{ page: 'index', title: 'My project documentation' }, { directory: 'guide' }],
 })
 ```
 
@@ -64,7 +64,7 @@ import { defineDirectory } from '@amamo/doctrine'
 
 export default defineDirectory({
   title: 'Guide',
-  items: [{ page: 'install', title: 'Install Acme' }],
+  items: [{ page: 'install', title: 'Install My project' }],
 })
 ```
 
@@ -99,9 +99,9 @@ Create `doctrine.config.ts` in the directory where the CLI runs:
 import { defineConfig } from '@amamo/doctrine'
 
 export default defineConfig({
-  title: 'Acme documentation',
-  description: 'Product guides and API notes for Acme.',
-  githubUrl: 'https://github.com/acme/acme',
+  title: 'My project documentation',
+  description: 'Product guides and API notes for My project.',
+  githubUrl: 'https://github.com/your-org/my-project',
 })
 ```
 
@@ -129,7 +129,8 @@ dist/
 
 Doctrine builds client and SSR bundles, prerenders every navigation route, removes Vite's private
 manifest, and indexes the resulting HTML with Pagefind. A repository URL such as
-`https://user.github.io/acme/` changes public URLs to `/acme/...`; it does not create `dist/acme`.
+`https://user.github.io/my-project/` changes public URLs to `/my-project/...`; it does not create
+`dist/my-project`.
 
 ## 7. Keep generated work out of Git
 

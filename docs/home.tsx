@@ -124,9 +124,12 @@ export function Home({ components, locale }: IHomeProps) {
       </section>
 
       <section className="border-b border-border" aria-label={copy.eyebrow}>
-        <div className="mx-auto grid max-w-6xl divide-y divide-border px-4 sm:px-6 md:grid-cols-3 md:divide-x md:divide-y-0 lg:px-8">
+        <div className="mx-auto grid max-w-6xl px-4 sm:px-6 md:grid-cols-3 lg:px-8">
           {copy.features.map((feature) => (
-            <div className="py-10 md:px-8 md:py-12 md:first:pl-0 md:last:pr-0" key={feature.title}>
+            <div
+              className="border-b border-border py-10 last:border-b-0 md:border-r md:border-b-0 md:px-8 md:py-12 md:first:pl-0 md:last:border-r-0 md:last:pr-0"
+              key={feature.title}
+            >
               <h2 className="text-base font-semibold tracking-tight">{feature.title}</h2>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">{feature.description}</p>
             </div>

@@ -68,8 +68,8 @@ import { defineConfig } from '@amamo/doctrine'
 export default defineConfig({
   title: 'My project',
   description: 'Guides for My project.',
-  githubUrl: 'https://github.com/acme/my-project',
-  copyright: 'Copyright © 2026 Acme.',
+  githubUrl: 'https://github.com/your-org/my-project',
+  copyright: 'Copyright © 2026 Your organization.',
   locales: {
     default: 'en',
     names: ['en', 'zh-CN'],
