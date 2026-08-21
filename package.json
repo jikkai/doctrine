@@ -1,6 +1,6 @@
 {
   "name": "@amamo/doctrine",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "An MDX-first static documentation site generator",
   "homepage": "https://jikkai.github.io/doctrine/",
   "license": "MIT",
