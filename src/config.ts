@@ -22,10 +22,12 @@ export interface IDoctrineConfig {
   components?: string
   copyright?: string
   description?: string
+  githubSourceRoot?: string
   githubUrl?: string
   iconLibrary?: string
   locales?: IDoctrineLocaleConfig
   outDir?: string
+  pageActions?: boolean
   siteUrl?: string
   styles?: string
   title?: string
@@ -38,11 +40,13 @@ export interface INormalizedDoctrineConfig {
   copyright?: string
   description: string
   githubUrl?: string
+  githubSourceRoot?: string
   iconLibrary?: string
   locales: IDoctrineLocaleConfig
   navigation: DoctrineNavigation
   navigationIcons: string[]
   outDir: string
+  pageActions: boolean
   root: string
   siteUrl: string
   styles?: string
@@ -95,13 +99,20 @@ export async function normalizeDoctrineConfig(
   }
   assertOptionalString(config.copyright, 'copyright')
   assertOptionalString(config.description, 'description')
+  assertOptionalString(config.githubSourceRoot, 'githubSourceRoot')
   assertOptionalString(config.title, 'title')
+  assertOptionalBoolean(config.pageActions, 'pageActions')
 
   const locales = normalizeLocales(config.locales)
   const siteUrl = normalizeSiteUrl(options.siteUrl ?? config.siteUrl ?? 'http://localhost/')
   const githubUrl = config.githubUrl
     ? normalizeExternalUrl(config.githubUrl, 'githubUrl')
     : undefined
+  const canonicalContentDirectory = realpathSync.native(contentDirectory)
+  const githubSourceRoot =
+    config.githubSourceRoot === undefined
+      ? relativeSourcePath(root, canonicalContentDirectory)
+      : normalizeGithubSourceRoot(config.githubSourceRoot)
   const components = await resolveOptionalFile(root, config.components, 'Components module')
   const styles = await resolveOptionalFile(root, config.styles, 'Stylesheet')
   const {
@@ -121,20 +132,31 @@ export async function normalizeDoctrineConfig(
   return {
     base: new URL(siteUrl).pathname,
     components,
-    contentDirectory: realpathSync.native(contentDirectory),
+    contentDirectory: canonicalContentDirectory,
     copyright: config.copyright,
     description: config.description ?? 'Documentation built from MDX.',
     githubUrl,
+    githubSourceRoot,
     iconLibrary: config.iconLibrary,
     locales,
     navigation,
     navigationIcons,
     outDir: path.resolve(root, options.outDir ?? config.outDir ?? 'dist'),
+    pageActions: config.pageActions ?? true,
     root,
     siteUrl,
     styles,
     title: config.title ?? 'Documentation',
     tsxPages,
+  }
+}
+
+function assertOptionalBoolean(
+  value: unknown,
+  label: string,
+): asserts value is boolean | undefined {
+  if (value !== undefined && typeof value !== 'boolean') {
+    throw new Error(`${label} must be a boolean`)
   }
 }
 
@@ -192,4 +214,24 @@ function normalizeExternalUrl(value: string, label: string): string {
     throw new Error(`${label} must use http or https`)
   }
   return url.href
+}
+
+function relativeSourcePath(root: string, directory: string): string | undefined {
+  const relative = path.relative(root, directory)
+  if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+    return undefined
+  }
+  return relative.split(path.sep).join('/')
+}
+
+function normalizeGithubSourceRoot(value: string): string {
+  const normalized = value.replaceAll('\\', '/')
+  const segments = normalized.split('/').filter(Boolean)
+  if (
+    normalized.startsWith('/') ||
+    segments.some((segment) => segment === '.' || segment === '..')
+  ) {
+    throw new Error('githubSourceRoot must be a repository-relative path')
+  }
+  return segments.join('/')
 }

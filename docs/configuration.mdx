@@ -25,6 +25,7 @@ export default defineConfig({
   description: 'Product guides and API notes.',
   siteUrl: 'https://docs.example.com/',
   githubUrl: 'https://github.com/your-org/my-project',
+  pageActions: true,
   copyright: 'Copyright © 2026 Your organization.',
   iconLibrary: 'lucide-react',
   outDir: 'dist',
@@ -40,25 +41,42 @@ export default defineConfig({
 
 ## Site options
 
-| Option        | Type                    | Default                            | Purpose                                                  |
-| ------------- | ----------------------- | ---------------------------------- | -------------------------------------------------------- |
-| `title`       | `string`                | `"Documentation"`                  | Brand text and page-title suffix.                        |
-| `description` | `string`                | `"Documentation built from MDX."`  | Fallback meta description.                               |
-| `siteUrl`     | `string`                | `"http://localhost/"`              | Absolute public URL and Vite deployment base.            |
-| `githubUrl`   | `string`                | none                               | External link shown as the GitHub header icon.           |
-| `copyright`   | `string`                | none                               | Footer text.                                             |
-| `iconLibrary` | `string`                | none                               | Module with named React icon exports used by navigation. |
-| `outDir`      | `string`                | `"dist"`                           | Static output directory.                                 |
-| `locales`     | `IDoctrineLocaleConfig` | `{ default: "en", names: ["en"] }` | Locale routes, navigation sets, and switch labels.       |
-| `components`  | `string`                | none                               | Custom MDX component module.                             |
-| `styles`      | `string`                | none                               | Custom stylesheet loaded after Doctrine CSS.             |
+| Option             | Type                    | Default                            | Purpose                                                   |
+| ------------------ | ----------------------- | ---------------------------------- | --------------------------------------------------------- |
+| `title`            | `string`                | `"Documentation"`                  | Brand text and page-title suffix.                         |
+| `description`      | `string`                | `"Documentation built from MDX."`  | Fallback meta description.                                |
+| `siteUrl`          | `string`                | `"http://localhost/"`              | Absolute public URL and Vite deployment base.             |
+| `githubUrl`        | `string`                | none                               | Repository link used by the header and MDX page actions.  |
+| `githubSourceRoot` | `string`                | inferred inside the project root   | Content path from the repository root for source links.   |
+| `pageActions`      | `boolean`               | `true`                             | Emit authored `.md` routes and show actions on MDX pages. |
+| `copyright`        | `string`                | none                               | Footer text.                                              |
+| `iconLibrary`      | `string`                | none                               | Module with named React icon exports used by navigation.  |
+| `outDir`           | `string`                | `"dist"`                           | Static output directory.                                  |
+| `locales`          | `IDoctrineLocaleConfig` | `{ default: "en", names: ["en"] }` | Locale routes, navigation sets, and switch labels.        |
+| `components`       | `string`                | none                               | Custom MDX component module.                              |
+| `styles`           | `string`                | none                               | Custom stylesheet loaded after Doctrine CSS.              |
 
 `title`, `description`, and `copyright` are site-wide values. Put localized page descriptions in
 the corresponding MDX frontmatter or locale-specific navigation entry.
 
 `siteUrl` must use HTTP or HTTPS and cannot contain a query or fragment. Doctrine normalizes its
-pathname with one leading and one trailing slash; that pathname becomes `base`. `githubUrl` also
-requires HTTP or HTTPS.
+pathname with one leading and one trailing slash; that pathname becomes `base`. Set `githubUrl` to
+the HTTP or HTTPS URL of the GitHub repository. The header icon links to that URL. With page actions
+enabled, **Open in GitHub** appends `blob/HEAD` and the current locale's source path so GitHub opens
+the real MDX file on the repository's default branch. Doctrine normally derives that path from the
+content directory relative to the project root. In a monorepo where the project root is below the
+repository root, set `githubSourceRoot` to the content directory's repository-relative POSIX path,
+such as `packages/docs/docs`.
+
+`pageActions` applies only to MDX document pages. Its default `true` value emits each page's authored
+MDX at the corresponding route-level `.md` URL and shows **Copy Page**, **View as Markdown**, and the
+conditional GitHub action. The source stays MDX and may contain frontmatter, imports, and JSX. Set
+the option to `false` to suppress both the `.md` output and page-action UI. Standalone TSX pages
+never receive either one, and the GitHub header link remains available independently.
+
+Generated Markdown and HTML outputs must not claim the same file or a parent directory, and a
+generated `.md` path must not collide with a file under `public/`. Doctrine reports these conflicts
+before writing document pages instead of choosing one source silently.
 
 ## Paths, precedence, and generated work
 

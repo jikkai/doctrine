@@ -4,58 +4,97 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 :root {
-  --doctrine-background: oklch(0.985 0.007 80);
-  --doctrine-foreground: oklch(0.225 0.018 55);
-  --doctrine-card: oklch(0.995 0.004 80);
-  --doctrine-card-foreground: oklch(0.21 0.018 55);
-  --doctrine-primary: oklch(0.45 0.115 35);
-  --doctrine-primary-foreground: oklch(0.985 0 0);
-  --doctrine-muted: oklch(0.955 0.011 75);
-  --doctrine-muted-foreground: oklch(0.455 0.021 55);
-  --doctrine-accent: oklch(0.94 0.026 65);
-  --doctrine-accent-foreground: oklch(0.31 0.07 38);
-  --doctrine-border: oklch(0.875 0.018 70);
-  --doctrine-input: oklch(0.84 0.022 70);
-  --doctrine-ring: oklch(0.52 0.14 38);
-  --doctrine-radius: 0.5rem;
+  --doctrine-background: oklch(0.985 0 0);
+  --doctrine-foreground: oklch(0.16 0 0);
+  --doctrine-card: oklch(0.995 0 0);
+  --doctrine-card-foreground: oklch(0.16 0 0);
+  --doctrine-popover: oklch(0.995 0 0);
+  --doctrine-popover-foreground: oklch(0.16 0 0);
+  --doctrine-primary: oklch(0.2 0 0);
+  --doctrine-primary-foreground: oklch(0.98 0 0);
+  --doctrine-secondary: oklch(0.95 0 0);
+  --doctrine-secondary-foreground: oklch(0.24 0 0);
+  --doctrine-muted: oklch(0.95 0 0);
+  --doctrine-muted-foreground: oklch(0.46 0 0);
+  --doctrine-accent: oklch(0.92 0 0);
+  --doctrine-accent-foreground: oklch(0.18 0 0);
+  --doctrine-border: oklch(0.86 0 0);
+  --doctrine-separator: oklch(0.91 0 0);
+  --doctrine-input: oklch(0.82 0 0);
+  --doctrine-ring: oklch(0.36 0 0);
+  --doctrine-sidebar: oklch(0.97 0 0);
+  --doctrine-sidebar-foreground: oklch(0.24 0 0);
+  --doctrine-sidebar-accent: oklch(0.91 0 0);
+  --doctrine-sidebar-accent-foreground: oklch(0.18 0 0);
+  --doctrine-code: oklch(0.945 0 0);
+  --doctrine-code-foreground: oklch(0.19 0 0);
+  --doctrine-radius: 0.625rem;
   --doctrine-font-sans:
-    'Avenir Next', 'Segoe UI Variable', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-  --doctrine-font-display:
-    'Iowan Old Style', Charter, 'Source Han Serif SC', 'Noto Serif CJK SC', 'Songti SC', ui-serif,
-    Georgia, serif;
-  --doctrine-content-width: 46.5rem;
-  --doctrine-sidebar-width: 17rem;
-  --doctrine-header-height: 4rem;
+    'Inter Variable', Inter, 'Noto Sans SC', ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --doctrine-font-display: var(--doctrine-font-sans);
+  --doctrine-font-mono: 'JetBrains Mono Variable', 'SFMono-Regular', ui-monospace, monospace;
+  --doctrine-content-width: 50rem;
+  --doctrine-sidebar-width: 16rem;
+  --doctrine-toc-width: 15rem;
+  --doctrine-header-height: 3rem;
   --background: var(--doctrine-background);
   --foreground: var(--doctrine-foreground);
   --card: var(--doctrine-card);
   --card-foreground: var(--doctrine-card-foreground);
+  --popover: var(--doctrine-popover);
+  --popover-foreground: var(--doctrine-popover-foreground);
   --primary: var(--doctrine-primary);
   --primary-foreground: var(--doctrine-primary-foreground);
+  --secondary: var(--doctrine-secondary);
+  --secondary-foreground: var(--doctrine-secondary-foreground);
   --muted: var(--doctrine-muted);
   --muted-foreground: var(--doctrine-muted-foreground);
   --accent: var(--doctrine-accent);
   --accent-foreground: var(--doctrine-accent-foreground);
   --border: var(--doctrine-border);
+  --separator: var(--doctrine-separator);
   --input: var(--doctrine-input);
   --ring: var(--doctrine-ring);
+  --sidebar: var(--doctrine-sidebar);
+  --sidebar-foreground: var(--doctrine-sidebar-foreground);
+  --sidebar-accent: var(--doctrine-sidebar-accent);
+  --sidebar-accent-foreground: var(--doctrine-sidebar-accent-foreground);
+  --code: var(--doctrine-code);
+  --code-foreground: var(--doctrine-code-foreground);
+  --font-family-sans: var(--doctrine-font-sans);
+  --font-family-mono: var(--doctrine-font-mono);
+  --radius: var(--doctrine-radius);
+  --header-height: var(--doctrine-header-height);
+  --sidebar-width: var(--doctrine-sidebar-width);
+  --toc-width: var(--doctrine-toc-width);
 }
 
 [data-theme='dark'] {
-  --doctrine-background: oklch(0.165 0.011 50);
-  --doctrine-foreground: oklch(0.91 0.014 75);
-  --doctrine-card: oklch(0.195 0.014 50);
-  --doctrine-card-foreground: oklch(0.925 0.013 75);
-  --doctrine-primary: oklch(0.73 0.105 58);
-  --doctrine-primary-foreground: oklch(0.165 0.015 45);
-  --doctrine-muted: oklch(0.235 0.015 50);
-  --doctrine-muted-foreground: oklch(0.715 0.022 70);
-  --doctrine-accent: oklch(0.275 0.035 45);
-  --doctrine-accent-foreground: oklch(0.925 0.017 75);
-  --doctrine-border: oklch(0.8 0.02 70 / 18%);
-  --doctrine-input: oklch(0.8 0.02 70 / 24%);
-  --doctrine-ring: oklch(0.72 0.11 60);
+  --doctrine-background: oklch(0.145 0 0);
+  --doctrine-foreground: oklch(0.93 0 0);
+  --doctrine-card: oklch(0.19 0 0);
+  --doctrine-card-foreground: oklch(0.93 0 0);
+  --doctrine-popover: oklch(0.19 0 0);
+  --doctrine-popover-foreground: oklch(0.93 0 0);
+  --doctrine-primary: oklch(0.92 0 0);
+  --doctrine-primary-foreground: oklch(0.16 0 0);
+  --doctrine-secondary: oklch(0.24 0 0);
+  --doctrine-secondary-foreground: oklch(0.86 0 0);
+  --doctrine-muted: oklch(0.22 0 0);
+  --doctrine-muted-foreground: oklch(0.69 0 0);
+  --doctrine-accent: oklch(0.27 0 0);
+  --doctrine-accent-foreground: oklch(0.94 0 0);
+  --doctrine-border: oklch(0.32 0 0);
+  --doctrine-separator: oklch(0.26 0 0);
+  --doctrine-input: oklch(0.36 0 0);
+  --doctrine-ring: oklch(0.72 0 0);
+  --doctrine-sidebar: oklch(0.17 0 0);
+  --doctrine-sidebar-foreground: oklch(0.86 0 0);
+  --doctrine-sidebar-accent: oklch(0.26 0 0);
+  --doctrine-sidebar-accent-foreground: oklch(0.95 0 0);
+  --doctrine-code: oklch(0.12 0 0);
+  --doctrine-code-foreground: oklch(0.9 0 0);
 }
 
 @theme inline {
@@ -63,18 +102,45 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-border: var(--border);
+  --color-separator: var(--separator);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --radius-md: calc(var(--doctrine-radius) - 0.25rem);
-  --radius-lg: var(--doctrine-radius);
-  --radius-xl: calc(var(--doctrine-radius) + 0.25rem);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-code: var(--code);
+  --color-code-foreground: var(--code-foreground);
+  --font-sans: var(--font-family-sans);
+  --font-mono: var(--font-family-mono);
+  --text-docs-body: 0.9375rem;
+  --text-docs-body--line-height: 1.625rem;
+  --text-docs-h2: 1.375rem;
+  --text-docs-h2--line-height: 1.875rem;
+  --text-docs-h3: 1.125rem;
+  --text-docs-h3--line-height: 1.75rem;
+  --text-docs-h4: 1rem;
+  --text-docs-h4--line-height: 1.5rem;
+  --text-docs-lead: 1rem;
+  --text-docs-lead--line-height: 1.625rem;
+  --text-docs-title: 1.75rem;
+  --text-docs-title--line-height: 2.25rem;
+  --radius-sm: calc(var(--radius) - 0.25rem);
+  --radius-md: calc(var(--radius) - 0.125rem);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 0.25rem);
+  --container-docs: var(--doctrine-content-width);
 }
 
 @layer base {
@@ -96,10 +162,12 @@
 
   body {
     min-width: 20rem;
+    min-height: 100svh;
     margin: 0;
     background: var(--background);
     color: var(--foreground);
     font-family: var(--doctrine-font-sans);
+    -webkit-font-smoothing: antialiased;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
   }
@@ -110,8 +178,14 @@
     font: inherit;
   }
 
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
   ::selection {
-    background: color-mix(in oklab, var(--primary) 22%, transparent);
+    background: color-mix(in oklab, var(--primary) 20%, transparent);
+    color: var(--foreground);
   }
 
   :where(a, button, input, select, summary, textarea):focus-visible {
@@ -134,24 +208,24 @@
 }
 
 [data-slot='dialog-viewport'] {
-  padding-top: max(0.5rem, env(safe-area-inset-top));
-  padding-right: max(0.5rem, env(safe-area-inset-right));
-  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
-  padding-left: max(0.5rem, env(safe-area-inset-left));
+  padding-top: max(5rem, env(safe-area-inset-top));
+  padding-right: max(1rem, env(safe-area-inset-right));
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  padding-left: max(1rem, env(safe-area-inset-left));
 }
 
 .doctrine-prose {
   --typeset-font-body: var(--doctrine-font-sans);
   --typeset-font-display: var(--doctrine-font-display);
   --typeset-font-heading: var(--doctrine-font-sans);
-  --typeset-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --typeset-size: 1rem;
-  --typeset-leading: 1.8;
-  --typeset-flow: 1.35em;
+  --typeset-font-mono: var(--doctrine-font-mono);
+  --typeset-size: 0.9375rem;
+  --typeset-leading: 1.625rem;
+  --typeset-flow: 1rem;
   font-family: var(--typeset-font-body);
   font-size: var(--typeset-size);
   line-height: var(--typeset-leading);
-  color: color-mix(in oklab, var(--foreground) 88%, var(--background));
+  color: color-mix(in oklab, var(--foreground) 90%, transparent);
   font-kerning: normal;
   hanging-punctuation: first allow-end last;
   overflow-wrap: break-word;
@@ -168,46 +242,59 @@
 .doctrine-prose :where(h1, h2, h3, h4) {
   scroll-margin-top: calc(var(--doctrine-header-height) + 1.5rem);
   font-family: var(--typeset-font-heading);
-  font-weight: 650;
-  line-height: 1.2;
+  font-weight: 600;
   color: var(--foreground);
-  letter-spacing: -0.03em;
+  letter-spacing: -0.015em;
   text-wrap: balance;
 }
 
 .doctrine-prose h1 {
   font-family: var(--typeset-font-display);
-  font-size: clamp(2.5rem, 7vw, 3.5rem);
+  font-size: 1.75rem;
   font-weight: 600;
-  line-height: 1.05;
-  letter-spacing: -0.045em;
+  line-height: 2.25rem;
+  letter-spacing: -0.025em;
 }
 
 .doctrine-prose h2 {
-  font-size: 1.55em;
+  font-size: 1.375rem;
+  line-height: 1.875rem;
 }
 
 .doctrine-prose h3 {
-  font-size: 1.25em;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
 }
 
 .doctrine-prose h4 {
-  font-size: 1.1em;
+  font-size: 1rem;
+  line-height: 1.5rem;
 }
 
-.doctrine-prose > :where(h2, h3, h4) {
-  margin-block-start: calc(var(--typeset-flow) * 2.35);
+.doctrine-prose > h2 {
+  margin-block-start: 2.5rem;
+}
+
+.doctrine-prose > h3 {
+  margin-block-start: 2rem;
+}
+
+.doctrine-prose > h4 {
+  margin-block-start: 1.5rem;
 }
 
 .doctrine-prose > :where(h1, h2, h3, h4) + :where(*) {
-  margin-block-start: calc(var(--typeset-flow) * 0.65);
+  margin-block-start: 0.75rem;
 }
 
 .doctrine-prose > h1 + p {
-  max-width: 42rem;
-  color: color-mix(in oklab, var(--foreground) 72%, var(--background));
-  font-size: 1.0625em;
-  line-height: 1.85;
+  max-width: 46rem;
+  margin-block-end: 2rem;
+  border-bottom: 1px solid var(--separator);
+  padding-bottom: 1.5rem;
+  color: var(--muted-foreground);
+  font-size: 1rem;
+  line-height: 1.625rem;
 }
 
 .doctrine-prose :where(ul, ol) {
@@ -223,11 +310,11 @@
 }
 
 .doctrine-prose :where(li + li) {
-  margin-block-start: 0.35em;
+  margin-block-start: 0.25rem;
 }
 
 .doctrine-prose :where(li > ul, li > ol) {
-  margin-block: 0.5em 0;
+  margin-block: 0.25rem 0;
 }
 
 .doctrine-prose [data-slot='file-tree'] ul {
@@ -238,7 +325,7 @@
 
 .doctrine-prose [data-slot='file-tree-folder'] > ul {
   margin-left: 1rem;
-  border-left: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  border-left: 1px solid var(--separator);
   padding-left: 0.75rem;
 }
 
@@ -246,17 +333,22 @@
   margin-block-start: 0.125rem;
 }
 
-.doctrine-prose :where(li)::marker {
+.doctrine-prose ul > li::marker {
   color: var(--primary);
+}
+
+.doctrine-prose ol > li::marker {
+  color: var(--muted-foreground);
+  font-family: var(--typeset-font-mono);
 }
 
 .doctrine-prose a {
   color: var(--primary);
   font-weight: 500;
   text-decoration: underline;
-  text-decoration-color: color-mix(in oklab, currentColor 35%, transparent);
+  text-decoration-color: color-mix(in oklab, currentColor 30%, transparent);
   text-decoration-thickness: 1px;
-  text-underline-offset: 0.2em;
+  text-underline-offset: 0.25rem;
   transition: text-decoration-color 150ms ease-out;
 }
 
@@ -265,32 +357,46 @@
 }
 
 .doctrine-prose blockquote {
-  border-left: 2px solid var(--primary);
-  padding: 0.25rem 0 0.25rem 1.25rem;
-  color: color-mix(in oklab, var(--foreground) 76%, var(--background));
-  font-family: var(--typeset-font-display);
-  font-size: 1.08em;
+  border-left: 2px solid var(--separator);
+  padding-left: 1rem;
+  color: var(--muted-foreground);
+  font-size: var(--typeset-size);
   font-style: italic;
 }
 
 .doctrine-prose :not(pre) > code {
-  border-radius: 0.25rem;
+  border-radius: calc(var(--doctrine-radius) - 0.25rem);
   background: var(--muted);
-  color: var(--accent-foreground);
-  padding: 0.15em 0.35em;
+  color: var(--foreground);
+  padding: 0.125rem 0.375rem;
   font-family: var(--typeset-font-mono);
-  font-size: 0.875em;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
 .doctrine-prose pre {
   margin: 0;
   overflow-x: auto;
-  padding: 0.875rem;
+  background: var(--code);
+  color: var(--code-foreground);
+  padding: 1rem;
   font-family: var(--typeset-font-mono);
   font-size: 0.875rem;
-  line-height: 1.7;
+  line-height: 1.25rem;
   tab-size: 2;
+}
+
+.doctrine-prose [data-slot='code-block'] {
+  border-color: var(--separator);
+  background: var(--code);
+  color: var(--code-foreground);
+  box-shadow: 0 1px 2px 0 color-mix(in oklab, var(--foreground) 5%, transparent);
+}
+
+.doctrine-prose [data-slot='code-block-header'] {
+  min-height: 2.25rem;
+  border-color: var(--separator);
+  background: color-mix(in oklab, var(--muted) 50%, transparent);
 }
 
 .doctrine-prose [data-slot='code-block'] > pre {
@@ -328,11 +434,11 @@
 }
 
 .doctrine-prose hr {
-  width: 4rem;
-  margin-block: calc(var(--typeset-flow) * 2.4);
+  width: 100%;
+  margin-block: 2.5rem;
   margin-inline: 0;
   border: 0;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--separator);
 }
 
 .doctrine-prose kbd {
@@ -358,7 +464,7 @@
 }
 
 .doctrine-prose details {
-  border-block: 1px solid var(--border);
+  border-block: 1px solid var(--separator);
   padding-block: 0.25rem;
 }
 
@@ -390,7 +496,7 @@
 
 .doctrine-prose dt,
 .doctrine-prose dd {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--separator);
   padding-block: 0.75rem;
 }
 
@@ -406,36 +512,34 @@
 .doctrine-prose table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9375em;
+  font-size: 0.875rem;
 }
 
 .doctrine-prose :where(th, td) {
-  border-bottom: 1px solid color-mix(in oklab, var(--border) 78%, transparent);
-  padding: 0.7em 0.8em;
+  border-bottom: 1px solid var(--separator);
+  padding: 0.625rem 0.75rem;
   text-align: left;
   vertical-align: top;
 }
 
 .doctrine-prose th {
-  background: color-mix(in oklab, var(--muted) 48%, transparent);
+  background: color-mix(in oklab, var(--muted) 70%, transparent);
   color: var(--foreground);
   font-weight: 600;
 }
 
 html:lang(zh) .doctrine-prose {
-  --typeset-leading: 1.9;
   line-break: strict;
   text-autospace: normal;
   word-break: normal;
 }
 
 html:lang(zh) .doctrine-prose :where(h1, h2, h3, h4) {
-  line-height: 1.3;
   letter-spacing: 0;
 }
 
 .doctrine-prose [data-slot='table-scroll'] {
-  border: 1px solid color-mix(in oklab, var(--border) 78%, transparent);
+  border: 1px solid var(--separator);
   border-radius: var(--radius-lg);
 }
 
@@ -450,10 +554,6 @@ html:lang(zh) .doctrine-prose :where(h1, h2, h3, h4) {
     padding-right: max(1rem, env(safe-area-inset-right));
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
     padding-left: max(1rem, env(safe-area-inset-left));
-  }
-
-  .doctrine-prose pre {
-    padding: 1rem;
   }
 }
 
@@ -488,6 +588,7 @@ html:lang(zh) .doctrine-prose :where(h1, h2, h3, h4) {
   [data-slot='sidebar'],
   [data-slot='toc'],
   [data-slot='toc-mobile'],
+  [data-slot='page-actions-row'],
   [data-slot='page-navigation'],
   [data-slot='footer'] {
     display: none !important;

@@ -8,9 +8,11 @@ export interface IRuntimeConfig {
   copyright?: string
   description: string
   dev: boolean
+  githubSourceRoot?: string
   githubUrl?: string
   locales: IDoctrineLocaleConfig
   navigation: DoctrineNavigation
+  pageActions: boolean
   siteUrl: string
   title: string
 }
@@ -39,8 +41,15 @@ export interface IDocumentRoute {
   locale: string
   path: string
   slug: string
+  source?: IDocumentSource
   standalone: boolean
   title: string
+}
+
+export interface IDocumentSource {
+  githubUrl?: string
+  markdownPath: string
+  sourcePath: string
 }
 
 export type DoctrineIconComponent = ComponentType<ComponentProps<'svg'>>

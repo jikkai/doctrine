@@ -1,12 +1,19 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import type { Plugin, ViteDevServer } from 'vite'
 import react from '@vitejs/plugin-react'
 import * as pagefind from 'pagefind'
 import { createServer } from 'vite'
 import type { INormalizedDoctrineConfig } from './config.js'
-import type { IPageAssets } from './runtime/types.js'
-import { normalizeRoutePath, withBase, withoutBase } from './runtime/url.js'
+import type { IDocumentSource, IPageAssets } from './runtime/types.js'
+import { findOutputConflict } from './output.js'
+import {
+  documentRouteFromMarkdownPath,
+  normalizeRoutePath,
+  withBase,
+  withoutBase,
+} from './runtime/url.js'
 import { doctrinePlugins, runtimeEntry } from './vite.js'
 
 export interface IDevOptions {
@@ -16,6 +23,7 @@ export interface IDevOptions {
 
 interface IServerBundle {
   getRoutePaths: () => string[]
+  getRouteSource: (pathname: string) => IDocumentSource | undefined
   renderPage: (pathname: string, assets: IPageAssets) => Promise<string>
 }
 
@@ -30,6 +38,25 @@ export async function dev(
   let searchFiles: Promise<Map<string, Uint8Array>> | undefined
   const markSearchDirty = () => {
     searchFiles = undefined
+  }
+
+  const markdownPlugin: Plugin = {
+    name: 'doctrine-dev-markdown',
+    configureServer(server) {
+      server.middlewares.use((request, response, next) => {
+        return handleMarkdownRequest(server, request, response).then(
+          (handled) => {
+            if (!handled) next()
+            return undefined
+          },
+          (error: unknown) => {
+            server.ssrFixStacktrace(error as Error)
+            next(error)
+            return undefined
+          },
+        )
+      })
+    },
   }
 
   const htmlPlugin: Plugin = {
@@ -51,6 +78,30 @@ export async function dev(
         })
       }
     },
+  }
+
+  async function handleMarkdownRequest(
+    server: ViteDevServer,
+    request: IOriginalRequest,
+    response: ServerResponse,
+  ): Promise<boolean> {
+    if (request.method !== 'GET' && request.method !== 'HEAD') return false
+    const requestUrl = request.originalUrl ?? request.url ?? '/'
+    const url = new URL(requestUrl, 'http://doctrine.local')
+    const relativePath = url.pathname.startsWith(config.base)
+      ? `/${url.pathname.slice(config.base.length)}`
+      : undefined
+    const markdownRoute = relativePath ? documentRouteFromMarkdownPath(relativePath) : undefined
+    if (!markdownRoute) return false
+    const module = (await server.ssrLoadModule(runtimeEntry('server'))) as IServerBundle
+    const source = module.getRouteSource(markdownRoute)
+    if (!source) return false
+    const markdown = await readFile(path.join(config.contentDirectory, source.sourcePath), 'utf8')
+    response.statusCode = 200
+    response.setHeader('Content-Type', 'text/markdown; charset=utf-8')
+    if (request.method === 'HEAD') response.end()
+    else response.end(markdown)
+    return true
   }
 
   async function handleRequest(
@@ -130,6 +181,7 @@ export async function dev(
       include: [
         '@amamo/doctrine > @base-ui/react/button',
         '@amamo/doctrine > @base-ui/react/dialog',
+        '@amamo/doctrine > @base-ui/react/menu',
         '@amamo/doctrine > @base-ui/react/select',
         '@amamo/doctrine > @base-ui/react/tabs',
         '@amamo/doctrine > lucide-react',
@@ -139,6 +191,7 @@ export async function dev(
     plugins: [
       react(),
       ...doctrinePlugins({ config, dev: true, onContentChange: markSearchDirty }),
+      markdownPlugin,
       htmlPlugin,
     ],
     root: config.root,
@@ -153,9 +206,30 @@ export async function dev(
       },
     },
   })
-  await server.listen()
+  try {
+    await server.listen()
+    await assertPublicMarkdownCompatibility(server)
+  } catch (error) {
+    await server.close()
+    throw error
+  }
   server.printUrls()
   return server
+
+  async function assertPublicMarkdownCompatibility(viteServer: ViteDevServer): Promise<void> {
+    const module = (await viteServer.ssrLoadModule(runtimeEntry('server'))) as IServerBundle
+    const publicDirectory = path.join(config.root, 'public')
+    for (const route of module.getRoutePaths()) {
+      const source = module.getRouteSource(route)
+      if (!source) continue
+      const conflict = await findOutputConflict(publicDirectory, source.markdownPath)
+      if (conflict) {
+        throw new Error(
+          `Markdown route ${source.markdownPath} conflicts with public output ${path.relative(publicDirectory, conflict)}`,
+        )
+      }
+    }
+  }
 }
 
 function devAssetUrl(file: string): string {

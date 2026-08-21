@@ -69,6 +69,7 @@ export default defineConfig({
   title: 'My project',
   description: 'Guides for My project.',
   githubUrl: 'https://github.com/your-org/my-project',
+  pageActions: true,
   copyright: 'Copyright © 2026 Your organization.',
   locales: {
     default: 'en',
@@ -95,10 +96,19 @@ docs/guide/meta.zh-CN.ts
 The default locale uses `/guide/install/`; the translated page uses
 `/zh-CN/guide/install/`. Navigation modules own page titles, icons, child directories, and order.
 
+By default, each MDX document route also exposes its authored source at the corresponding `.md`
+URL. For example, `/guide/install/` has `/guide/install.md`, while the translated page has
+`/zh-CN/guide/install.md`. Document pages provide **Copy Page** and **View as Markdown** actions.
+When `githubUrl` is configured and the repository-relative source root can be inferred or is set
+with `githubSourceRoot`, **Open in GitHub** targets the actual locale source on the repository's
+default branch. The `.md` response is the original MDX rather than Markdown rebuilt from HTML, so
+it can include frontmatter, imports, and JSX. Set `pageActions: false` to disable both the actions
+and `.md` output without removing the GitHub link in the header.
+
 A page entry can also name a same-directory `.tsx` file. Only TSX files listed by the matching
 locale navigation module become routes; every other TSX file remains an ordinary component. These
 pages render inside Doctrine's header and footer without the documentation sidebar, prose layout,
-or table of contents.
+table of contents, page actions, or a generated `.md` source route.
 
 ## What the build does
 
@@ -107,7 +117,7 @@ CLI + doctrine.config.* + meta*.ts
   -> normalize paths, URLs, locales, and navigation
   -> Vite + @amamo/mdx compile content and client/SSR bundles
   -> React prerenders every navigation route
-  -> Doctrine writes HTML, assets, and 404.html
+  -> Doctrine writes HTML, authored MDX sources, assets, and 404.html
   -> Pagefind indexes the final HTML
 ```
 

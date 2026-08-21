@@ -26,13 +26,13 @@ export function LivePreview({
 
   return (
     <section
-      className={`overflow-hidden rounded-lg border border-border/70 bg-card/35 ${className ?? ''}`}
+      className={`my-6 overflow-hidden rounded-lg border border-separator bg-card shadow-sm ${className ?? ''}`}
       {...props}
       data-slot="live-preview"
     >
       {title && (
         <div
-          className="border-b border-border/60 bg-muted/25 px-4 py-3 text-sm font-medium text-foreground"
+          className="flex h-9 items-center border-b border-separator bg-muted/50 px-4 text-sm font-medium text-foreground"
           data-slot="live-preview-title"
         >
           {title}
@@ -45,9 +45,9 @@ export function LivePreview({
         {children}
       </div>
       {source && (
-        <details className="group border-t border-border/60" data-slot="live-preview-code">
+        <details className="group border-t border-separator" data-slot="live-preview-code">
           <summary
-            className="flex min-h-10 cursor-pointer list-none items-center gap-2 px-4 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/45 hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50 [&::-webkit-details-marker]:hidden"
+            className="flex h-9 cursor-pointer list-none items-center gap-2 px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring [&::-webkit-details-marker]:hidden"
             data-slot="live-preview-code-toggle"
           >
             <CodeXmlIcon aria-hidden="true" className="size-3.5 shrink-0" />
@@ -58,7 +58,7 @@ export function LivePreview({
             />
           </summary>
           <div
-            className="border-t border-border/60 [&>figure]:rounded-none [&>figure]:border-0"
+            className="border-t border-separator [&>figure]:my-0 [&>figure]:rounded-none [&>figure]:border-0 [&>figure]:shadow-none"
             data-slot="live-preview-source"
           >
             <CodeBlock language={language}>

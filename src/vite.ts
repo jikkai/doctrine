@@ -20,6 +20,10 @@ const CONFIG_ID = 'virtual:doctrine/config'
 const ICONS_ID = 'virtual:doctrine/icons'
 const CUSTOM_STYLES_ID = 'virtual:doctrine/custom-styles.css'
 const STYLES_ID = 'virtual:doctrine/styles.css'
+const FONT_STYLE_IDS = [
+  '@fontsource-variable/inter',
+  '@fontsource-variable/jetbrains-mono',
+] as const
 const RESOLVED_CONTENT_ID = `\0${CONTENT_ID}`
 const RESOLVED_COMPONENTS_ID = `\0${COMPONENTS_ID}`
 const RESOLVED_CONFIG_ID = `\0${CONFIG_ID}`
@@ -103,7 +107,18 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
     {
       name: 'doctrine',
       enforce: 'pre',
+      config() {
+        return {
+          resolve: {
+            alias: FONT_STYLE_IDS.map((font) => ({
+              find: font,
+              replacement: packageRequire.resolve(font),
+            })),
+          },
+        }
+      },
       resolveId(source) {
+        if (FONT_STYLE_IDS.some((font) => font === source)) return packageRequire.resolve(source)
         if (source === '@amamo/doctrine/components') {
           return path.join(options.packageRoot ?? doctrinePackageRoot(), 'components.js')
         }
@@ -138,9 +153,11 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
             copyright: options.config.copyright,
             description: options.config.description,
             dev: options.dev,
+            githubSourceRoot: options.config.githubSourceRoot,
             githubUrl: options.config.githubUrl,
             locales: options.config.locales,
             navigation: current.navigation,
+            pageActions: options.config.pageActions,
             siteUrl: options.config.siteUrl,
             title: options.config.title,
           }
@@ -156,7 +173,10 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
           return `import { ${names} } from ${JSON.stringify(options.config.iconLibrary)}; export default { ${names} };`
         }
         if (id === RESOLVED_CUSTOM_STYLES_ID) return ''
-        if (id === resolvedStylesId) return readFile(styles, 'utf8')
+        if (id === resolvedStylesId) {
+          const fonts = FONT_STYLE_IDS.map((font) => `@import ${JSON.stringify(font)};`).join('\n')
+          return `${fonts}\n${await readFile(styles, 'utf8')}`
+        }
         return null
       },
       configureServer(server: ViteDevServer) {
@@ -205,9 +225,14 @@ export function doctrinePlugins(options: IDoctrinePluginOptions): Plugin[] {
 }
 
 function isRuntimeDependency(source: string): boolean {
-  return ['@base-ui/react', 'lucide-react', 'react', 'react-dom'].some(
-    (dependency) => source === dependency || source.startsWith(`${dependency}/`),
-  )
+  return [
+    '@base-ui/react',
+    '@fontsource-variable/inter',
+    '@fontsource-variable/jetbrains-mono',
+    'lucide-react',
+    'react',
+    'react-dom',
+  ].some((dependency) => source === dependency || source.startsWith(`${dependency}/`))
 }
 
 function usesTailwind(root: string): boolean {

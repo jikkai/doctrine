@@ -2,10 +2,12 @@ import type { ChangeEvent, ComponentProps, ComponentType, ReactNode } from 'reac
 import { Dialog } from '@base-ui/react/dialog'
 import { Select } from '@base-ui/react/select'
 import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
   CheckIcon,
   LanguagesIcon,
-  MenuIcon,
   MoonIcon,
+  PanelLeftIcon,
   SearchIcon,
   SunIcon,
   XIcon,
@@ -14,13 +16,17 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react'
 
 import type { IDoctrineComponents } from '../config.js'
 import type { DoctrineNavigationNode } from '../navigation.js'
+import type { IPageActionsLabels } from './components/page-actions.js'
 import type { DoctrineIcons, IDocumentRoute, IMdxContentProps, IRuntimeConfig } from './types.js'
 
+import { GitHubIcon } from './components/github-icon.js'
 import { DoctrineLocaleContext } from './components/mdx/context.js'
 import { builtinMdxComponents } from './components/mdx/registry.js'
+import { PageActions } from './components/page-actions.js'
 import { TableOfContents } from './components/table-of-contents.js'
 import { Button } from './components/ui/button.js'
 import { DialogSurface } from './components/ui/dialog-surface.js'
+import { SheetSurface } from './components/ui/sheet-surface.js'
 import { withBase } from './url.js'
 
 export interface IAppProps {
@@ -57,6 +63,7 @@ interface ILabels {
   notFoundDescription: string
   next: string
   onThisPage: string
+  pageActions: IPageActionsLabels
   pageNavigation: string
   previous: string
   search: string
@@ -79,6 +86,14 @@ const LABELS: Readonly<Record<'en' | 'zh', ILabels>> = {
     notFoundDescription: 'The page may have moved or does not exist.',
     next: 'Next',
     onThisPage: 'On This Page',
+    pageActions: {
+      copied: 'Copied',
+      copyFailed: 'Copy failed',
+      copyPage: 'Copy Page',
+      moreActions: 'More page actions',
+      openInGitHub: 'Open in GitHub',
+      viewAsMarkdown: 'View as Markdown',
+    },
     pageNavigation: 'Page navigation',
     previous: 'Previous',
     search: 'Search',
@@ -99,6 +114,14 @@ const LABELS: Readonly<Record<'en' | 'zh', ILabels>> = {
     notFoundDescription: '该页面可能已移动，或从未存在。',
     next: '下一篇',
     onThisPage: '本页目录',
+    pageActions: {
+      copied: '已复制',
+      copyFailed: '复制失败',
+      copyPage: '复制页面',
+      moreActions: '更多页面操作',
+      openInGitHub: '在 GitHub 中打开',
+      viewAsMarkdown: '查看 Markdown',
+    },
     pageNavigation: '页面导航',
     previous: '上一篇',
     search: '搜索',
@@ -161,17 +184,15 @@ function Navigation({
 
   function renderItems(nodes: readonly DoctrineNavigationNode[], nested = false): ReactNode {
     return (
-      <ul
-        className={nested ? 'mt-1 ml-2 space-y-0.5 border-l border-border/60 pl-3' : 'space-y-0.5'}
-      >
+      <ul className={nested ? 'ml-3 border-l border-separator pl-2' : undefined}>
         {nodes.map((item) => {
           const Icon = item.icon ? icons[item.icon] : undefined
           if (item.type === 'directory') {
             return (
-              <li className="pt-5 first:pt-0" key={item.directory}>
-                <div className="flex items-center gap-2 px-3 py-2 text-[0.6875rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
-                  {Icon && <Icon aria-hidden="true" className="size-3.5 shrink-0" />}
-                  <span>{item.title}</span>
+              <li className="mt-5" key={item.directory}>
+                <div className="flex items-center gap-2 px-3 pt-2 pb-1 text-sm font-semibold text-sidebar-foreground">
+                  {Icon && <Icon aria-hidden="true" className="size-4 shrink-0" />}
+                  <span className="min-w-0 wrap-break-word whitespace-normal">{item.title}</span>
                 </div>
                 {renderItems(item.items, true)}
               </li>
@@ -184,11 +205,13 @@ function Navigation({
             <li key={item.documentKey}>
               <a
                 aria-current={current?.path === route.path ? 'page' : undefined}
-                className={`relative flex items-center gap-2 rounded-sm px-3 py-2 text-[0.8125rem] leading-5 text-muted-foreground transition-colors before:absolute before:inset-y-2 before:-left-px before:w-px before:bg-transparent hover:bg-muted/60 hover:text-foreground aria-[current=page]:bg-accent/55 aria-[current=page]:font-medium aria-[current=page]:text-accent-foreground aria-[current=page]:before:bg-primary ${mobile ? 'min-h-11 text-sm' : 'min-h-9'}`}
+                className={`my-0.5 flex min-h-9 items-center gap-2 rounded-md px-3 py-2 text-sm leading-5 text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium aria-[current=page]:text-sidebar-accent-foreground ${mobile ? 'min-h-11' : ''}`}
                 href={withBase(base, route.path)}
               >
-                {Icon && <Icon aria-hidden="true" className="size-3.5 shrink-0" />}
-                <span>{item.title}</span>
+                {Icon && <Icon aria-hidden="true" className="size-4 shrink-0" />}
+                <span className="min-w-0 flex-1 wrap-break-word whitespace-normal">
+                  {item.title}
+                </span>
               </a>
             </li>
           )
@@ -200,7 +223,7 @@ function Navigation({
   return (
     <nav
       aria-label={label}
-      className={mobile ? 'max-h-[calc(100dvh-4.5rem)] overflow-y-auto p-4' : 'py-8 pr-6'}
+      className={mobile ? 'min-h-0 flex-1 overflow-y-auto py-5 pr-3 pl-2' : 'py-5 pr-3 pl-2'}
       data-slot="navigation"
     >
       {renderItems(items)}
@@ -225,16 +248,18 @@ function MobileNavigation({
     <Dialog.Root>
       <Dialog.Trigger
         aria-label={labels.menu}
-        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-transparent bg-transparent transition-colors hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:h-9 sm:w-9 lg:hidden!"
+        className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring md:hidden!"
       >
-        <MenuIcon aria-hidden="true" className="size-4" />
+        <PanelLeftIcon aria-hidden="true" className="size-4" />
       </Dialog.Trigger>
-      <DialogSurface className="max-w-sm">
-        <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <Dialog.Title className="font-semibold">{labels.menu}</Dialog.Title>
+      <SheetSurface>
+        <div className="flex h-12 shrink-0 items-center justify-between border-b border-separator px-5">
+          <Dialog.Title className="text-sm font-semibold text-foreground">
+            {labels.menu}
+          </Dialog.Title>
           <Dialog.Close
             aria-label={labels.close}
-            className="inline-flex size-11 items-center justify-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:size-9"
+            className="inline-flex size-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
             <XIcon aria-hidden="true" className="size-4" />
           </Dialog.Close>
@@ -247,7 +272,7 @@ function MobileNavigation({
           mobile
           routes={routes}
         />
-      </DialogSurface>
+      </SheetSurface>
     </Dialog.Root>
   )
 }
@@ -282,7 +307,7 @@ function LocaleSwitcher({
     <Select.Root items={items} onValueChange={handleValueChange} value={value}>
       <Select.Trigger
         aria-label={label}
-        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-transparent bg-transparent transition-colors hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:h-9 sm:w-9"
+        className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         data-slot="locale-switcher"
       >
         <LanguagesIcon aria-hidden="true" className="size-4" />
@@ -290,11 +315,11 @@ function LocaleSwitcher({
       </Select.Trigger>
       <Select.Portal>
         <Select.Positioner align="end" className="z-50 outline-none" sideOffset={4}>
-          <Select.Popup className="min-w-36 rounded-lg border border-border/70 bg-card p-1 text-card-foreground shadow-lg outline-none">
+          <Select.Popup className="min-w-36 origin-[var(--transform-origin)] rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none transition-[scale,opacity] duration-100 data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0">
             <Select.List>
               {items.map((item) => (
                 <Select.Item
-                  className="grid min-h-9 cursor-default grid-cols-[1rem_1fr] items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none data-[highlighted]:bg-accent/70 data-[highlighted]:text-accent-foreground"
+                  className="grid min-h-8 cursor-default grid-cols-[1rem_1fr] items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-none select-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
                   key={item.value}
                   value={item.value}
                 >
@@ -323,9 +348,9 @@ function ThemeToggle({ label }: { label: string }) {
   return (
     <Button
       aria-label={label}
-      className="h-11 w-11 shrink-0 border-transparent! px-0! shadow-none! sm:h-9 sm:w-9"
+      className="size-9 shrink-0 border-transparent! px-0! shadow-none!"
       onClick={handleClick}
-      variant="outline"
+      variant="ghost"
     >
       <SunIcon aria-hidden="true" className="theme-icon-light size-4" />
       <MoonIcon aria-hidden="true" className="theme-icon-dark size-4" />
@@ -397,23 +422,20 @@ function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILab
     <Dialog.Root onOpenChange={handleOpenChange} open={open}>
       <Dialog.Trigger
         aria-label={labels.search}
-        className="inline-flex h-11 w-11 shrink-0 items-center justify-center gap-2 rounded-md border border-transparent bg-transparent text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:h-9 sm:w-52 sm:justify-start sm:bg-muted/55 sm:px-3"
+        className="inline-flex size-9 shrink-0 items-center justify-center gap-2 rounded-md bg-muted/70 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:w-48 sm:justify-start sm:px-2.5 lg:w-60"
       >
-        <SearchIcon aria-hidden="true" className="size-4" />
-        <span className="hidden sm:inline">{labels.search}</span>
-        <kbd className="ml-auto hidden border-0 bg-transparent p-0 text-[0.6875rem] font-normal text-muted-foreground sm:inline">
-          ⌘ K
-        </kbd>
+        <SearchIcon aria-hidden="true" className="size-4 shrink-0" />
+        <span className="hidden flex-1 truncate text-left sm:block">{labels.search}</span>
       </Dialog.Trigger>
       <DialogSurface className="max-w-2xl overflow-hidden" initialFocus={inputRef}>
         <Dialog.Title className="sr-only">{labels.search}</Dialog.Title>
         <Dialog.Description className="sr-only">{labels.searchPlaceholder}</Dialog.Description>
-        <div className="flex items-center border-b border-border/70 px-4">
-          <SearchIcon aria-hidden="true" className="size-4 text-muted-foreground" />
+        <div className="flex items-center gap-2.5 border-b border-separator px-4">
+          <SearchIcon aria-hidden="true" className="size-5 shrink-0 text-muted-foreground" />
           <input
             aria-label={labels.search}
             autoComplete="off"
-            className="h-14 min-w-0 flex-1 bg-transparent px-3 outline-none placeholder:text-muted-foreground"
+            className="h-12 min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground"
             onChange={handleQueryChange}
             placeholder={labels.searchPlaceholder}
             ref={inputRef}
@@ -421,7 +443,7 @@ function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILab
           />
           <Dialog.Close
             aria-label={labels.close}
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:size-9"
+            className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
             <XIcon aria-hidden="true" className="size-4" />
           </Dialog.Close>
@@ -429,7 +451,7 @@ function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILab
         <div
           aria-busy={status === 'loading'}
           aria-live="polite"
-          className="max-h-[min(55dvh,28rem)] min-h-28 overflow-y-auto p-2"
+          className="max-h-[min(55dvh,32rem)] min-h-28 overflow-y-auto p-1.5"
         >
           {status === 'idle' && (
             <p className="p-4 text-sm leading-6 text-muted-foreground">{labels.searchHint}</p>
@@ -445,13 +467,13 @@ function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILab
           )}
           {results.map((result) => (
             <a
-              className="block rounded-md p-3 transition-colors hover:bg-accent/70 hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              className="block rounded-md px-3 py-2 text-sm leading-5 transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:outline-2 focus-visible:outline-ring"
               href={result.url}
               key={result.url}
             >
               <strong className="block text-sm">{result.meta.title ?? result.url}</strong>
               <span
-                className="mt-1 line-clamp-3 text-sm leading-6 text-muted-foreground [&_mark]:bg-transparent [&_mark]:font-semibold [&_mark]:text-foreground"
+                className="mt-0.5 line-clamp-3 text-sm leading-5 text-muted-foreground [&_mark]:bg-transparent [&_mark]:font-semibold [&_mark]:text-foreground"
                 dangerouslySetInnerHTML={{ __html: result.excerpt }}
               />
             </a>
@@ -485,7 +507,7 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
     if (!config.copyright) return null
     return (
       <footer
-        className="mx-auto max-w-[var(--doctrine-content-width)] border-t border-border/60 py-10 text-center text-xs tracking-wide text-muted-foreground"
+        className="mx-auto max-w-[var(--doctrine-content-width)] border-t border-separator py-10 text-center text-xs text-muted-foreground"
         data-pagefind-ignore
         data-slot="footer"
       >
@@ -499,30 +521,42 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
     return (
       <nav
         aria-label={labels.pageNavigation}
-        className="mx-auto mt-20 grid max-w-[var(--doctrine-content-width)] grid-cols-2 gap-6"
+        className="mx-auto mt-16 grid max-w-[var(--doctrine-content-width)] gap-3 border-t border-separator pt-8 sm:grid-cols-2"
         data-pagefind-ignore
         data-slot="page-navigation"
       >
         {previousRoute ? (
           <a
-            className="group min-w-0 border-t border-border/60 pt-4 text-left transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="group flex min-h-24 min-w-0 flex-col justify-center rounded-lg border border-separator bg-card px-5 py-4 text-left transition-colors hover:border-primary/40 hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             href={withBase(config.base, previousRoute.path)}
           >
-            <span className="block text-xs text-muted-foreground">← {labels.previous}</span>
-            <strong className="mt-1 block truncate text-sm font-semibold group-hover:text-primary">
+            <span className="mb-2 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+              <ArrowLeftIcon
+                aria-hidden="true"
+                className="size-3.5 transition-transform group-hover:-translate-x-0.5"
+              />
+              {labels.previous}
+            </span>
+            <strong className="block truncate font-medium text-foreground">
               {previousRoute.title}
             </strong>
           </a>
         ) : (
-          <span />
+          <span className="hidden sm:block" />
         )}
         {nextRoute && (
           <a
-            className="group min-w-0 border-t border-border/60 pt-4 text-right transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="group flex min-h-24 min-w-0 flex-col items-end justify-center rounded-lg border border-separator bg-card px-5 py-4 text-right transition-colors hover:border-primary/40 hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             href={withBase(config.base, nextRoute.path)}
           >
-            <span className="block text-xs text-muted-foreground">{labels.next} →</span>
-            <strong className="mt-1 block truncate text-sm font-semibold group-hover:text-primary">
+            <span className="mb-2 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+              {labels.next}
+              <ArrowRightIcon
+                aria-hidden="true"
+                className="size-3.5 transition-transform group-hover:translate-x-0.5"
+              />
+            </span>
+            <strong className="block truncate font-medium text-foreground">
               {nextRoute.title}
             </strong>
           </a>
@@ -540,12 +574,12 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
         {labels.skipToContent}
       </a>
       <header
-        className="sticky top-0 z-40 h-[var(--doctrine-header-height)] bg-background"
+        className="sticky top-0 z-40 h-[var(--doctrine-header-height)] border-b border-separator bg-background/90 backdrop-blur-xl"
         data-pagefind-ignore
         data-slot="header"
       >
         <div
-          className="relative mx-auto flex h-full max-w-screen-2xl items-center gap-0 px-2 after:absolute after:inset-x-2 after:bottom-0 after:h-px after:bg-border/55 min-[23rem]:gap-1 min-[23rem]:px-3 min-[23rem]:after:inset-x-3 sm:gap-2 sm:px-4 sm:after:inset-x-4 lg:px-8 lg:after:inset-x-8"
+          className="mx-auto flex h-full max-w-screen-2xl items-center gap-1.5 px-3 sm:px-4"
           data-slot="header-inner"
         >
           <MobileNavigation
@@ -555,42 +589,41 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
             labels={labels}
             routes={localeRoutes}
           />
-          <div className="mr-auto flex min-w-0 items-center gap-2">
+          <div className="min-w-0 shrink border-r border-separator pr-2.5 sm:shrink-0 sm:pr-4">
             <a
-              className="group relative inline-flex min-h-11 min-w-0 shrink items-center truncate rounded-sm text-sm font-semibold tracking-[-0.015em] after:absolute after:inset-x-0 after:bottom-2 after:h-px after:origin-right after:scale-x-0 after:bg-current after:opacity-40 after:transition-transform after:duration-200 hover:after:origin-left hover:after:scale-x-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 motion-reduce:after:transition-none sm:min-h-9 sm:text-[0.9375rem]"
+              className="inline-flex h-9 min-w-0 items-center truncate rounded-md text-sm font-semibold text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
               data-slot="brand"
               href={withBase(config.base, home?.path ?? '/')}
             >
               {siteTitle}
             </a>
-            {documentationHome && (
-              <nav
-                aria-label={labels.documentation}
-                className="ml-4 hidden shrink-0 lg:flex"
-                data-slot="header-navigation"
-              >
-                <a
-                  aria-current={route && !route.standalone ? 'location' : undefined}
-                  className="inline-flex min-h-10 items-center rounded-sm border-b border-transparent px-1 text-sm font-medium text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 aria-[current=location]:border-primary/60 aria-[current=location]:text-foreground"
-                  href={withBase(config.base, documentationHome.path)}
-                >
-                  {labels.documentation}
-                </a>
-              </nav>
-            )}
           </div>
+          {documentationHome && (
+            <nav
+              aria-label={labels.documentation}
+              className="hidden shrink-0 items-center gap-1 lg:flex"
+              data-slot="header-navigation"
+            >
+              <a
+                aria-current={route && !route.standalone ? 'location' : undefined}
+                className="rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-ring aria-[current=location]:bg-accent aria-[current=location]:font-medium aria-[current=location]:text-accent-foreground"
+                href={withBase(config.base, documentationHome.path)}
+              >
+                {labels.documentation}
+              </a>
+            </nav>
+          )}
+          <div className="flex-1" />
           <SearchDialog config={config} labels={labels} />
           {config.githubUrl && (
             <a
               aria-label="GitHub"
-              className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-md border border-transparent bg-transparent transition-colors hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 min-[23rem]:inline-flex sm:h-9 sm:w-9"
+              className="hidden size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:inline-flex"
               href={config.githubUrl}
               rel="noreferrer"
               target="_blank"
             >
-              <svg aria-hidden="true" className="size-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.3c-3.3.7-4-1.4-4-1.4-.5-1.4-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.7.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3Z" />
-              </svg>
+              <GitHubIcon aria-hidden="true" className="size-4" />
             </a>
           )}
           <LocaleSwitcher config={config} label={labels.language} route={route} routes={routes} />
@@ -607,9 +640,9 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
           {renderFooter()}
         </>
       ) : (
-        <div className="mx-auto grid max-w-screen-2xl grid-cols-1 px-4 lg:grid-cols-[var(--doctrine-sidebar-width)_minmax(0,1fr)] lg:px-8 xl:grid-cols-[var(--doctrine-sidebar-width)_minmax(0,1fr)_14rem]">
+        <div className="mx-auto grid max-w-screen-2xl grid-cols-1 md:grid-cols-[var(--doctrine-sidebar-width)_minmax(0,1fr)] xl:grid-cols-[var(--doctrine-sidebar-width)_minmax(0,1fr)_var(--doctrine-toc-width)]">
           <aside
-            className="sticky top-[var(--doctrine-header-height)] hidden h-[calc(100vh-var(--doctrine-header-height))] overflow-y-auto border-r border-border/50 lg:block"
+            className="sticky top-[var(--doctrine-header-height)] hidden h-[calc(100svh-var(--doctrine-header-height))] overflow-y-auto border-r border-separator bg-sidebar md:block"
             data-pagefind-ignore
             data-slot="sidebar"
           >
@@ -623,34 +656,49 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
           </aside>
           <div className="min-w-0">
             <main
-              className="px-0 py-10 sm:px-6 lg:px-12 lg:py-16"
+              className="px-4 py-10 sm:px-6 lg:py-12"
               data-slot="main"
               id="main-content"
               tabIndex={-1}
             >
-              {route && Content && (
-                <TableOfContents label={labels.onThisPage} mobile routePath={route.path} />
-              )}
               {route && Content ? (
                 <>
-                  <article
-                    className="doctrine-prose mx-auto max-w-[var(--doctrine-content-width)]"
-                    data-pagefind-body
-                    data-slot="content"
-                  >
-                    <DoctrineLocaleContext value={locale}>
-                      <Content components={mdxComponents} />
-                    </DoctrineLocaleContext>
-                  </article>
+                  <div className="mx-auto max-w-[var(--doctrine-content-width)] sm:grid sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-x-6 print:block">
+                    {route.source && (
+                      <div
+                        className="mb-5 flex justify-end sm:col-start-2 sm:row-start-2 sm:z-10 sm:mt-0.5 sm:mb-0 sm:self-start"
+                        data-pagefind-ignore
+                        data-slot="page-actions-row"
+                      >
+                        <PageActions
+                          labels={labels.pageActions}
+                          markdownUrl={withBase(config.base, route.source.markdownPath)}
+                          sourceUrl={route.source.githubUrl}
+                        />
+                      </div>
+                    )}
+                    <div className="sm:col-span-2 sm:row-start-1">
+                      <TableOfContents label={labels.onThisPage} mobile routePath={route.path} />
+                    </div>
+                    <article
+                      className={`doctrine-prose min-w-0 max-w-[var(--doctrine-content-width)] sm:col-span-2 sm:col-start-1 sm:row-start-2 ${route.source ? 'sm:[&>h1:first-child]:pr-44 print:[&>h1:first-child]:pr-0' : ''}`}
+                      data-pagefind-body
+                      data-slot="content"
+                    >
+                      <DoctrineLocaleContext value={locale}>
+                        <Content components={mdxComponents} />
+                      </DoctrineLocaleContext>
+                    </article>
+                  </div>
                   {renderPageNavigation()}
                 </>
               ) : (
                 <div className="mx-auto max-w-3xl py-20 text-center">
                   <p className="text-sm font-medium text-muted-foreground">404</p>
-                  <h1 className="mt-3 text-4xl font-bold tracking-tight">{labels.notFound}</h1>
+                  <h1 className="mt-3 text-[1.75rem] leading-9 font-semibold">{labels.notFound}</h1>
                   <p className="mt-4 text-muted-foreground">{labels.notFoundDescription}</p>
                   <a
-                    className="mt-8 inline-block font-medium underline underline-offset-4"
+                    className="mt-8 inline-block font-medium text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                     href={withBase(config.base, home?.path ?? '/')}
                   >
                     {siteTitle}

@@ -24,6 +24,7 @@ export default defineConfig({
   description: '我的项目产品指南和 API 说明。',
   siteUrl: 'https://docs.example.com/',
   githubUrl: 'https://github.com/your-org/my-project',
+  pageActions: true,
   copyright: '版权所有 © 2026 你的组织。',
   iconLibrary: 'lucide-react',
   outDir: 'dist',
@@ -39,25 +40,39 @@ export default defineConfig({
 
 ## 网站选项
 
-| 选项          | 类型                    | 默认值                             | 用途                                   |
-| ------------- | ----------------------- | ---------------------------------- | -------------------------------------- |
-| `title`       | `string`                | `"Documentation"`                  | 品牌文案和页面 title 后缀。            |
-| `description` | `string`                | `"Documentation built from MDX."`  | 默认 meta description。                |
-| `siteUrl`     | `string`                | `"http://localhost/"`              | 绝对公开 URL 和 Vite 部署 base。       |
-| `githubUrl`   | `string`                | 无                                 | Header 中 GitHub 图标的外部链接。      |
-| `copyright`   | `string`                | 无                                 | Footer 文案。                          |
-| `iconLibrary` | `string`                | 无                                 | 提供导航图标命名 React 导出的模块。    |
-| `outDir`      | `string`                | `"dist"`                           | 静态输出目录。                         |
-| `locales`     | `IDoctrineLocaleConfig` | `{ default: "en", names: ["en"] }` | 语言路由、导航集合和切换标签。         |
-| `components`  | `string`                | 无                                 | 自定义 MDX 组件模块。                  |
-| `styles`      | `string`                | 无                                 | 在 Doctrine CSS 后加载的自定义样式表。 |
+| 选项               | 类型                    | 默认值                             | 用途                                     |
+| ------------------ | ----------------------- | ---------------------------------- | ---------------------------------------- |
+| `title`            | `string`                | `"Documentation"`                  | 品牌文案和页面 title 后缀。              |
+| `description`      | `string`                | `"Documentation built from MDX."`  | 默认 meta description。                  |
+| `siteUrl`          | `string`                | `"http://localhost/"`              | 绝对公开 URL 和 Vite 部署 base。         |
+| `githubUrl`        | `string`                | 无                                 | Header 与 MDX 页面操作使用的仓库链接。   |
+| `githubSourceRoot` | `string`                | 位于项目 root 内时自动推导         | 源码链接所用的仓库内 content 路径。      |
+| `pageActions`      | `boolean`               | `true`                             | 输出原始 `.md` 路由并显示 MDX 页面操作。 |
+| `copyright`        | `string`                | 无                                 | Footer 文案。                            |
+| `iconLibrary`      | `string`                | 无                                 | 提供导航图标命名 React 导出的模块。      |
+| `outDir`           | `string`                | `"dist"`                           | 静态输出目录。                           |
+| `locales`          | `IDoctrineLocaleConfig` | `{ default: "en", names: ["en"] }` | 语言路由、导航集合和切换标签。           |
+| `components`       | `string`                | 无                                 | 自定义 MDX 组件模块。                    |
+| `styles`           | `string`                | 无                                 | 在 Doctrine CSS 后加载的自定义样式表。   |
 
 `title`、`description` 和 `copyright` 是站点级单一值。本地化页面描述应写在对应 MDX 的
 frontmatter，或 locale 对应的导航条目中。
 
 `siteUrl` 必须使用 HTTP 或 HTTPS，且不能包含 query 或 fragment。Doctrine 会把 pathname 归一化
-为一个开头斜杠和一个结尾斜杠；这个 pathname 就是 `base`。`githubUrl` 也必须使用 HTTP 或
-HTTPS。
+为一个开头斜杠和一个结尾斜杠；这个 pathname 就是 `base`。`githubUrl` 应设为 GitHub 仓库的
+HTTP 或 HTTPS URL，Header 图标会链接到该地址。启用页面操作时，**Open in GitHub** 会追加
+`blob/HEAD` 和当前 locale 的源码路径，让 GitHub 打开仓库默认分支中的真实 MDX 文件。Doctrine
+通常根据 content 目录相对项目 root 的路径自动推导。若 monorepo 中项目 root 位于仓库 root
+之下，请把 `githubSourceRoot` 设为 content 目录相对仓库的 POSIX 路径，例如
+`packages/docs/docs`。
+
+`pageActions` 只作用于 MDX 正文页。默认值 `true` 会将每个页面的原始 MDX 输出到路由对应的
+`.md` URL，并显示 **Copy Page**、**View as Markdown** 和条件性的 GitHub 操作。源码仍是 MDX，
+可以包含 frontmatter、import 和 JSX。设为 `false` 会同时关闭 `.md` 输出和页面操作 UI。独立
+TSX 页面始终不会获得这两项能力，Header 中的 GitHub 链接则不受影响。
+
+生成的 Markdown 与 HTML 不能争用同一文件或彼此的父目录；生成的 `.md` 路径也不能与 `public/`
+中的文件冲突。Doctrine 会在写入文档页面前报告这些冲突，而不会静默选择其中一份内容。
 
 ## 路径、优先级与生成目录
 

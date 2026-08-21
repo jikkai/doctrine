@@ -119,13 +119,15 @@ doctrine build docs --site-url https://docs.example.com/
 dist/
 ├── 404.html
 ├── assets/
+├── guide/install.md
 ├── guide/install/index.html
 ├── index.html
+├── index.md
 └── pagefind/
 ```
 
-Doctrine 会构建客户端与 SSR bundle、预渲染全部导航路由、移除 Vite 私有 manifest，再由
-Pagefind 索引最终 HTML。`https://user.github.io/my-project/` 这样的仓库网址会把公开 URL 改为
+Doctrine 会构建客户端与 SSR bundle、预渲染全部导航路由、把原始 MDX 写入对应的 `.md` 路径、
+移除 Vite 私有 manifest，再由 Pagefind 索引最终 HTML。`https://user.github.io/my-project/` 这样的仓库网址会把公开 URL 改为
 `/my-project/...`，而不会创建 `dist/my-project`。
 
 ## 7. 不要提交生成目录

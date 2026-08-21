@@ -26,16 +26,16 @@ export function Tabs({ children, className, defaultValue, variant = 'default' }:
 
   const listClass =
     variant === 'line'
-      ? 'inline-flex max-w-full items-center gap-1 overflow-x-auto border-b border-border/70 bg-transparent text-muted-foreground'
-      : 'flex min-h-12 w-full max-w-full items-center overflow-x-auto border-b border-border/70 bg-transparent text-muted-foreground sm:min-h-10'
+      ? 'inline-flex h-8 w-fit max-w-full items-center gap-1 self-start overflow-x-auto bg-transparent p-[3px] text-muted-foreground'
+      : 'inline-flex h-8 max-w-full items-center self-start overflow-x-auto rounded-[var(--radius)] bg-muted p-[3px] text-muted-foreground'
   const tabClass =
     variant === 'line'
-      ? 'relative inline-flex min-h-11 items-center justify-center whitespace-nowrap border-b-2 border-transparent px-3 py-1 text-sm font-medium transition-[color,box-shadow] focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 data-[active]:border-primary data-[active]:text-foreground sm:min-h-9'
-      : 'relative inline-flex min-h-11 items-center justify-center whitespace-nowrap border-b-2 border-transparent px-3 py-1 text-sm font-medium transition-[color,box-shadow] focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 data-[active]:border-primary data-[active]:text-foreground sm:min-h-10 sm:px-4'
+      ? 'relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-[calc(var(--radius)-0.125rem)] border border-transparent bg-transparent px-1.5 py-0.5 text-sm font-medium text-foreground/60 transition-all after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:bg-foreground after:opacity-0 after:transition-opacity hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 data-active:bg-transparent data-active:text-foreground data-active:shadow-none data-active:after:opacity-100 dark:text-muted-foreground dark:hover:text-foreground dark:data-active:border-transparent dark:data-active:bg-transparent'
+      : 'relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-[calc(var(--radius)-0.125rem)] border border-transparent px-1.5 py-0.5 text-sm font-medium text-foreground/60 transition-all hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 data-active:bg-background data-active:text-foreground data-active:shadow-sm dark:text-muted-foreground dark:hover:text-foreground dark:data-active:border-input dark:data-active:bg-input/30 dark:data-active:text-foreground'
 
   return (
     <TabsPrimitive.Tabs.Root
-      className={`flex flex-col gap-3 ${className ?? ''}`}
+      className={`flex flex-col gap-2 ${className ?? ''}`}
       data-slot="tabs"
       data-variant={variant}
       defaultValue={defaultValue ?? values[0]}
@@ -54,7 +54,7 @@ export function Tabs({ children, className, defaultValue, variant = 'default' }:
       </TabsPrimitive.Tabs.List>
       {items.map((item, index) => (
         <TabsPrimitive.Tabs.Panel
-          className="flex-1 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          className="flex-1 text-sm outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring [&>[data-slot='code-block']]:my-0"
           data-slot="tab-panel"
           keepMounted
           key={values[index]}

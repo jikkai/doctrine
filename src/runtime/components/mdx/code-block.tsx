@@ -111,16 +111,16 @@ export function CodeBlockPre({
 
   return (
     <figure
-      className="overflow-hidden rounded-lg border border-border/70 bg-card"
+      className="my-6 overflow-hidden rounded-lg border border-separator bg-code text-code-foreground shadow-sm"
       data-slot="code-block"
     >
       <figcaption
-        className="flex min-h-10 items-center gap-2 border-b border-border/60 bg-muted/30 px-3 text-xs text-muted-foreground"
+        className="flex h-9 items-center gap-1 border-b border-separator bg-muted/50 px-2 text-sm text-muted-foreground"
         data-slot="code-block-header"
       >
         {filename && (
           <span
-            className="min-w-0 flex-1 truncate font-mono text-foreground"
+            className="min-w-0 flex-1 truncate px-2 font-mono text-sm font-medium text-foreground"
             data-slot="code-block-filename"
             title={filename}
           >
@@ -128,14 +128,14 @@ export function CodeBlockPre({
           </span>
         )}
         <span
-          className={filename ? 'shrink-0' : 'min-w-0 flex-1 truncate'}
+          className={filename ? 'shrink-0 px-2' : 'min-w-0 flex-1 truncate px-2 font-medium'}
           data-slot="code-block-language"
         >
           {CODE_LANGUAGES[language.toLowerCase()] ?? language}
         </span>
         <button
           aria-label={copied ? copiedLabel : copyLabel}
-          className="inline-flex size-10 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          className="inline-flex size-8 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           data-slot="code-block-copy"
           onClick={handleCopy}
           title={copied ? copiedLabel : copyLabel}

@@ -95,12 +95,12 @@ export function TableOfContents({ label, mobile, routePath }: ITableOfContentsPr
 
   function renderItems() {
     return (
-      <ul className="space-y-0.5 border-l border-border/60">
+      <ul className="space-y-0.5">
         {items.map((item) => (
           <li key={item.id}>
             <a
               aria-current={activeId === item.id ? 'location' : undefined}
-              className={`relative block min-h-7 py-1 pr-1 pl-3 text-[0.78125rem] leading-5 text-muted-foreground transition-colors before:absolute before:inset-y-1.5 before:-left-px before:w-px before:bg-transparent hover:text-foreground aria-[current=location]:font-medium aria-[current=location]:text-foreground aria-[current=location]:before:bg-primary ${item.level === 3 ? 'pl-6' : ''}`}
+              className={`block rounded-md px-2 py-1.5 text-sm leading-snug text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring aria-[current=location]:bg-muted aria-[current=location]:font-medium aria-[current=location]:text-foreground ${item.level === 3 ? 'pl-5' : ''}`}
               href={`#${item.id}`}
               onClick={() => handleNavigate(item.id)}
             >
@@ -117,7 +117,7 @@ export function TableOfContents({ label, mobile, routePath }: ITableOfContentsPr
   if (mobile) {
     return (
       <details
-        className="group mx-auto mb-10 max-w-[var(--doctrine-content-width)] border-y border-border/60 xl:hidden"
+        className="group mx-auto mb-10 max-w-[var(--doctrine-content-width)] border-y border-separator xl:hidden"
         data-pagefind-ignore
         data-slot="toc-mobile"
         ref={detailsRef}
@@ -129,7 +129,7 @@ export function TableOfContents({ label, mobile, routePath }: ITableOfContentsPr
             className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
           />
         </summary>
-        <nav aria-label={label} className="pb-4 pt-1">
+        <nav aria-label={label} className="pt-1 pb-4">
           {renderItems()}
         </nav>
       </details>
@@ -138,13 +138,11 @@ export function TableOfContents({ label, mobile, routePath }: ITableOfContentsPr
 
   return (
     <aside
-      className="sticky top-[var(--doctrine-header-height)] hidden h-[calc(100vh-var(--doctrine-header-height))] overflow-y-auto py-9 pl-6 xl:block"
+      className="sticky top-[var(--doctrine-header-height)] hidden h-[calc(100svh-var(--doctrine-header-height))] overflow-y-auto py-10 pr-4 xl:block"
       data-pagefind-ignore
       data-slot="toc"
     >
-      <p className="mb-4 text-[0.6875rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
-        {label}
-      </p>
+      <p className="mb-2 px-2 text-sm font-medium text-muted-foreground">{label}</p>
       <nav aria-label={label}>{renderItems()}</nav>
     </aside>
   )

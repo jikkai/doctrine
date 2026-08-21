@@ -33,8 +33,9 @@ strict.
 2. Build browser and SSR environments with Vite.
 3. Import the SSR entry and enumerate document routes.
 4. Prerender each route plus a shared `404.html`.
-5. Remove Vite's private manifest.
-6. Build a Pagefind index from the final output directory.
+5. Emit route-level authored MDX sources when page actions are enabled.
+6. Remove Vite's private manifest.
+7. Build a Pagefind index from the final output directory.
 
 Every document page includes its `<html lang>`, title, description, canonical URL, matching locale
 alternates, and shared assets. When a default-locale translation exists, Doctrine also emits an
@@ -78,6 +79,36 @@ export default function LandingPage() {
 
 Doctrine's default MDX link component adds the deployment base to root-relative links. External
 `https://...` links open in a new tab. Registering a custom `a` component replaces this behavior.
+
+## Page actions and authored Markdown
+
+By default, every MDX document page has a **Copy Page** action. Its menu also provides **View as
+Markdown**. **Open in GitHub** appears when `githubUrl` is configured and the repository-relative
+source root can be inferred or is set with `githubSourceRoot`. The GitHub action targets the actual
+source file for the current locale through `blob/HEAD`, which lets GitHub resolve the repository's
+default branch. A translated route therefore opens its suffixed source file rather than the
+default-locale document.
+
+Doctrine serves the same authored source at the route-level `.md` URL during development and writes
+it during production builds:
+
+```text
+/                         -> /index.md
+/index/                   -> /index/index.md
+/guide/install/           -> /guide/install.md
+/zh-CN/guide/install/     -> /zh-CN/guide/install.md
+```
+
+The extra `index` segment keeps the root and an actual `/index/` document from claiming the same
+file.
+
+This is the original MDX source, not Markdown reconstructed from the rendered HTML. It can include
+frontmatter, ESM imports, JavaScript expressions, and JSX. **Copy Page** copies that same source,
+while **View as Markdown** opens its `.md` URL.
+
+Standalone TSX pages do not show these actions and do not get `.md` source routes. Set
+`pageActions: false` to disable the actions and MDX source output for the whole site. This setting
+does not remove the separate GitHub link from the header.
 
 ## Search
 

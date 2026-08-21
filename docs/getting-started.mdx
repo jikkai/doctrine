@@ -122,13 +122,16 @@ The default output is:
 dist/
 ├── 404.html
 ├── assets/
+├── guide/install.md
 ├── guide/install/index.html
 ├── index.html
+├── index.md
 └── pagefind/
 ```
 
-Doctrine builds client and SSR bundles, prerenders every navigation route, removes Vite's private
-manifest, and indexes the resulting HTML with Pagefind. A repository URL such as
+Doctrine builds client and SSR bundles, prerenders every navigation route, writes the authored MDX
+at the matching `.md` paths, removes Vite's private manifest, and indexes the resulting HTML with
+Pagefind. A repository URL such as
 `https://user.github.io/my-project/` changes public URLs to `/my-project/...`; it does not create
 `dist/my-project`.
 

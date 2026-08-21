@@ -56,11 +56,24 @@ test('loads ordered navigation from the nearest locale config', async () => {
       en: [
         {
           directory: 'guide',
-          items: [{ documentKey: 'en:guide/start', title: 'Start', type: 'page' }],
+          items: [
+            {
+              documentKey: 'en:guide/start',
+              sourcePath: 'guide/start.mdx',
+              title: 'Start',
+              type: 'page',
+            },
+          ],
           title: 'Guide',
           type: 'directory',
         },
-        { documentKey: 'en:/', icon: 'House', title: 'Home', type: 'page' },
+        {
+          documentKey: 'en:/',
+          icon: 'House',
+          sourcePath: 'index.mdx',
+          title: 'Home',
+          type: 'page',
+        },
         {
           description: 'Standalone page',
           documentKey: 'en:landing',
@@ -69,10 +82,22 @@ test('loads ordered navigation from the nearest locale config', async () => {
         },
       ],
       'zh-CN': [
-        { documentKey: 'zh-CN:/', title: '首页', type: 'page' },
+        {
+          documentKey: 'zh-CN:/',
+          sourcePath: 'index.zh-CN.mdx',
+          title: '首页',
+          type: 'page',
+        },
         {
           directory: 'guide',
-          items: [{ documentKey: 'zh-CN:guide/start', title: '开始', type: 'page' }],
+          items: [
+            {
+              documentKey: 'zh-CN:guide/start',
+              sourcePath: 'guide/start.zh-CN.mdx',
+              title: '开始',
+              type: 'page',
+            },
+          ],
           title: '指南',
           type: 'directory',
         },

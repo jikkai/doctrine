@@ -30,6 +30,7 @@ export interface INormalizedDoctrineNavigationPage {
   description?: string
   documentKey: string
   icon?: string
+  sourcePath?: string
   title: string
   type: 'page'
 }
@@ -68,10 +69,14 @@ export interface IDoctrineTsxPage {
   slug: string
 }
 
-interface IDocumentFile {
+interface IDocumentIdentity {
   directory: string
   locale: string
   page: string
+}
+
+interface IDocumentFile extends IDocumentIdentity {
+  sourcePath: string
 }
 
 export function defineDirectory<T extends IDoctrineDirectoryConfig>(config: T): T {
@@ -206,6 +211,7 @@ async function loadDirectory(
           ...(item.description ? { description: item.description } : {}),
           documentKey,
           ...(item.icon ? { icon: item.icon } : {}),
+          ...(document ? { sourcePath: document.sourcePath } : {}),
           title: item.title,
           type: 'page',
         }
@@ -287,7 +293,7 @@ async function findDocuments(
             throw new Error(`Duplicate localized MDX document: ${relative}`)
           }
           identities.add(key)
-          documents.push({ directory: relativeDirectory, ...identity })
+          documents.push({ directory: relativeDirectory, sourcePath: relative, ...identity })
         }
       }),
     )
@@ -350,7 +356,14 @@ function validateDirectoryConfig(
       )
     }
     if ('page' in item) {
-      if (typeof item.page !== 'string' || !item.page || item.page.includes('/')) {
+      if (
+        typeof item.page !== 'string' ||
+        !item.page ||
+        item.page.includes('/') ||
+        item.page.includes('\\') ||
+        item.page === '.' ||
+        item.page === '..'
+      ) {
         throw new Error(
           `Navigation page must be a direct MDX or TSX basename: ${displayPath(options, file)}`,
         )
@@ -373,6 +386,7 @@ function validateDirectoryConfig(
       typeof item.directory !== 'string' ||
       !item.directory ||
       item.directory.includes('/') ||
+      item.directory.includes('\\') ||
       item.directory === '.' ||
       item.directory === '..'
     ) {
@@ -414,11 +428,11 @@ function addIcon(
   icons.add(icon)
 }
 
-function documentKeyFor(document: IDocumentFile): string {
+function documentKeyFor(document: IDocumentIdentity): string {
   return `${document.locale}:${documentSlugFor(document).replace(/^\//, '').replace(/\/$/, '') || '/'}`
 }
 
-function documentSlugFor(document: IDocumentFile): string {
+function documentSlugFor(document: IDocumentIdentity): string {
   const page = document.page === 'index' || document.page === 'page' ? '' : document.page
   const slug = [document.directory, page].filter(Boolean).join('/') || '/'
   return slug === '/' ? slug : `/${slug}/`

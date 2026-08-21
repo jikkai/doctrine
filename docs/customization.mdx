@@ -26,10 +26,12 @@ Doctrine imports this file after its precompiled runtime CSS. Override only what
 :root {
   --doctrine-accent: oklch(0.9 0.05 155);
   --doctrine-accent-foreground: oklch(0.25 0.04 155);
+  --doctrine-separator: oklch(0.88 0.025 155);
+  --doctrine-sidebar: oklch(0.97 0.01 155);
   --doctrine-ring: oklch(0.48 0.12 155);
   --doctrine-radius: 0.9rem;
   --doctrine-font-sans: Inter, sans-serif;
-  --doctrine-font-display: Charter, serif;
+  --doctrine-font-mono: 'JetBrains Mono', monospace;
   --doctrine-content-width: 52rem;
 }
 
@@ -41,22 +43,26 @@ Doctrine imports this file after its precompiled runtime CSS. Override only what
 
 ### Theme variables
 
-| Variable                       | Controls                             |
-| ------------------------------ | ------------------------------------ |
-| `--doctrine-background`        | Page and surface background          |
-| `--doctrine-foreground`        | Primary text                         |
-| `--doctrine-muted`             | Muted surfaces and hover states      |
-| `--doctrine-muted-foreground`  | Secondary text                       |
-| `--doctrine-border`            | Borders and separators               |
-| `--doctrine-ring`              | Keyboard focus rings                 |
-| `--doctrine-accent`            | Badges, steps, and selected controls |
-| `--doctrine-accent-foreground` | Text on the accent color             |
-| `--doctrine-radius`            | Shared surface radius                |
-| `--doctrine-font-sans`         | Site font stack                      |
-| `--doctrine-font-display`      | Display heading font stack           |
-| `--doctrine-content-width`     | Maximum article width                |
-| `--doctrine-sidebar-width`     | Desktop navigation width             |
-| `--doctrine-header-height`     | Sticky header height                 |
+| Variable                                                            | Controls                             |
+| ------------------------------------------------------------------- | ------------------------------------ |
+| `--doctrine-background`, `--doctrine-foreground`                    | Page background and primary text     |
+| `--doctrine-card`, `--doctrine-card-foreground`                     | Raised card surfaces                 |
+| `--doctrine-popover`, `--doctrine-popover-foreground`               | Menus, selects, and dialogs          |
+| `--doctrine-primary`, `--doctrine-primary-foreground`               | Primary actions and links            |
+| `--doctrine-secondary`, `--doctrine-secondary-foreground`           | Secondary surfaces                   |
+| `--doctrine-muted`, `--doctrine-muted-foreground`                   | Muted surfaces and secondary text    |
+| `--doctrine-accent`, `--doctrine-accent-foreground`                 | Hovered and selected controls        |
+| `--doctrine-border`, `--doctrine-separator`                         | Strong borders and subtle separators |
+| `--doctrine-input`, `--doctrine-ring`                               | Input boundaries and keyboard focus  |
+| `--doctrine-sidebar`, `--doctrine-sidebar-foreground`               | Navigation surface and text          |
+| `--doctrine-sidebar-accent`, `--doctrine-sidebar-accent-foreground` | Navigation hover and selection       |
+| `--doctrine-code`, `--doctrine-code-foreground`                     | Code block surface and text          |
+| `--doctrine-radius`                                                 | Shared surface radius                |
+| `--doctrine-font-sans`, `--doctrine-font-display`                   | UI, body, and heading font stacks    |
+| `--doctrine-font-mono`                                              | Code font stack                      |
+| `--doctrine-content-width`                                          | Maximum article width                |
+| `--doctrine-sidebar-width`, `--doctrine-toc-width`                  | Desktop navigation and TOC widths    |
+| `--doctrine-header-height`                                          | Sticky header height                 |
 
 Put light values in `:root` and dark overrides in `[data-theme='dark']`.
 
@@ -79,7 +85,9 @@ Use `data-slot` instead of depending on generated utility classes:
 ```
 
 The shell exposes `header`, `header-inner`, `brand`, `navigation`, `sidebar`, `main`, `content`,
-`page-navigation`, and `footer`. Built-ins expose `badge`, `callout`, `card`, `card-grid`, `code-block`,
+`page-actions-row`, `page-actions`, `page-actions-copy`, `page-actions-menu-trigger`,
+`page-actions-menu`, `page-actions-markdown`, `page-actions-source`, `page-navigation`, and `footer`.
+Built-ins expose `badge`, `callout`, `card`, `card-grid`, `code-block`,
 `code-block-header`, `code-block-filename`, `code-block-language`, `code-block-copy`, `file-tree`,
 `file-tree-list`, `file-tree-folder`, `file-tree-file`, `live-preview`, `live-preview-title`,
 `live-preview-canvas`, `live-preview-code`, `live-preview-code-toggle`, `live-preview-source`, `step`,

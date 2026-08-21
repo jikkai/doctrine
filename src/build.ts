@@ -6,7 +6,8 @@ import react from '@vitejs/plugin-react'
 import * as pagefind from 'pagefind'
 import { createBuilder } from 'vite'
 import type { INormalizedDoctrineConfig } from './config.js'
-import type { IPageAssets } from './runtime/types.js'
+import type { IDocumentSource, IPageAssets } from './runtime/types.js'
+import { findOutputConflict, resolveOutputFile } from './output.js'
 import { withBase } from './runtime/url.js'
 import { doctrinePackageRoot, doctrinePlugins, runtimeEntry } from './vite.js'
 
@@ -17,6 +18,7 @@ export interface IBuildResult {
 
 interface IServerBundle {
   getRoutePaths: () => string[]
+  getRouteSource: (pathname: string) => IDocumentSource | undefined
   renderPage: (pathname: string, assets: IPageAssets) => Promise<string>
 }
 
@@ -65,8 +67,34 @@ export async function build(config: INormalizedDoctrineConfig): Promise<IBuildRe
     const serverUrl = `${pathToFileURL(path.join(serverOut, 'entry-server.mjs')).href}?t=${Date.now()}`
     const server = (await import(serverUrl)) as IServerBundle
     const routes = server.getRoutePaths()
+    const markdownPages = new Map(
+      await Promise.all(
+        routes.flatMap((route) => {
+          const source = server.getRouteSource(route)
+          return source
+            ? [
+                readFile(path.join(config.contentDirectory, source.sourcePath), 'utf8').then(
+                  (contents) => [route, { contents, path: source.markdownPath }] as const,
+                ),
+              ]
+            : []
+        }),
+      ),
+    )
+    for (const page of markdownPages.values()) {
+      const conflict = await findOutputConflict(config.outDir, page.path)
+      if (conflict) {
+        throw new Error(
+          `Markdown output ${page.path} conflicts with existing output ${path.relative(config.outDir, conflict)}`,
+        )
+      }
+    }
     for (const route of routes) {
       await writePage(config.outDir, route, await server.renderPage(route, assets))
+      const markdown = markdownPages.get(route)
+      if (markdown) {
+        await writeMarkdown(config.outDir, markdown.path, markdown.contents)
+      }
     }
     await writeFile(
       path.join(config.outDir, '404.html'),
@@ -100,6 +128,16 @@ async function writePage(outDir: string, route: string, contents: string): Promi
   const directory = path.join(outDir, ...segments)
   await mkdir(directory, { recursive: true })
   await writeFile(path.join(directory, 'index.html'), contents)
+}
+
+async function writeMarkdown(
+  outDir: string,
+  markdownPath: string,
+  contents: string,
+): Promise<void> {
+  const file = resolveOutputFile(outDir, markdownPath)
+  await mkdir(path.dirname(file), { recursive: true })
+  await writeFile(file, contents, { flag: 'wx' })
 }
 
 async function buildSearchIndex(outDir: string): Promise<void> {

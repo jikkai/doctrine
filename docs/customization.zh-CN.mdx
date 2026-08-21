@@ -25,10 +25,12 @@ Doctrine 会在预编译运行时 CSS 之后 import 这个文件。只覆盖网�
 :root {
   --doctrine-accent: oklch(0.9 0.05 155);
   --doctrine-accent-foreground: oklch(0.25 0.04 155);
+  --doctrine-separator: oklch(0.88 0.025 155);
+  --doctrine-sidebar: oklch(0.97 0.01 155);
   --doctrine-ring: oklch(0.48 0.12 155);
   --doctrine-radius: 0.9rem;
   --doctrine-font-sans: Inter, sans-serif;
-  --doctrine-font-display: Charter, serif;
+  --doctrine-font-mono: 'JetBrains Mono', monospace;
   --doctrine-content-width: 52rem;
 }
 
@@ -40,22 +42,26 @@ Doctrine 会在预编译运行时 CSS 之后 import 这个文件。只覆盖网�
 
 ### 主题变量
 
-| 变量                           | 控制内容              |
-| ------------------------------ | --------------------- |
-| `--doctrine-background`        | 页面与表面背景        |
-| `--doctrine-foreground`        | 主要文字              |
-| `--doctrine-muted`             | 次要表面与 hover 状态 |
-| `--doctrine-muted-foreground`  | 次要文字              |
-| `--doctrine-border`            | 边框与分隔线          |
-| `--doctrine-ring`              | 键盘焦点环            |
-| `--doctrine-accent`            | Badge、步骤与选中控件 |
-| `--doctrine-accent-foreground` | 强调色上的文字        |
-| `--doctrine-radius`            | 共用表面圆角          |
-| `--doctrine-font-sans`         | 网站字体栈            |
-| `--doctrine-font-display`      | 大标题字体栈          |
-| `--doctrine-content-width`     | 正文最大宽度          |
-| `--doctrine-sidebar-width`     | 桌面导航宽度          |
-| `--doctrine-header-height`     | 吸顶 header 高度      |
+| 变量                                                                | 控制内容               |
+| ------------------------------------------------------------------- | ---------------------- |
+| `--doctrine-background`、`--doctrine-foreground`                    | 页面背景与主要文字     |
+| `--doctrine-card`、`--doctrine-card-foreground`                     | 抬升卡片表面           |
+| `--doctrine-popover`、`--doctrine-popover-foreground`               | 菜单、选择器与 Dialog  |
+| `--doctrine-primary`、`--doctrine-primary-foreground`               | 主要操作与链接         |
+| `--doctrine-secondary`、`--doctrine-secondary-foreground`           | 次要表面               |
+| `--doctrine-muted`、`--doctrine-muted-foreground`                   | 次要表面与次要文字     |
+| `--doctrine-accent`、`--doctrine-accent-foreground`                 | Hover 与选中控件       |
+| `--doctrine-border`、`--doctrine-separator`                         | 强边框与细分隔线       |
+| `--doctrine-input`、`--doctrine-ring`                               | 输入框边界与键盘焦点   |
+| `--doctrine-sidebar`、`--doctrine-sidebar-foreground`               | 导航表面与文字         |
+| `--doctrine-sidebar-accent`、`--doctrine-sidebar-accent-foreground` | 导航 hover 与选中状态  |
+| `--doctrine-code`、`--doctrine-code-foreground`                     | 代码块表面与文字       |
+| `--doctrine-radius`                                                 | 共用表面圆角           |
+| `--doctrine-font-sans`、`--doctrine-font-display`                   | UI、正文与标题字体栈   |
+| `--doctrine-font-mono`                                              | 代码字体栈             |
+| `--doctrine-content-width`                                          | 正文最大宽度           |
+| `--doctrine-sidebar-width`、`--doctrine-toc-width`                  | 桌面导航与本页目录宽度 |
+| `--doctrine-header-height`                                          | 吸顶 header 高度       |
 
 亮色值写在 `:root`，暗色覆盖写在 `[data-theme='dark']`。
 
@@ -78,7 +84,9 @@ Doctrine 会在预编译运行时 CSS 之后 import 这个文件。只覆盖网�
 ```
 
 网站外壳提供 `header`、`header-inner`、`brand`、`navigation`、`sidebar`、`main`、`content`、
-`page-navigation` 和 `footer`。内置组件提供 `badge`、`callout`、`card`、`card-grid`、`step`、`steps`、`tabs`、
+`page-actions-row`、`page-actions`、`page-actions-copy`、`page-actions-menu-trigger`、
+`page-actions-menu`、`page-actions-markdown`、`page-actions-source`、`page-navigation` 和 `footer`。
+内置组件提供 `badge`、`callout`、`card`、`card-grid`、`step`、`steps`、`tabs`、
 `code-block`、`code-block-header`、`code-block-filename`、`code-block-language`、
 `code-block-copy`、`file-tree`、`file-tree-list`、`file-tree-folder`、`file-tree-file`、
 `live-preview`、`live-preview-title`、`live-preview-canvas`、`live-preview-code`、

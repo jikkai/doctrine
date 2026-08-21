@@ -31,12 +31,13 @@ doctrine dev website --host 0.0.0.0 --port 4173
 ```
 
 The command keeps running until the server is stopped. MDX and navigation changes update the site;
-the Pagefind development data is rebuilt lazily after the next search request.
+when page actions are enabled, matching `.md` source routes update with the authored files. The
+Pagefind development data is rebuilt lazily after the next search request.
 
 ## `doctrine build`
 
-Builds the client and SSR bundles, prerenders every navigation route, writes `404.html`, and creates
-the Pagefind index.
+Builds the client and SSR bundles, prerenders every navigation route, writes `404.html` and the
+enabled `.md` source routes, and creates the Pagefind index.
 
 | Argument or option | Default                       | Meaning                                                     |
 | ------------------ | ----------------------------- | ----------------------------------------------------------- |

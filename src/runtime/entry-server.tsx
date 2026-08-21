@@ -17,6 +17,10 @@ export function getRoutePaths(): string[] {
   return routes.map((route) => route.path)
 }
 
+export function getRouteSource(pathname: string) {
+  return findDocumentRoute(routes, pathname)?.source
+}
+
 export async function renderPage(pathname: string, assets: IPageAssets): Promise<string> {
   const route = findDocumentRoute(routes, pathname)
   const module = route ? await route.document.load() : undefined

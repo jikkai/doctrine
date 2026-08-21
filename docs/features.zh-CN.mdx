@@ -30,8 +30,9 @@ Serve 模式允许相关文件依次保存时出现短暂导航不一致。新�
 2. 用 Vite 构建浏览器与 SSR environment。
 3. Import SSR entry 并列出文档路由。
 4. 预渲染每条路由和共享的 `404.html`。
-5. 移除 Vite 私有 manifest。
-6. 根据最终输出目录生成 Pagefind 索引。
+5. 启用页面操作时，输出与路由对应的原始 MDX 源码。
+6. 移除 Vite 私有 manifest。
+7. 根据最终输出目录生成 Pagefind 索引。
 
 每篇文档页面都包含 `<html lang>`、title、description、canonical URL、匹配的语言 alternate 和
 共享资源。存在默认 locale 翻译时，Doctrine 还会输出 `x-default` alternate。
@@ -72,6 +73,31 @@ export default function LandingPage() {
 
 Doctrine 默认的 MDX 链接组件会给根相对链接补上部署 base。外部 `https://...` 链接在新标签页
 打开。注册自定义 `a` 组件会替换这套行为。
+
+## 页面操作与原始 Markdown
+
+默认情况下，每个 MDX 正文页都有 **Copy Page** 操作，其菜单还会提供 **View as Markdown**。
+配置 `githubUrl`，且能够推导仓库内源码根目录或显式设置 `githubSourceRoot` 时，还会显示
+**Open in GitHub**。GitHub 操作通过 `blob/HEAD` 指向当前 locale 的真实源文件，让 GitHub 解析到
+仓库默认分支。因此，翻译路由会打开带 locale 后缀的源文件，而不是默认 locale 文档。
+
+Doctrine 在开发环境提供同一份原始源码，并在生产构建中将其写入路由对应的 `.md` URL：
+
+```text
+/                         -> /index.md
+/index/                   -> /index/index.md
+/guide/install/           -> /guide/install.md
+/zh-CN/guide/install/     -> /zh-CN/guide/install.md
+```
+
+额外的 `index` 段用于避免站点根页与真实的 `/index/` 文档争用同一个文件。
+
+这里输出的是原始 MDX，不是从渲染后 HTML 还原的 Markdown，因此可以包含 frontmatter、ESM import、
+JavaScript 表达式和 JSX。**Copy Page** 复制同一份源码，**View as Markdown** 则打开对应的 `.md`
+URL。
+
+独立 TSX 页面不显示这些操作，也不会生成 `.md` 源码路由。设置 `pageActions: false` 可以在整个
+站点关闭页面操作和 MDX 源码输出，但不会移除 Header 中独立的 GitHub 链接。
 
 ## 搜索
 

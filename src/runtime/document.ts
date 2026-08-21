@@ -41,8 +41,11 @@ export function htmlDocument(
     .map((src) => `<script type="module" src="${escapeHtml(src)}"></script>`)
     .join('')
   const canonicalLink = canonical ? `<link rel="canonical" href="${escapeHtml(canonical)}">` : ''
+  const markdownAlternate = route?.source
+    ? `<link rel="alternate" type="text/markdown" href="${escapeHtml(absoluteRouteUrl(config.siteUrl, route.source.markdownPath))}">`
+    : ''
 
-  return `<!doctype html><html lang="${escapeHtml(locale)}" data-theme="light"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="@amamo/doctrine"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><meta data-pagefind-meta="title" content="${escapeHtml(route?.title ?? siteTitle)}">${canonicalLink}${alternates.join('')}${styles}<script>${THEME_SCRIPT}</script></head><body><div id="doctrine-root">${appHtml}</div>${scripts}</body></html>`
+  return `<!doctype html><html lang="${escapeHtml(locale)}" data-theme="light"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="@amamo/doctrine"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><meta data-pagefind-meta="title" content="${escapeHtml(route?.title ?? siteTitle)}">${canonicalLink}${markdownAlternate}${alternates.join('')}${styles}<script>${THEME_SCRIPT}</script></head><body><div id="doctrine-root">${appHtml}</div>${scripts}</body></html>`
 }
 
 function absoluteRouteUrl(siteUrl: string, routePath: string): string {

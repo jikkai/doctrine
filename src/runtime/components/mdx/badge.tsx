@@ -7,11 +7,11 @@ export interface IBadgeProps extends HTMLAttributes<HTMLSpanElement> {
 export function Badge({ className, variant = 'default', ...props }: IBadgeProps) {
   const variantClass =
     variant === 'outline'
-      ? 'border-border/80 bg-transparent text-foreground'
-      : 'border-transparent bg-accent/75 text-accent-foreground'
+      ? 'border-separator bg-background text-foreground'
+      : 'border-transparent bg-secondary text-secondary-foreground'
   return (
     <span
-      className={`inline-flex items-center rounded-sm border px-2 py-0.5 text-xs font-semibold tracking-[0.01em] ${variantClass} ${className ?? ''}`}
+      className={`inline-flex h-5 shrink-0 items-center rounded-md border px-2 text-xs font-medium ${variantClass} ${className ?? ''}`}
       {...props}
       data-slot="badge"
     />
