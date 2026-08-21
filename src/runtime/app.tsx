@@ -370,7 +370,12 @@ function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILab
   }
 
   function handleQueryChange(event: ChangeEvent<HTMLInputElement>) {
-    setQuery(event.target.value)
+    const nextQuery = event.target.value
+    setQuery(nextQuery)
+    if (!nextQuery.trim()) {
+      setResults([])
+      setStatus('idle')
+    }
   }
 
   useEffect(() => {
@@ -386,11 +391,7 @@ function SearchDialog({ config, labels }: { config: IRuntimeConfig; labels: ILab
 
   useEffect(() => {
     const value = query.trim()
-    if (!value) {
-      setResults([])
-      setStatus('idle')
-      return
-    }
+    if (!value) return
     let cancelled = false
     const timer = window.setTimeout(() => {
       setStatus('loading')
@@ -678,7 +679,7 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
                       </div>
                     )}
                     <div className="sm:col-span-2 sm:row-start-1">
-                      <TableOfContents label={labels.onThisPage} mobile routePath={route.path} />
+                      <TableOfContents label={labels.onThisPage} mobile />
                     </div>
                     <article
                       className={`doctrine-prose min-w-0 max-w-[var(--doctrine-content-width)] sm:col-span-2 sm:col-start-1 sm:row-start-2 ${route.source ? 'sm:[&>h1:first-child]:pr-44 print:[&>h1:first-child]:pr-0' : ''}`}
@@ -708,7 +709,7 @@ export function App({ Content, components, config, icons, route, routes }: IAppP
             </main>
             {renderFooter()}
           </div>
-          {route && Content && <TableOfContents label={labels.onThisPage} routePath={route.path} />}
+          {route && Content && <TableOfContents label={labels.onThisPage} />}
         </div>
       )}
     </BaseContext>

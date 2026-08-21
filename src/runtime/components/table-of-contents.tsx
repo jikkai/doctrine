@@ -10,10 +10,9 @@ interface ITableOfContentsItem {
 export interface ITableOfContentsProps {
   label: string
   mobile?: boolean
-  routePath: string
 }
 
-export function TableOfContents({ label, mobile, routePath }: ITableOfContentsProps) {
+export function TableOfContents({ label, mobile }: ITableOfContentsProps) {
   const detailsRef = useRef<HTMLDetailsElement>(null)
   const [activeId, setActiveId] = useState('')
   const [hydrated, setHydrated] = useState(false)
@@ -21,10 +20,7 @@ export function TableOfContents({ label, mobile, routePath }: ITableOfContentsPr
 
   useEffect(() => {
     const content = document.querySelector<HTMLElement>('[data-slot="content"]')
-    if (!content) {
-      setHydrated(true)
-      return
-    }
+    if (!content) return
     const contentElement = content
 
     let sectionObserver: IntersectionObserver | undefined
@@ -79,14 +75,15 @@ export function TableOfContents({ label, mobile, routePath }: ITableOfContentsPr
       for (const heading of headings) sectionObserver.observe(heading)
     }
 
-    update()
+    const frame = window.requestAnimationFrame(update)
     const contentObserver = new MutationObserver(update)
     contentObserver.observe(contentElement, { childList: true, subtree: true })
     return () => {
+      window.cancelAnimationFrame(frame)
       contentObserver.disconnect()
       sectionObserver?.disconnect()
     }
-  }, [routePath])
+  }, [])
 
   function handleNavigate(id: string) {
     setActiveId(id)
